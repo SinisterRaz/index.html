@@ -142,6 +142,55 @@ body.terminal{
   --idle-logo:#00ff00;--idle-glow:rgba(0,255,0,0.6);--bar-color:#00ff00;--tv-radius:0px;
 }
 
+/* HALLOWEEN */
+body.halloween{
+  --bg:#0a0500;--frame:#3a1500;
+  --brand-bg:linear-gradient(90deg,#1a0800,#2a0f00,#1a0800);--brand-border:#4a2000;
+  --logo-color:#ff6600;--logo-glow:rgba(255,102,0,0.6);
+  --np-color:#ff8800;--ep-color:#6a2800;--ch-color:#ff6600;--ch-glow:#ff6600;
+  --btn-bg:linear-gradient(145deg,#2a1000,#1a0800);--btn-border:#4a2000;--btn-color:#884400;
+  --cnt-color:#ff8800;--gbar-bg:#0a0500;--gc-bg:#1a0800;--gc-border:#2a1000;--gc-color:#6a2800;
+  --gov-bg:rgba(10,5,0,0.97);--got-color:#ff6600;--cat-color:#ff6600;--ch-entry:#aa5500;
+  --scanline:rgba(255,80,0,0.05);--vignette:rgba(20,5,0,0.85);
+  --idle-logo:#ff6600;--idle-glow:rgba(255,102,0,0.7);--bar-color:#ff6600;--tv-radius:0px;
+}
+/* CHRISTMAS */
+body.christmas{
+  --bg:#00080a;--frame:#003315;
+  --brand-bg:linear-gradient(90deg,#001f0a,#002f10,#001f0a);--brand-border:#004d1a;
+  --logo-color:#ff2222;--logo-glow:rgba(255,34,34,0.6);
+  --np-color:#ffffff;--ep-color:#006622;--ch-color:#ff2222;--ch-glow:#ff2222;
+  --btn-bg:linear-gradient(145deg,#002f10,#001f0a);--btn-border:#004d1a;--btn-color:#008833;
+  --cnt-color:#ffdd00;--gbar-bg:#00080a;--gc-bg:#001f0a;--gc-border:#002f10;--gc-color:#004d1a;
+  --gov-bg:rgba(0,8,10,0.97);--got-color:#ff2222;--cat-color:#ffdd00;--ch-entry:#00aa44;
+  --scanline:rgba(0,255,0,0.03);--vignette:rgba(0,10,5,0.85);
+  --idle-logo:#ff2222;--idle-glow:rgba(255,34,34,0.6);--bar-color:#ffdd00;--tv-radius:0px;
+}
+/* NEW YEAR */
+body.newyear{
+  --bg:#05050a;--frame:#1a1a3a;
+  --brand-bg:linear-gradient(90deg,#0a0a1f,#15152f,#0a0a1f);--brand-border:#2a2a5a;
+  --logo-color:#ffd700;--logo-glow:rgba(255,215,0,0.7);
+  --np-color:#ffd700;--ep-color:#4a4a00;--ch-color:#ffd700;--ch-glow:#ffd700;
+  --btn-bg:linear-gradient(145deg,#1a1a3a,#0a0a1f);--btn-border:#2a2a5a;--btn-color:#8888aa;
+  --cnt-color:#ffffff;--gbar-bg:#05050a;--gc-bg:#0a0a1f;--gc-border:#1a1a3a;--gc-color:#3a3a6a;
+  --gov-bg:rgba(5,5,10,0.97);--got-color:#ffd700;--cat-color:#ffd700;--ch-entry:#aaaabb;
+  --scanline:rgba(255,215,0,0.03);--vignette:rgba(5,5,20,0.85);
+  --idle-logo:#ffd700;--idle-glow:rgba(255,215,0,0.8);--bar-color:#ffd700;--tv-radius:0px;
+}
+/* VALENTINES */
+body.valentines{
+  --bg:#080003;--frame:#3a0018;
+  --brand-bg:linear-gradient(90deg,#1f000a,#2f0012,#1f000a);--brand-border:#4d001a;
+  --logo-color:#ff3366;--logo-glow:rgba(255,51,102,0.6);
+  --np-color:#ff6699;--ep-color:#660022;--ch-color:#ff3366;--ch-glow:#ff3366;
+  --btn-bg:linear-gradient(145deg,#2f0012,#1f000a);--btn-border:#4d001a;--btn-color:#880033;
+  --cnt-color:#ffaacc;--gbar-bg:#080003;--gc-bg:#1f000a;--gc-border:#2f0012;--gc-color:#4d001a;
+  --gov-bg:rgba(8,0,3,0.97);--got-color:#ff3366;--cat-color:#ff3366;--ch-entry:#cc3366;
+  --scanline:rgba(255,50,100,0.04);--vignette:rgba(20,0,8,0.85);
+  --idle-logo:#ff3366;--idle-glow:rgba(255,51,102,0.7);--bar-color:#ff3366;--tv-radius:0px;
+}
+
 /* APPLY VARS */
 html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-family:'VT323',monospace;}
 body::after{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
@@ -237,6 +286,18 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 .thm:hover{background:rgba(255,255,255,0.06);color:var(--cnt-color);}
 .thm.on{color:var(--cnt-color);}
 .thm-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);}
+/* OFF SCREEN */
+#off-screen{position:fixed;inset:0;z-index:998;display:none;
+  background:#000;flex-direction:column;align-items:center;justify-content:center;}
+#off-screen.show{display:flex;}
+#off-dot{width:3px;height:3px;background:#fff;border-radius:50%;
+  box-shadow:0 0 8px #fff,0 0 20px #fff;animation:dotfade 0.8s ease-out forwards;}
+@keyframes dotfade{0%{width:80vw;height:4px;opacity:1;border-radius:2px;}
+  40%{width:6px;height:6px;opacity:0.8;}
+  100%{width:1px;height:1px;opacity:0;}}
+#off-btn{border-color:#440000!important;color:#660000!important;}
+#off-btn:hover{color:#ff3333!important;border-color:#ff3333!important;}
+#off-btn.on{color:#00ff88!important;border-color:#00ff88!important;}
 </style>
 </head>
 <body>
@@ -263,6 +324,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
     <button class="cb" onclick="nextEp()" title="Next Episode">EP &#9654;</button>
     <div id="cnw"><div id="cnt">SINISTER TV - ARCHIVE EDITION</div></div>
     <button class="cb" onclick="toggleGuide()">&#9776; GUIDE</button>
+    <button class="cb" id="off-btn" onclick="toggleOff()" title="Power Off">&#9711;</button>
   </div>
   <div id="gbar"></div>
   <div id="gov">
@@ -273,6 +335,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 </div>
 
 <button id="thm-btn" onclick="toggleThemes()">&#127912; THEME</button>
+<div id="off-screen"><div id="off-dot"></div></div>
 <div id="thm-panel">
   <div id="thm-title">SELECT TV THEME</div>
   <div class="thm on"  onclick="setTheme('')"          ><div class="thm-dot" style="background:#00e5ff"></div>Sinister (Default)</div>
@@ -286,6 +349,10 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
   <div class="thm"     onclick="setTheme('bloodmoon')" ><div class="thm-dot" style="background:#cc0000"></div>Blood Moon</div>
   <div class="thm"     onclick="setTheme('ocean')"     ><div class="thm-dot" style="background:#00aaff"></div>Ocean Deep</div>
   <div class="thm"     onclick="setTheme('terminal')"  ><div class="thm-dot" style="background:#00ff00"></div>Terminal Green</div>
+  <div class="thm"     onclick="setTheme('halloween')" ><div class="thm-dot" style="background:#ff6600"></div>🎃 Halloween</div>
+  <div class="thm"     onclick="setTheme('christmas')" ><div class="thm-dot" style="background:#ff2222"></div>🎄 Christmas</div>
+  <div class="thm"     onclick="setTheme('newyear')"   ><div class="thm-dot" style="background:#ffd700"></div>🎆 New Year</div>
+  <div class="thm"     onclick="setTheme('valentines')"><div class="thm-dot" style="background:#ff3366"></div>💕 Valentines</div>
 </div>
 
 <script>
@@ -299,14 +366,14 @@ const B = "https://archive.org/download/";
 
 const CHANNELS = [
 
-  // ── CH 1: BONANZA (2024 clean MPEG4 upload - 31 episodes) ──
-  {
-    num:1, name:"Bonanza", cat:"Western", avgDur:2700,
-    embedOnly:"bonanza-1959-1973-s-01e-01_202401",
-    files:[{u:"",n:"Bonanza"}]
-  },
+  // ══════════════════════════════════════════════
+  // WESTERN
+  // ══════════════════════════════════════════════
+  { num:1, name:"Bonanza", cat:"Western", avgDur:2700, embedOnly:"bonanza-1959-1973-s-01e-01_202401", files:[{u:"",n:"Bonanza"}] },
 
-  // ── CH 2: THREE STOOGES ──
+  // ══════════════════════════════════════════════
+  // COMEDY
+  // ══════════════════════════════════════════════
   {
     num:2, name:"Three Stooges", cat:"Comedy", avgDur:1100,
     files:[
@@ -316,240 +383,237 @@ const CHANNELS = [
       {u:B+"3stooges/3stooges_NewMalice1.mp4",   n:"Malice in the Palace"},
     ]
   },
-
-  // ── CH 3: INNER SANCTUM RADIO ──
   {
-    num:3, name:"Inner Sanctum Radio", cat:"Radio", avgDur:1800,
-    files:[
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0239-DeathByScripture.-10-09-1945.mp3",           n:"Death by Scripture"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0240-TillDeathDoUsPart-10-16-1945.mp3",           n:"Till Death Do Us Part"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0241-CorridorOfDoom-BorisKarloff-10-23-1945.mp3", n:"Corridor of Doom"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0242-TheManWhoCouldntDie-10-30-1945.mp3",         n:"The Man Who Couldn't Die"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0243-TheWailingWall-11-06-1945.mp3",              n:"The Wailing Wall"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0248-DarkChamber-12-11-1945.mp3",                 n:"Dark Chamber"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0249-TheUndead-12-18-1945.mp3",                   n:"The Undead"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0253-TheEdgeOfDeath-01-15-1946.mp3",              n:"The Edge of Death"},
-      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0256-SkeletonBay-02-05-1946.mp3",                 n:"Skeleton Bay"},
-    ]
-  },
-
-  // ── CH 4: SHERLOCK HOLMES RADIO ──
-  {
-    num:4, name:"Sherlock Holmes Radio", cat:"Radio", avgDur:1800,
-    files:[
-      {u:B+"sherlockholmes_otr/391106%20The%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Adventure%20of%20the%20Missing%20Submarine%20Plans.ogg", n:"The Missing Submarine Plans"},
-      {u:B+"sherlockholmes_otr/401006TheAdventuresOfSherlockHolmes-TheCopperBeeches.ogg",                                                              n:"The Copper Beeches"},
-      {u:B+"sherlockholmes_otr/411207TheAdventuresOfSherlockHolmes-TheMysteryOfMrs.WarrensKey.ogg",                                                    n:"The Mystery of Mrs Warren's Key"},
-      {u:B+"sherlockholmes_otr/450326%20The%20New%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Book%20of%20Tobit.ogg",                            n:"The Book of Tobit"},
-      {u:B+"sherlockholmes_otr/450507%20The%20New%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Purloined%20Ruby.ogg",                             n:"The Purloined Ruby"},
-      {u:B+"sherlockholmes_otr/450409%20The%20New%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Viennese%20Strangler.ogg",                         n:"The Viennese Strangler"},
-      {u:B+"sherlockholmes_otr/450423%20The%20New%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Notorious%20Canary%20Trainer.ogg",                 n:"The Notorious Canary Trainer"},
-    ]
-  },
-
-  // ── CH 5: THREE STOOGES TOONS ──
-  {
-    num:5, name:"Three Stooges Toons", cat:"Cartoons", avgDur:900,
+    num:3, name:"Three Stooges Toons", cat:"Comedy", avgDur:900,
     files:[
       {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x112%20-%20%27Fraidy%20Cat.mp4",          n:"Fraidy Cat"},
       {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x114%20-%20Aim%2C%20Fire%2C%20Scoot.mp4", n:"Aim Fire Scoot"},
       {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x116%20-%20Caught%20on%20the%20Bounce.mp4",n:"Caught on the Bounce"},
-      {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x117%20-%20Spies%20and%20Guys.mp4",       n:"Spies and Guys"},
-      {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x120%20-%20The%20Fire%20Chaser.mp4",      n:"The Fire Chaser"},
     ]
   },
+  { num:4,  name:"ALF",          cat:"Comedy", avgDur:1500, embedOnly:"ALF-The-Complete-Series",                       files:[{u:"",n:"ALF"}] },
+  { num:5,  name:"Dick Van Dyke",cat:"Comedy", avgDur:1500, embedOnly:"the-dick-van-dyke-show-the-complete-series-1961-1966", files:[{u:"",n:"Dick Van Dyke"}] },
 
-  // ── CH 6: READING RAINBOW ──
+  // ══════════════════════════════════════════════
+  // DRAMA
+  // ══════════════════════════════════════════════
+  { num:6,  name:"Baywatch",     cat:"Drama",  avgDur:2700, embedOnly:"baywatch_202212",             files:[{u:"",n:"Baywatch"}] },
+
+  // ══════════════════════════════════════════════
+  // SCIFI & HORROR
+  // ══════════════════════════════════════════════
+  { num:7,  name:"Thunderbirds",           cat:"SciFi",  avgDur:3000, embedOnly:"ThunderbirdsSeries",                                        files:[{u:"",n:"Thunderbirds"}] },
+  { num:8,  name:"Tales from the Darkside",cat:"SciFi",  avgDur:1380, embedOnly:"tales-from-the-darkside-s01-en",                            files:[{u:"",n:"Tales from the Darkside"}] },
+  { num:9,  name:"Twilight Zone",          cat:"SciFi",  avgDur:1380, embedOnly:"the.-twilight.-zone.-2002.-s-01.480p.-dvd-rip.-x-264.-will-1869", files:[{u:"",n:"Twilight Zone"}] },
+  { num:10, name:"Alfred Hitchcock",       cat:"SciFi",  avgDur:1380, embedOnly:"the-new-alfred-hitchcock-presents-complete",                 files:[{u:"",n:"Alfred Hitchcock"}] },
+  { num:11, name:"Freddy\'s Nightmares",  cat:"SciFi",  avgDur:2700, embedOnly:"freddys-nightmares-complete-tv-series",                     files:[{u:"",n:"Freddy\'s Nightmares"}] },
+  { num:12, name:"Tales from Cryptkeeper", cat:"SciFi",  avgDur:1380, embedOnly:"s-01-e-06-the-works...-in-wax",                             files:[{u:"",n:"Tales from Cryptkeeper"}] },
+
+  // ══════════════════════════════════════════════
+  // KIDS
+  // ══════════════════════════════════════════════
   {
-    num:6, name:"Reading Rainbow", cat:"Kids", avgDur:1800,
+    num:13, name:"Reading Rainbow", cat:"Kids", avgDur:1800,
     files:[
       {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S01E01.Tight.Times.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",                       n:"Tight Times"},
       {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S01E02.Miss.Nelson.is.Back.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",               n:"Miss Nelson is Back"},
       {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S01E03.Bea.and.Mr.Jones.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",                  n:"Bea and Mr Jones"},
       {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S01E04.Bringing.the.Rain.to.Kapiti.Plain.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4", n:"Bringing the Rain"},
       {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S01E05.Louis.the.Fish.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",                    n:"Louis the Fish"},
-      {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S01E06.Digging.Up.Dinosaurs.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",              n:"Digging Up Dinosaurs"},
       {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S02E01.Hot-Air.Henry.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",                     n:"Hot Air Henry"},
-      {u:B+"ReadingRainbowTVSeries/Reading.Rainbow.S03E01.Paul.Bunyan.480p.AMZN.WEB-DL.DD.2.0.x264-RTN.mp4",                       n:"Paul Bunyan"},
     ]
   },
-
-  // ── CH 7: EERIE INDIANA ──
   {
-    num:7, name:"Eerie Indiana", cat:"Kids", avgDur:1500,
+    num:14, name:"Eerie Indiana", cat:"Kids", avgDur:1500,
     files:[
       {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x01%20-%20Foreverware.mp4",                            n:"Foreverware"},
       {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x02%20-%20The%20Retainer.mp4",                         n:"The Retainer"},
       {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x03%20-%20ATM%20With%20a%20Heart%20of%20Gold.mp4",     n:"ATM With a Heart of Gold"},
       {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x04%20-%20The%20Losers.mp4",                           n:"The Losers"},
       {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x05%20-%20Broken%20Record.mp4",                        n:"Broken Record"},
-      {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x06%20-%20America%27s%20Scariest%20Home%20Videos.mp4", n:"America's Scariest Home Videos"},
-      {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x07%20-%20Heart%20on%20a%20Chain.mp4",                 n:"Heart on a Chain"},
-      {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x08%20-%20Just%20Say%20No%20Fun.mp4",                  n:"Just Say No Fun"},
+      {u:B+"eerie-indiana-1x-18-zombies-in-p.-j.s/Eerie%20Indiana%20-%201x06%20-%20America%27s%20Scariest%20Home%20Videos.mp4", n:"America\'s Scariest Home Videos"},
     ]
   },
-
-  // ── CH 8: GOOSEBUMPS ──
   {
-    num:8, name:"Goosebumps", cat:"Kids", avgDur:1500,
+    num:15, name:"Goosebumps", cat:"Kids", avgDur:1500,
     files:[
-      {u:B+"goosebumps-s01/S01_01-02.ia.mp4", n:"The Haunted Mask Pt 1 and 2"},
+      {u:B+"goosebumps-s01/S01_01-02.ia.mp4", n:"The Haunted Mask"},
       {u:B+"goosebumps-s01/S01_03.ia.mp4",    n:"Stay Out of the Basement Pt 1"},
       {u:B+"goosebumps-s01/S01_04.ia.mp4",    n:"Stay Out of the Basement Pt 2"},
-      {u:B+"goosebumps-s01/S01_05.ia.mp4",    n:"The Curse of the Mummy's Tomb"},
-      {u:B+"goosebumps-s01/S01_06.ia.mp4",    n:"Let's Get Invisible"},
+      {u:B+"goosebumps-s01/S01_05.ia.mp4",    n:"The Curse of the Mummy\'s Tomb"},
+      {u:B+"goosebumps-s01/S01_06.ia.mp4",    n:"Let\'s Get Invisible"},
       {u:B+"goosebumps-s01/S01_07.ia.mp4",    n:"Night of the Living Dummy Pt 1"},
       {u:B+"goosebumps-s01/S01_08.ia.mp4",    n:"Night of the Living Dummy Pt 2"},
-      {u:B+"goosebumps-s01/S01_09.ia.mp4",    n:"The Girl Who Cried Monster"},
-      {u:B+"goosebumps-s01/S01_10.ia.mp4",    n:"The Cuckoo Clock of Doom"},
-      {u:B+"goosebumps-s01/S01_11.ia.mp4",    n:"The Werewolf of Fever Swamp Pt 1"},
-      {u:B+"goosebumps-s01/S01_12.ia.mp4",    n:"The Werewolf of Fever Swamp Pt 2"},
     ]
   },
-
-  // ── CH 9: DIGIMON ──
   {
-    num:9, name:"Digimon", cat:"Anime", avgDur:1500,
-    files:[
-      {u:B+"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent/Digimon%20Digital%20Monsters%20-%201x04%20-%20Biyomon%20Gets%20Firepower%20%5Ba.k.a.%20Fireman%27s%20Ball%5D.mp4", n:"Biyomon Gets Firepower"},
-      {u:B+"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent/Digimon%20Digital%20Monsters%20-%201x05%20-%20Kabuterimon%27s%20Electro%20Shocker.mp4",                             n:"Kabuterimon's Electro Shocker"},
-      {u:B+"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent/Digimon%20Digital%20Monsters%20-%201x06%20-%20Togemon%20in%20Toy%20Town.mp4",                                        n:"Togemon in Toy Town"},
-      {u:B+"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent/Digimon%20Digital%20Monsters%20-%201x07%20-%20Ikkakumon%27s%20Harpoon%20Torpedo.mp4",                                n:"Ikkakumon's Harpoon Torpedo"},
-      {u:B+"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent/Digimon%20Digital%20Monsters%20-%201x08%20-%20Evil%20Shows%20His%20Face.mp4",                                        n:"Evil Shows His Face"},
-    ]
-  },
-
-  // ── CH 10: LITTLE BEAR ──
-  {
-    num:10, name:"Little Bear", cat:"Kids", avgDur:1800,
+    num:16, name:"Little Bear", cat:"Kids", avgDur:1800,
     files:[
       {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%201x01%20What%20Will%20Little%20Bear%20Wear_%20_%20Hide%20and%20Seek%20_%20Little%20Bear%20Goes%20to%20the%20Moon.mp4", n:"What Will Little Bear Wear"},
       {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%201x02%20Birthday%20Soup%20_%20Polar%20Bear%20_%20Gone%20Fishing.mp4",                                                 n:"Birthday Soup"},
       {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%201x03%20Up%20All%20Night%20_%20Little%20Bear%27s%20Bath%20_%20Father%20Bear%20Comes%20Home.mp4",                      n:"Up All Night"},
-      {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%201x04%20A%20Flu%20_%20Exploring%20_%20Fishing%20with%20Father%20Bear.mp4",                                            n:"A Flu"},
       {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%204x01%20Moonlight%20Serenade%20_%20Caterpillars%20_%20Goblin%20Night.mp4",                                            n:"Moonlight Serenade"},
-      {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%204x02%20Sleep%20Over%20_%20Sand%20Castle%20_%20Happy%20Anniversary.mp4",                                              n:"Sleep Over"},
       {u:B+"little-bear-4x-11-the-little-bear-movie/Little%20Bear%205x01%20Duck%20Loses%20Her%20Quack%20_%20Feathers%20In%20A%20Bunch%20_%20Detective%20Little%20Bear.mp4",              n:"Duck Loses Her Quack"},
     ]
   },
-
-  // ── CH 11: THOMAS THE TANK ENGINE US ──
   {
-    num:11, name:"Thomas the Tank Engine", cat:"Kids", avgDur:600,
+    num:17, name:"Thomas the Tank Engine", cat:"Kids", avgDur:600,
     files:[
       {u:B+"GC-AB/Y2Mate.is%20-%20Thomas%20%26%20Friends%E2%84%A2%20The%20Complete%20Season%201%20%28GC%20-%20HD%29-moKfc2SAI1c-1080p-1639089532746.mp4", n:"Complete Season 1"},
       {u:B+"GC-AB/Y2Mate.is%20-%20Thomas%20%26%20Friends%E2%84%A2%20The%20Complete%20Season%202%20%28GC%20-%20HD%29-gOdv1C767QU-1080p-1639257681902.mp4", n:"Complete Season 2"},
       {u:B+"GC-AB/Y2Mate.is%20-%20Thomas%20%26%20Friends%E2%84%A2%20The%20Complete%20Season%203%20%28GC%20-%20HD%29-iPqWZe1R6QU-1080p-1639350034125.mp4", n:"Complete Season 3"},
     ]
   },
+  { num:18, name:"Mister Rogers",    cat:"Kids", avgDur:1800, embedOnly:"MRogers",                                                                   files:[{u:"",n:"Mister Rogers"}] },
+  { num:19, name:"Totally Spies",    cat:"Kids", avgDur:1380, embedOnly:"totally-spies-the-complete-series",                                         files:[{u:"",n:"Totally Spies"}] },
+  { num:20, name:"Fairly OddParents",cat:"Kids", avgDur:1380, embedOnly:"the-fairly-oddparents-the-complete-series_202507",                          files:[{u:"",n:"Fairly OddParents"}] },
+  { num:21, name:"Foster\'s Home",  cat:"Kids", avgDur:1380, embedOnly:"fosters-home-for-imaginary-friends-the-complete-series_202507",             files:[{u:"",n:"Foster\'s Home"}] },
+  { num:22, name:"ReBoot",           cat:"Kids", avgDur:1380, embedOnly:"reboot-complete-series",                                                    files:[{u:"",n:"ReBoot"}] },
+  { num:23, name:"Exosquad",         cat:"Kids", avgDur:1380, embedOnly:"exosquad-s-02-e-06-mind-set",                                               files:[{u:"",n:"Exosquad"}] },
+  { num:24, name:"Powerpuff Girls",  cat:"Kids", avgDur:780,  embedOnly:"powerpuff-girls-complete-series",                                           files:[{u:"",n:"Powerpuff Girls"}] },
+  { num:25, name:"Duck Dodgers",     cat:"Kids", avgDur:1380, embedOnly:"duck-dodgers_",                                                              files:[{u:"",n:"Duck Dodgers"}] },
+  { num:26, name:"Kablam!",          cat:"Kids", avgDur:1380, embedOnly:"Kablam19962000",                                                             files:[{u:"",n:"Kablam!"}] },
+  { num:27, name:"Waynehead",        cat:"Kids", avgDur:1380, embedOnly:"Waynehead1996",                                                              files:[{u:"",n:"Waynehead"}] },
+  { num:28, name:"The Tick",         cat:"Kids", avgDur:1380, embedOnly:"the-tick-full-series",                                                       files:[{u:"",n:"The Tick"}] },
+  { num:29, name:"Recess",           cat:"Kids", avgDur:1380, embedOnly:"recessfullseries",                                                           files:[{u:"",n:"Recess"}] },
+  { num:30, name:"R.L. Stine",       cat:"Kids", avgDur:2700, embedOnly:"rl-stines-the-haunting-hour-full-series",                                   files:[{u:"",n:"R.L. Stine"}] },
+  { num:31, name:"Pete and Pete",    cat:"Kids", avgDur:1380, embedOnly:"the_adventures_of_pete_and_pete",                                           files:[{u:"",n:"Pete and Pete"}] },
+  { num:32, name:"Weinerville",      cat:"Kids", avgDur:1380, embedOnly:"s-4-the-weinerville-chanukah-special",                                      files:[{u:"",n:"Weinerville"}] },
+  { num:33, name:"Alex Mack",        cat:"Kids", avgDur:1380, embedOnly:"secret-world-of-alex-mack",                                                 files:[{u:"",n:"Alex Mack"}] },
+  { num:34, name:"Welcome Freshman", cat:"Kids", avgDur:1380, embedOnly:"Welcome-Frehsmen-1991-Series",                                              files:[{u:"",n:"Welcome Freshman"}] },
+  { num:35, name:"Global Guts",      cat:"Kids", avgDur:1380, embedOnly:"nickelodeon-global-guts-season-4",                                          files:[{u:"",n:"Global Guts"}] },
+  { num:36, name:"Figure It Out",    cat:"Kids", avgDur:1380, embedOnly:"figure_it_out_-_season_2_-_episode_06___578412314a427",                     files:[{u:"",n:"Figure It Out"}] },
 
-  // ── CH 12: MISTER ROGERS ──
+  // ══════════════════════════════════════════════
+  // ANIME
+  // ══════════════════════════════════════════════
+  { num:37, name:"Pokemon",       cat:"Anime", avgDur:1380, embedOnly:"pokemon-indigo-league-season-1-1998",                                                 files:[{u:"",n:"Pokemon"}] },
+  { num:38, name:"Digimon",       cat:"Anime", avgDur:1500, embedOnly:"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent",    files:[{u:"",n:"Digimon"}] },
+  { num:39, name:"DragonBall GT", cat:"Anime", avgDur:1380, embedOnly:"soaki_202111",                                                                        files:[{u:"",n:"DragonBall GT"}] },
+  { num:40, name:"MegaMan",       cat:"Anime", avgDur:1380, embedOnly:"mega-man-the-complete-tv-series-collection",                                          files:[{u:"",n:"MegaMan"}] },
+  { num:41, name:"Speed Racer X", cat:"Anime", avgDur:1380, embedOnly:"speed-racer-x-english-dub",                                                          files:[{u:"",n:"Speed Racer X"}] },
+  { num:42, name:"Deltora Quest", cat:"Anime", avgDur:1380, embedOnly:"deltora-quest-anime-1-to-13",                                                         files:[{u:"",n:"Deltora Quest"}] },
+
+  // ══════════════════════════════════════════════
+  // MOVIES
+  // ══════════════════════════════════════════════
+  { num:43, name:"Horror Cinema",  cat:"Movies", avgDur:5400, embedOnly:"SciFi_Horror",             files:[{u:"",n:"Horror Films"}] },
+  { num:44, name:"Sci-Fi Cinema",  cat:"Movies", avgDur:5400, embedOnly:"TheManInTheWhiteSuit1951", files:[{u:"",n:"Sci-Fi Films"}] },
+  { num:45, name:"Western Cinema", cat:"Movies", avgDur:5400, embedOnly:"johnwaynewesterns",        files:[{u:"",n:"Western Films"}] },
+  { num:46, name:"Film Noir",      cat:"Movies", avgDur:5400, embedOnly:"film_noir",               files:[{u:"",n:"Film Noir"}] },
+  { num:47, name:"VHS Movie Night",cat:"Movies", avgDur:5400, embedOnly:"vhsmovies",               files:[{u:"",n:"VHS Movies"}] },
+
+  // ══════════════════════════════════════════════
+  // AUTOMOTIVE
+  // ══════════════════════════════════════════════
+  { num:48, name:"Top Gear S22",  cat:"Automotive", avgDur:3600, embedOnly:"top-gear-s22",      files:[{u:"",n:"Top Gear"}] },
+  { num:49, name:"Monster Jam",   cat:"Automotive", avgDur:3600, embedOnly:"classicmonsterjam", files:[{u:"",n:"Monster Jam"}] },
+
+  // ══════════════════════════════════════════════
+  // YOUTUBE
+  // ══════════════════════════════════════════════
+  { num:50, name:"YouTube",       cat:"YouTube", youtube:true, files:[{u:"",n:"YouTube"}] },
+
+  // ══════════════════════════════════════════════
+  // LIVE - SCIFI & HORROR (Pluto)
+  // ══════════════════════════════════════════════
+  { num:51, name:"Star Trek",          cat:"Live SciFi", pluto:"5efbd39f8c4ce900075d7698" },
+  { num:52, name:"More Star Trek",     cat:"Live SciFi", pluto:"634dacf51d90320007fcd5fa" },
+  { num:53, name:"Stargate",           cat:"Live SciFi", pluto:"620bfa7df72827000703ddb1" },
+  { num:54, name:"Doctor Who Classic", cat:"Live SciFi", pluto:"5ce4475cd43850831ca91ce7" },
+  { num:55, name:"Twilight Zone Live", cat:"Live SciFi", pluto:"5b4fc274694c027be6ed3eea" },
+  { num:56, name:"MST3000",            cat:"Live SciFi", pluto:"545943f1c9f133a519bbac92" },
+  { num:57, name:"Godzilla Live",      cat:"Live SciFi", pluto:"6452c8cee1979c0008608e27" },
+  { num:58, name:"Pluto SciFi",        cat:"Live SciFi", pluto:"5b4fc274694c027be6ed3eea" },
+  { num:59, name:"Pluto Horror",       cat:"Live SciFi", pluto:"569546031a619b8f07ce6e25" },
+  { num:60, name:"Pluto Terror",       cat:"Live SciFi", pluto:"5c6dc88fcd232425a6e0f06e" },
+  { num:61, name:"Universal Monsters", cat:"Live SciFi", pluto:"65a9b20f0c7ff50008d3a3b6" },
+  { num:62, name:"RiffTrax",           cat:"Live SciFi", pluto:"58d947b9e420d8656ee101ab" },
+
+  // ══════════════════════════════════════════════
+  // LIVE - WESTERNS & CLASSICS (Pluto)
+  // ══════════════════════════════════════════════
+  { num:63, name:"Western TV",        cat:"Live Western", pluto:"5e8df4bc16e34700077e77d3" },
+  { num:64, name:"Gunsmoke",          cat:"Live Western", pluto:"60f75771dfc72a00071fd0e0" },
+  { num:65, name:"The Rifleman",      cat:"Live Western", pluto:"5e825550e758c700077b0aef" },
+  { num:66, name:"Rawhide",           cat:"Live Western", pluto:"634f307c7a068e00072c9982" },
+  { num:67, name:"Wanted Dead/Alive", cat:"Live Western", pluto:"6089788de5c8410007808e26" },
+  { num:68, name:"Pluto Westerns",    cat:"Live Western", pluto:"5b4e94282d4ec87bdcbb87cd" },
+
+  // ══════════════════════════════════════════════
+  // LIVE - SITCOMS & CLASSICS (Pluto)
+  // ══════════════════════════════════════════════
+  { num:69, name:"I Love Lucy",       cat:"Live Classic", pluto:"634f3011f4fff20007431641" },
+  { num:70, name:"Andy Griffith",     cat:"Live Classic", pluto:"60f75178e7f8aa0007e9c259" },
+  { num:71, name:"Addams Family",     cat:"Live Classic", pluto:"5d81607ab737153ea3c1c80e" },
+  { num:72, name:"Happy Days",        cat:"Live Classic", pluto:"5f7794162a4559000781fc12" },
+  { num:73, name:"Beverly Hillbillies",cat:"Live Classic",pluto:"5f7796e470510900070d4e3d" },
+  { num:74, name:"Three\'s Company", cat:"Live Classic", pluto:"5ef3977e5d773400077de284" },
+  { num:75, name:"Family Ties",       cat:"Live Classic", pluto:"5f77939a630f530007dde654" },
+  { num:76, name:"The Love Boat",     cat:"Live Classic", pluto:"5f7794a788d29000079d2f07" },
+  { num:77, name:"Dynasty",           cat:"Live Classic", pluto:"64d1606b4c5ed80008e3b8b9" },
+  { num:78, name:"Little House",      cat:"Live Classic", pluto:"654933ac986ad20008a1f406" },
+  { num:79, name:"Classic TV Comedy", cat:"Live Classic", pluto:"5f15e32b297f96000768f928" },
+  { num:80, name:"Sitcom Legends",    cat:"Live Classic", pluto:"633354b63df9700007f6a1b7" },
+  { num:81, name:"Mission Impossible",cat:"Live Classic", pluto:"5f77977bd924d80007eee60c" },
+  { num:82, name:"Perry Mason",       cat:"Live Classic", pluto:"6197086891ddd4000739941a" },
+  { num:83, name:"Murder She Wrote",  cat:"Live Classic", pluto:"6549337183595c000815ad05" },
+  { num:84, name:"Matlock",           cat:"Live Classic", pluto:"60f754f98185580007eb0754" },
+  { num:85, name:"Unsolved Mysteries",cat:"Live Classic", pluto:"5cc28d4db5f4824b1bc6c3c7" },
+  { num:86, name:"Bob Ross",          cat:"Live Classic", pluto:"5f36d726234ce10007784f2a" },
+
+  // ══════════════════════════════════════════════
+  // LIVE - MOVIES (Pluto)
+  // ══════════════════════════════════════════════
+  { num:87, name:"Classic Movies",    cat:"Live Movies", pluto:"561c5b0dada51f8004c4d855" },
+  { num:88, name:"80s Rewind",        cat:"Live Movies", pluto:"5ca525b650be2571e3943c63" },
+  { num:89, name:"90s Throwback",     cat:"Live Movies", pluto:"5f4d86f519358a00072b978e" },
+  { num:90, name:"Pluto Action",      cat:"Live Movies", pluto:"561d7d484dc7c8770484914a" },
+  { num:91, name:"Pluto Thrillers",   cat:"Live Movies", pluto:"5b4e69e08291147bd04a9fd7" },
+  { num:92, name:"Pluto Cult Films",  cat:"Live Movies", pluto:"5c665db3e6c01b72c4977bc2" },
+  { num:93, name:"Flicks of Fury",    cat:"Live Movies", pluto:"58e55b14ad8e9c364d55f717" },
+  { num:94, name:"Pluto Docs",        cat:"Live Movies", pluto:"5b85a7582921777994caea63" },
+
+  // ══════════════════════════════════════════════
+  // LIVE - COMEDY (Pluto)
+  // ══════════════════════════════════════════════
+  { num:95, name:"Comedy Central Anim",cat:"Live Comedy", pluto:"5f99e24636d67d0007a94e6d" },
+  { num:96, name:"British Comedy",    cat:"Live Comedy", pluto:"60f870184865da00074210ee" },
+  { num:97, name:"Stand Up",          cat:"Live Comedy", pluto:"5637d31f319573e26b64040b" },
+
+  // ══════════════════════════════════════════════
+  // LIVE - NEWS (Pluto + HLS)
+  // ══════════════════════════════════════════════
+  { num:98,  name:"CBS News Live",  cat:"Live News", pluto:"5f4efc5f9db8a30007c53e7c" },
+  { num:99,  name:"NASA TV",        cat:"Live News", hls:"https://nasa-i.akamaihd.net/hls/live/253565/NASA-NTV1-Public/master.m3u8" },
+  { num:100, name:"ABC News Live",  cat:"Live News", hls:"https://content.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be.m3u8" },
+
+  // ══════════════════════════════════════════════
+  // RADIO (last)
+  // ══════════════════════════════════════════════
   {
-    num:12, name:"Mister Rogers Neighborhood", cat:"Kids", avgDur:1800,
+    num:101, name:"Inner Sanctum Radio", cat:"Radio", avgDur:1800,
     files:[
-      {u:B+"MRogers/Mister%20Rogers%27%20Neighborhood%20-%2013x12%20-%20The%20king%20and%20queen%20plan%20a%20trip%20without%20Prince%20Tuesday%20(x264%2CAC3).mp4", n:"King and Queen Plan a Trip"},
-      {u:B+"MRogers/Mister%20Rogers%27%20Neighborhood%20-%2013x13%20-%20Day%20Care%20%26%20Night%20Care%20(x264%2CAC3).mp4",                                        n:"Day Care and Night Care"},
-      {u:B+"MRogers/Mister%20Rogers%27%20Neighborhood%20-%2019x11%20-%20Josephine%20the%20Short-Neck%20Giraffe%20(x264%2CAC3).mp4",                                 n:"Josephine the Short-Neck Giraffe"},
-      {u:B+"MRogers/Mister%20Rogers%27%20Neighborhood%20-%2021x08%20-%20Growing%20(x264%2CAC3).mp4",                                                                n:"Growing"},
-      {u:B+"MRogers/Mister%20Rogers%27%20Neighborhood%20-%2022x11%20-%20Learning%20(x264%2CAC3).mp4",                                                               n:"Learning"},
-      {u:B+"MRogers/Mister%20Rogers%27%20Neighborhood%20-%2026x03%20-%20Mad%20Feelings%20(x264%2CAC3).mp4",                                                         n:"Mad Feelings"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0239-DeathByScripture.-10-09-1945.mp3",           n:"Death by Scripture"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0240-TillDeathDoUsPart-10-16-1945.mp3",           n:"Till Death Do Us Part"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0241-CorridorOfDoom-BorisKarloff-10-23-1945.mp3", n:"Corridor of Doom"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0242-TheManWhoCouldntDie-10-30-1945.mp3",         n:"The Man Who Couldn\'t Die"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0243-TheWailingWall-11-06-1945.mp3",              n:"The Wailing Wall"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0248-DarkChamber-12-11-1945.mp3",                 n:"Dark Chamber"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0249-TheUndead-12-18-1945.mp3",                   n:"The Undead"},
+      {u:B+"otr_innersanctummysteries/InnerSanctum-Ep0253-TheEdgeOfDeath-01-15-1946.mp3",              n:"The Edge of Death"},
     ]
   },
-
-  // ── CH 13: ALLEGRA'S WINDOW ──
-  { num:13, name:"ALF",                    cat:"Comedy", avgDur:1500, embedOnly:"ALF-The-Complete-Series",                                    files:[{u:"",n:"ALF"}] },
-  { num:14, name:"Totally Spies",          cat:"Kids",   avgDur:1380, embedOnly:"totally-spies-the-complete-series",                          files:[{u:"",n:"Totally Spies"}] },
-  { num:15, name:"Baywatch",               cat:"Drama",  avgDur:2700, embedOnly:"baywatch_202212",                                            files:[{u:"",n:"Baywatch"}] },
-  { num:16, name:"Fairly OddParents",      cat:"Kids",   avgDur:1380, embedOnly:"the-fairly-oddparents-the-complete-series_202507",           files:[{u:"",n:"Fairly OddParents"}] },
-  { num:17, name:"Foster's Home",          cat:"Kids",   avgDur:1380, embedOnly:"fosters-home-for-imaginary-friends-the-complete-series_202507", files:[{u:"",n:"Foster's Home"}] },
-  { num:18, name:"ReBoot",                 cat:"Kids",   avgDur:1380, embedOnly:"reboot-complete-series",                                     files:[{u:"",n:"ReBoot"}] },
-  { num:19, name:"Exosquad",               cat:"Kids",   avgDur:1380, embedOnly:"exosquad-s-02-e-06-mind-set",                                files:[{u:"",n:"Exosquad"}] },
-  { num:20, name:"Powerpuff Girls",        cat:"Kids",   avgDur:780,  embedOnly:"powerpuff-girls-complete-series",                            files:[{u:"",n:"Powerpuff Girls"}] },
-  { num:21, name:"Thunderbirds",           cat:"SciFi",  avgDur:3000, embedOnly:"ThunderbirdsSeries",                                         files:[{u:"",n:"Thunderbirds"}] },
-  { num:22, name:"Duck Dodgers",           cat:"Kids",   avgDur:1380, embedOnly:"duck-dodgers_",                                              files:[{u:"",n:"Duck Dodgers"}] },
-  { num:23, name:"Tales from the Darkside",cat:"SciFi",  avgDur:1380, embedOnly:"tales-from-the-darkside-s01-en",                            files:[{u:"",n:"Tales from the Darkside"}] },
-  { num:24, name:"Twilight Zone",          cat:"SciFi",  avgDur:1380, embedOnly:"the.-twilight.-zone.-2002.-s-01.480p.-dvd-rip.-x-264.-will-1869", files:[{u:"",n:"Twilight Zone"}] },
-  { num:25, name:"Alfred Hitchcock",       cat:"SciFi",  avgDur:1380, embedOnly:"the-new-alfred-hitchcock-presents-complete",                 files:[{u:"",n:"Alfred Hitchcock"}] },
-  { num:26, name:"Kablam!",          cat:"Kids",       avgDur:1380, embedOnly:"Kablam19962000",                                                                          files:[{u:"",n:"Kablam!"}] },
-  { num:27, name:"Pokemon",          cat:"Anime",      avgDur:1380, embedOnly:"pokemon-indigo-league-season-1-1998",                                                    files:[{u:"",n:"Pokemon"}] },
-  { num:28, name:"Digimon",          cat:"Anime",      avgDur:1380, embedOnly:"digimon-digital-monsters-the-complete-seasons-1-4-collection-1999-2003-saban-ent",       files:[{u:"",n:"Digimon"}] },
-  { num:29, name:"DragonBall GT",    cat:"Anime",      avgDur:1380, embedOnly:"soaki_202111",                                                                            files:[{u:"",n:"DragonBall GT"}] },
-  { num:30, name:"MegaMan",          cat:"Anime",      avgDur:1380, embedOnly:"mega-man-the-complete-tv-series-collection",                                              files:[{u:"",n:"MegaMan"}] },
-  { num:31, name:"Speed Racer X",    cat:"Anime",      avgDur:1380, embedOnly:"speed-racer-x-english-dub",                                                              files:[{u:"",n:"Speed Racer X"}] },
-  { num:32, name:"Deltora Quest",    cat:"Anime",      avgDur:1380, embedOnly:"deltora-quest-anime-1-to-13",                                                             files:[{u:"",n:"Deltora Quest"}] },
-  { num:33, name:"Top Gear S22",     cat:"Automotive", avgDur:3600, embedOnly:"top-gear-s22",                                                                            files:[{u:"",n:"Top Gear S22"}] },
-  { num:34, name:"Horror Cinema",    cat:"Movies",     avgDur:5400, embedOnly:"SciFi_Horror",                                                                            files:[{u:"",n:"Horror Films"}] },
-  { num:35, name:"Sci-Fi Cinema",    cat:"Movies",     avgDur:5400, embedOnly:"TheManInTheWhiteSuit1951",                                                                files:[{u:"",n:"Sci-Fi Films"}] },
-  { num:36, name:"Western Cinema",   cat:"Movies",     avgDur:5400, embedOnly:"johnwaynewesterns",                                                                       files:[{u:"",n:"Western Films"}] },
-  { num:37, name:"Film Noir",        cat:"Movies",     avgDur:5400, embedOnly:"film_noir",                                                                               files:[{u:"",n:"Film Noir"}] },
-  { num:38, name:"Tales from Cryptkeeper", cat:"Kids",       avgDur:1380, embedOnly:"s-01-e-06-the-works...-in-wax",                              files:[{u:"",n:"Tales from the Cryptkeeper"}] },
-  { num:39, name:"Freddy's Nightmares",    cat:"Horror",     avgDur:2700, embedOnly:"freddys-nightmares-complete-tv-series",                        files:[{u:"",n:"Freddy's Nightmares"}] },
-  { num:40, name:"Waynehead",              cat:"Kids",       avgDur:1380, embedOnly:"Waynehead1996",                                                 files:[{u:"",n:"Waynehead"}] },
-  { num:41, name:"The Tick",               cat:"Kids",       avgDur:1380, embedOnly:"the-tick-full-series",                                          files:[{u:"",n:"The Tick"}] },
-  { num:42, name:"Recess",                 cat:"Kids",       avgDur:1380, embedOnly:"recessfullseries",                                              files:[{u:"",n:"Recess"}] },
-  { num:43, name:"R.L. Stine Haunting Hour",cat:"Kids",      avgDur:2700, embedOnly:"rl-stines-the-haunting-hour-full-series",                       files:[{u:"",n:"Haunting Hour"}] },
-  { num:44, name:"Pete and Pete",          cat:"Kids",       avgDur:1380, embedOnly:"the_adventures_of_pete_and_pete",                               files:[{u:"",n:"Pete and Pete"}] },
-  { num:45, name:"Weinerville",            cat:"Kids",       avgDur:1380, embedOnly:"s-4-the-weinerville-chanukah-special",                          files:[{u:"",n:"Weinerville"}] },
-  { num:46, name:"Alex Mack",              cat:"Kids",       avgDur:1380, embedOnly:"secret-world-of-alex-mack",                                     files:[{u:"",n:"Alex Mack"}] },
-  { num:47, name:"Welcome Freshman",       cat:"Kids",       avgDur:1380, embedOnly:"Welcome-Frehsmen-1991-Series",                                  files:[{u:"",n:"Welcome Freshman"}] },
-  { num:48, name:"Monster Jam",            cat:"Automotive", avgDur:3600, embedOnly:"classicmonsterjam",                                             files:[{u:"",n:"Monster Jam"}] },
-  { num:49, name:"Global Guts",            cat:"Kids",       avgDur:1380, embedOnly:"nickelodeon-global-guts-season-4",                              files:[{u:"",n:"Global Guts"}] },
-  { num:50, name:"Figure It Out",          cat:"Kids",       avgDur:1380, embedOnly:"figure_it_out_-_season_2_-_episode_06___578412314a427",          files:[{u:"",n:"Figure It Out"}] },
-  { num:51, name:"Dick Van Dyke",          cat:"Comedy",     avgDur:1500, embedOnly:"the-dick-van-dyke-show-the-complete-series-1961-1966",           files:[{u:"",n:"Dick Van Dyke"}] },
-
-  // ── PLUTO TV LIVE CHANNELS ──
-  { num:52,  name:"Star Trek",              cat:"Live", pluto:"5efbd39f8c4ce900075d7698" },
-  { num:53,  name:"More Star Trek",         cat:"Live", pluto:"634dacf51d90320007fcd5fa" },
-  { num:54,  name:"Stargate",               cat:"Live", pluto:"620bfa7df72827000703ddb1" },
-  { num:55,  name:"Doctor Who Classic",     cat:"Live", pluto:"5ce4475cd43850831ca91ce7" },
-  { num:56,  name:"Twilight Zone Live",     cat:"Live", pluto:"5b4fc274694c027be6ed3eea" },
-  { num:57,  name:"MST3000",                cat:"Live", pluto:"545943f1c9f133a519bbac92" },
-  { num:58,  name:"Pluto Horror",           cat:"Live", pluto:"569546031a619b8f07ce6e25" },
-  { num:52,  name:"Pluto Terror",           cat:"Live", pluto:"5c6dc88fcd232425a6e0f06e" },
-  { num:53,  name:"Western TV",             cat:"Live", pluto:"5e8df4bc16e34700077e77d3" },
-  { num:54,  name:"Gunsmoke",               cat:"Live", pluto:"60f75771dfc72a00071fd0e0" },
-  { num:55,  name:"I Love Lucy",            cat:"Live", pluto:"634f3011f4fff20007431641" },
-  { num:56,  name:"Andy Griffith",          cat:"Live", pluto:"60f75178e7f8aa0007e9c259" },
-  { num:57,  name:"Addams Family",          cat:"Live", pluto:"5d81607ab737153ea3c1c80e" },
-  { num:58,  name:"Happy Days",             cat:"Live", pluto:"5f7794162a4559000781fc12" },
-  { num:52,  name:"Classic TV Comedy",      cat:"Live", pluto:"5f15e32b297f96000768f928" },
-  { num:53,  name:"Sitcom Legends",         cat:"Live", pluto:"633354b63df9700007f6a1b7" },
-  { num:54,  name:"Bob Ross",               cat:"Live", pluto:"5f36d726234ce10007784f2a" },
-  { num:55,  name:"Pluto Westerns",         cat:"Live", pluto:"5b4e94282d4ec87bdcbb87cd" },
-  { num:56,  name:"Classic Movies",         cat:"Live", pluto:"561c5b0dada51f8004c4d855" },
-  { num:57,  name:"80s Rewind",             cat:"Live", pluto:"5ca525b650be2571e3943c63" },
-  { num:58,  name:"90s Throwback",          cat:"Live", pluto:"5f4d86f519358a00072b978e" },
-  { num:52,  name:"Mission Impossible",     cat:"Live", pluto:"5f77977bd924d80007eee60c" },
-  { num:53,  name:"Perry Mason",            cat:"Live", pluto:"6197086891ddd4000739941a" },
-  { num:54,  name:"Godzilla",               cat:"Live", pluto:"6452c8cee1979c0008608e27" },
-  { num:55,  name:"Flicks of Fury",         cat:"Live", pluto:"58e55b14ad8e9c364d55f717" },
-  { num:56,  name:"The Rifleman",           cat:"Live", pluto:"5e825550e758c700077b0aef" },
-  { num:57,  name:"Rawhide",                cat:"Live", pluto:"634f307c7a068e00072c9982" },
-  { num:58,  name:"Wanted Dead or Alive",   cat:"Live", pluto:"6089788de5c8410007808e26" },
-  { num:52,  name:"Little House",           cat:"Live", pluto:"654933ac986ad20008a1f406" },
-  { num:53,  name:"Murder She Wrote",       cat:"Live", pluto:"6549337183595c000815ad05" },
-  { num:54,  name:"Matlock",                cat:"Live", pluto:"60f754f98185580007eb0754" },
-  { num:55,  name:"Three's Company",        cat:"Live", pluto:"5ef3977e5d773400077de284" },
-  { num:56,  name:"Family Ties",            cat:"Live", pluto:"5f77939a630f530007dde654" },
-  { num:57,  name:"The Love Boat",          cat:"Live", pluto:"5f7794a788d29000079d2f07" },
-  { num:58,  name:"Dynasty",                cat:"Live", pluto:"64d1606b4c5ed80008e3b8b9" },
-  { num:52,  name:"Beverly Hillbillies",    cat:"Live", pluto:"5f7796e470510900070d4e3d" },
-  { num:53,  name:"Pluto Action",           cat:"Live", pluto:"561d7d484dc7c8770484914a" },
-  { num:54,  name:"Pluto Thrillers",        cat:"Live", pluto:"5b4e69e08291147bd04a9fd7" },
-  { num:55,  name:"Pluto Cult Films",       cat:"Live", pluto:"5c665db3e6c01b72c4977bc2" },
-  { num:56,  name:"Universal Monsters",     cat:"Live", pluto:"65a9b20f0c7ff50008d3a3b6" },
-  { num:57,  name:"RiffTrax",               cat:"Live", pluto:"58d947b9e420d8656ee101ab" },
-  { num:58, name:"Pluto Documentaries",    cat:"Live", pluto:"5b85a7582921777994caea63" },
-  { num:52, name:"Comedy Central Anim",    cat:"Live", pluto:"5f99e24636d67d0007a94e6d" },
-  { num:53, name:"British Comedy",         cat:"Live", pluto:"60f870184865da00074210ee" },
-  { num:54, name:"Stand Up Comedy",        cat:"Live", pluto:"5637d31f319573e26b64040b" },
-  { num:55, name:"CBS News Live",          cat:"Live", pluto:"5f4efc5f9db8a30007c53e7c" },
-  { num:56, name:"Unsolved Mysteries",     cat:"Live", pluto:"5cc28d4db5f4824b1bc6c3c7" },
-
-  // ── HLS LIVE STREAMS ──
-  { num:57, name:"NASA TV",                cat:"Live", hls:"https://nasa-i.akamaihd.net/hls/live/253565/NASA-NTV1-Public/master.m3u8" },
-  { num:58, name:"ABC News Live",          cat:"Live", hls:"https://content.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be.m3u8" },
-  { num:59, name:"CBS News HLS",           cat:"Live", hls:"https://cbsn-us-cedexis.cbsnstream.cbsnews.com/out/v1/55a8648e8f134e82a470f83d562deeca/master.m3u8" },
+  {
+    num:102, name:"Sherlock Holmes Radio", cat:"Radio", avgDur:1800,
+    files:[
+      {u:B+"sherlockholmes_otr/391106%20The%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Adventure%20of%20the%20Missing%20Submarine%20Plans.ogg", n:"The Missing Submarine Plans"},
+      {u:B+"sherlockholmes_otr/401006TheAdventuresOfSherlockHolmes-TheCopperBeeches.ogg",                                                              n:"The Copper Beeches"},
+      {u:B+"sherlockholmes_otr/411207TheAdventuresOfSherlockHolmes-TheMysteryOfMrs.WarrensKey.ogg",                                                    n:"The Mystery of Mrs Warren\'s Key"},
+      {u:B+"sherlockholmes_otr/450326%20The%20New%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Book%20of%20Tobit.ogg",                            n:"The Book of Tobit"},
+      {u:B+"sherlockholmes_otr/450507%20The%20New%20Adventures%20of%20Sherlock%20Holmes%20-%20The%20Purloined%20Ruby.ogg",                             n:"The Purloined Ruby"},
+    ]
+  },
 
 ];
 
@@ -674,6 +738,22 @@ async function selectCh(idx){
 
   setTimeout(async()=>{
     setBar(85);
+
+    // YOUTUBE channel - load YouTube browse
+    if(ch.youtube){
+      player.style.display='none';
+      const fr=document.createElement('iframe');
+      fr.id='fallback-iframe';
+      fr.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:none;z-index:1;';
+      fr.allow='autoplay; encrypted-media; fullscreen; picture-in-picture';
+      fr.src='https://www.youtube.com/';
+      document.getElementById('screen').appendChild(fr);
+      document.getElementById('np-ep').textContent='Browse YouTube';
+      ssoff();setBar(100);
+      document.getElementById('idle').classList.add('gone');
+      loading=false;
+      return;
+    }
 
     // PLUTO TV channels - load Pluto embed iframe in theater mode
     if(ch.pluto){
@@ -826,14 +906,40 @@ function prevCh(){selectCh((curIdx-1+CHANNELS.length)%CHANNELS.length);}
 function toggleGuide(){document.getElementById('gov').classList.toggle('show');}
 function toggleThemes(){document.getElementById('thm-panel').classList.toggle('show');}
 
-const THEMES=['','sears','jcpenney','zenith','trinitron','spaceage','neon','midnight','bloodmoon','ocean','terminal'];
+const THEMES=['','sears','jcpenney','zenith','trinitron','spaceage','neon','midnight','bloodmoon','ocean','terminal','halloween','christmas','newyear','valentines'];
 function setTheme(t){
   document.body.className=t;
   document.querySelectorAll('.thm').forEach((el,i)=>el.classList.toggle('on',THEMES[i]===t));
   localStorage.setItem('sinister-theme',t);
   document.getElementById('thm-panel').classList.remove('show');
 }
-// Restore saved theme
+// ── TV OFF ──
+let tvOff=false;
+function toggleOff(){
+  tvOff=!tvOff;
+  const os=document.getElementById('off-screen');
+  const btn=document.getElementById('off-btn');
+  if(tvOff){
+    // Kill all audio/video first
+    const player=document.getElementById('player');
+    player.pause(); player.removeAttribute('src'); player.load();
+    const fr=document.getElementById('fallback-iframe');
+    if(fr){fr.src='about:blank'; fr.remove();}
+    // Restart dot animation
+    const dot=document.getElementById('off-dot');
+    dot.style.animation='none'; dot.offsetHeight; dot.style.animation='';
+    os.classList.add('show');
+    btn.classList.add('on');
+    btn.textContent='⏻';
+  } else {
+    os.classList.remove('show');
+    btn.classList.remove('on');
+    btn.textContent='⭕';
+    if(curIdx>=0) selectCh(curIdx);
+  }
+}
+
+// ── THEMES ──
 const saved=localStorage.getItem('sinister-theme');
 if(saved!==null) setTheme(saved);
 
