@@ -6,7 +6,7 @@
 <title>Sinister TV - Archive Edition</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Permanent+Marker&family=Rock+Salt&family=Pacifico&family=Orbitron:wght@700&family=Rajdhani:wght@600&family=Raleway:wght@400&family=Nunito:wght@400&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
 
 /* DEFAULT THEME */
@@ -327,6 +327,15 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 #osd.show{opacity:1;animation:osdFade 2s forwards;}
 @keyframes osdFade{0%{opacity:1;}70%{opacity:1;}100%{opacity:0;}}
 #player{position:absolute;inset:0;width:100%;height:100%;border:none;background:#000;border-radius:var(--tv-radius);}
+
+/* MUSIC GENRE BACKGROUNDS */
+.music-bg-rap{background:linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #000 100%);}
+.music-bg-rock{background:linear-gradient(135deg, #0a0a0a 0%, #2a1a1a 50%, #000 100%);}
+.music-bg-funk{background:linear-gradient(135deg, #2a0a4a 0%, #4a2a0a 50%, #000 100%);}
+.music-bg-electronic{background:linear-gradient(135deg, #001a4a 0%, #004a8a 50%, #000 100%);}
+.music-bg-ambient{background:linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 50%, #000 100%);}
+.music-bg-default{background:linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 50%, #000 100%);}
+
 #idle{position:absolute;inset:0;z-index:20;background:#000;border-radius:var(--tv-radius);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
 #idle.gone{display:none;}
@@ -388,12 +397,20 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 .goch.ach .gonm,.goch.ach .gonum{color:var(--cnt-color);}
 .gomt{font-size:1.1rem;color:var(--gc-color);margin-left:auto;letter-spacing:1px;}
 
-/* THEME PICKER */
-#thm-btn{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:200;
+/* THEME PICKER - MOVED TO RIGHT SIDE */
+#thm-btn{position:fixed;top:10px;left:50%;transform:translateX(calc(-50% + 90px));z-index:200;
   background:var(--gc-bg);border:2px solid var(--gc-border);color:var(--gc-color);
   font-family:'VT323',monospace;font-size:1.6rem;padding:6px 18px;cursor:pointer;
   letter-spacing:1px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
 #thm-btn:hover{color:var(--cnt-color);border-color:var(--cnt-color);box-shadow:0 0 12px var(--logo-glow);}
+
+/* ON-DEMAND BUTTON (formerly BROWSE) - MOVED TO LEFT SIDE */
+#browse-btn{position:fixed;top:10px;left:50%;transform:translateX(calc(-50% - 90px));z-index:200;
+  background:var(--gc-bg);border:2px solid var(--gc-border);color:var(--gc-color);
+  font-family:'VT323',monospace;font-size:1.6rem;padding:6px 18px;cursor:pointer;
+  letter-spacing:1px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
+#browse-btn:hover{color:var(--cnt-color);border-color:var(--cnt-color);box-shadow:0 0 12px var(--logo-glow);}
+
 #thm-panel{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:201;
   background:var(--gov-bg);border:2px solid var(--brand-border);padding:12px 16px;
   display:none;flex-direction:column;gap:2px;min-width:280px;border-radius:4px;
@@ -408,6 +425,140 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 .thm:hover{background:rgba(255,255,255,0.06);color:var(--cnt-color);}
 .thm.on{color:var(--cnt-color);}
 .thm-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);}
+
+/* BROWSE OVERLAY */
+#browse-overlay{position:fixed;top:0;left:0;width:100%;height:100%;
+  background:var(--gov-bg);z-index:300;display:none;overflow-y:auto;padding:60px 20px 20px 20px;
+  opacity:0;transition:opacity 0.3s ease;}
+#browse-overlay.show{display:block;animation:fadeIn 0.3s ease forwards;}
+
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+/* Loading Spinner */
+.browse-loading{text-align:center;padding:60px 20px;animation:pulse 1.5s ease-in-out infinite;}
+.browse-spinner{width:60px;height:60px;margin:0 auto 20px auto;
+  border:4px solid var(--gc-border);border-top:4px solid var(--ch-color);
+  border-radius:50%;animation:spin 1s linear infinite;}
+
+@keyframes spin{
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
+}
+
+@keyframes pulse{
+  0%, 100%{opacity:1;}
+  50%{opacity:0.5;}
+}
+
+/* GAME PLAYER OVERLAY */
+#game-overlay{position:fixed;top:0;left:0;width:100%;height:100%;
+  background:#000;z-index:400;display:none;}
+#game-overlay.show{display:flex;flex-direction:column;}
+#game-header{background:var(--brand-bg);padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid var(--brand-border);box-shadow:0 2px 10px rgba(0,0,0,0.5);}
+#game-title{font-family:'Press Start 2P',monospace;font-size:.8rem;
+  color:var(--got-color);letter-spacing:2px;}
+#game-exit{background:var(--btn-bg);border:2px solid var(--btn-border);
+  color:var(--btn-color);font-family:'VT323',monospace;font-size:1.4rem;
+  padding:6px 14px;cursor:pointer;letter-spacing:1px;border-radius:4px;}
+#game-exit:hover{color:var(--cnt-color);border-color:var(--cnt-color);
+  box-shadow:0 0 8px var(--logo-glow);}
+#game-frame{flex:1;border:none;width:100%;height:100%;background:#000;}
+#browse-header{position:fixed;top:0;left:0;right:0;height:50px;
+  background:var(--brand-bg);border-bottom:2px solid var(--brand-border);
+  display:flex;align-items:center;justify-content:center;z-index:301;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5);}
+#browse-title{font-family:'Press Start 2P',monospace;font-size:.8rem;
+  color:var(--got-color);letter-spacing:2px;}
+#browse-close{position:absolute;right:20px;top:50%;transform:translateY(-50%);
+  background:var(--btn-bg);border:2px solid var(--btn-border);color:var(--btn-color);
+  font-family:'VT323',monospace;font-size:1.4rem;padding:4px 12px;cursor:pointer;
+  letter-spacing:1px;border-radius:4px;}
+#browse-close:hover{color:var(--cnt-color);border-color:var(--cnt-color);
+  box-shadow:0 0 8px var(--logo-glow);}
+.browse-category{margin-bottom:30px;}
+.browse-cat-title{font-family:'VT323',monospace;font-size:1.8rem;
+  color:var(--cat-color);margin-bottom:12px;letter-spacing:2px;
+  border-bottom:2px solid var(--gc-border);padding-bottom:6px;}
+.browse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:15px;}
+.browse-card{background:var(--gc-bg);border:2px solid var(--gc-border);
+  padding:12px;cursor:pointer;border-radius:4px;transition:all .3s ease;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);position:relative;}
+.browse-card:hover{border-color:var(--cnt-color);
+  box-shadow:0 0 20px var(--logo-glow), 0 4px 12px rgba(0,0,0,0.5);
+  transform:translateY(-4px) scale(1.02);}
+.browse-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
+  background:linear-gradient(45deg, transparent, var(--logo-glow), transparent);
+  border-radius:4px;opacity:0;transition:opacity .3s ease;z-index:-1;}
+.browse-card:hover::before{opacity:0.3;}
+.browse-ch-num{font-family:'Press Start 2P',monospace;font-size:.6rem;
+  color:var(--ch-color);margin-bottom:6px;}
+.browse-ch-name{font-family:'VT323',monospace;font-size:1.6rem;
+  color:var(--np-color);margin-bottom:4px;letter-spacing:1px;}
+.browse-ch-info{font-family:'VT323',monospace;font-size:1.2rem;
+  color:var(--gc-color);letter-spacing:0.5px;}
+.browse-ch-click{font-family:'VT323',monospace;font-size:1.1rem;
+  color:var(--ch-color);margin-top:6px;opacity:0;transition:opacity .2s;}
+.browse-card:hover .browse-ch-click{opacity:1;}
+
+/* Continue Watching Cards - Special Styling */
+.continue-watching-card{border-left:4px solid var(--ch-color);
+  background:linear-gradient(90deg, rgba(0,255,136,0.05), var(--gc-bg));}
+.continue-watching-card .browse-ch-info{color:var(--ch-color);font-weight:bold;}
+
+/* SHOW DETAILS VIEW */
+.show-detail-header{position:sticky;top:60px;background:var(--brand-bg);
+  border-bottom:2px solid var(--brand-border);padding:15px 20px;margin:-60px -20px 20px -20px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5);z-index:299;}
+.back-btn,.play-channel-btn{background:var(--btn-bg);border:2px solid var(--btn-border);
+  color:var(--btn-color);font-family:'VT323',monospace;font-size:1.4rem;
+  padding:6px 14px;cursor:pointer;letter-spacing:1px;border-radius:4px;}
+.back-btn:hover,.play-channel-btn:hover{color:var(--cnt-color);
+  border-color:var(--cnt-color);box-shadow:0 0 8px var(--logo-glow);}
+.show-detail-title{flex:1;text-align:center;}
+.show-title{font-family:'Press Start 2P',monospace;font-size:.9rem;
+  color:var(--got-color);letter-spacing:2px;margin-bottom:6px;}
+.show-subtitle{font-family:'VT323',monospace;font-size:1.4rem;
+  color:var(--np-color);letter-spacing:1px;}
+
+/* EPISODE GRID */
+.episode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:15px;padding:0 20px 40px 20px;}
+.episode-card{background:var(--gc-bg);border:2px solid var(--gc-border);
+  padding:14px;cursor:pointer;border-radius:4px;transition:all .3s ease;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);position:relative;overflow:hidden;}
+.episode-card:hover{border-color:var(--cnt-color);
+  box-shadow:0 0 20px var(--logo-glow), 0 4px 15px rgba(0,0,0,0.6);
+  transform:translateY(-4px) scale(1.02);}
+.episode-card::after{content:'';position:absolute;top:50%;left:50%;
+  width:0;height:0;background:radial-gradient(circle, var(--logo-glow), transparent);
+  border-radius:50%;transform:translate(-50%, -50%);
+  transition:width .5s ease, height .5s ease;opacity:0.2;z-index:0;}
+.episode-card:hover::after{width:300px;height:300px;}
+.episode-card > *{position:relative;z-index:1;}
+.episode-num{font-family:'Press Start 2P',monospace;font-size:.6rem;
+  color:var(--ch-color);margin-bottom:8px;letter-spacing:1px;}
+.episode-name{font-family:'VT323',monospace;font-size:1.5rem;
+  color:var(--np-color);margin-bottom:6px;letter-spacing:0.5px;line-height:1.3;
+  min-height:40px;}
+.episode-duration{font-family:'VT323',monospace;font-size:1.2rem;
+  color:var(--gc-color);margin-bottom:8px;}
+.episode-play{font-family:'VT323',monospace;font-size:1.3rem;
+  color:var(--ch-color);letter-spacing:1px;opacity:0;transition:opacity .2s;}
+.episode-card:hover .episode-play{opacity:1;}
+
+/* Last Watched Episode Highlight */
+.last-watched-ep{border-left:4px solid var(--ch-color);
+  background:linear-gradient(90deg, rgba(0,255,136,0.1), var(--gc-bg));}
+.last-watched-ep .episode-num{color:var(--ch-color);}
+.last-watched-ep .episode-play{opacity:1;color:var(--ch-color);font-weight:bold;}
+
 /* OFF SCREEN */
 #off-screen{position:fixed;inset:0;z-index:998;display:none;
   background:#000;flex-direction:column;align-items:center;justify-content:center;}
@@ -478,6 +629,46 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
       <div id="bw"><div id="bb"></div></div>
     </div>
     <div id="static"><canvas id="sc"></canvas></div>
+    
+    <!-- MUSIC VISUALIZER OVERLAY -->
+    <div id="music-overlay" style="
+      position: absolute;
+      inset: 0;
+      display: none;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 5;
+    ">
+      <div id="music-info" style="
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.85);
+        border: 3px solid #FFD700;
+        border-radius: 15px;
+        padding: 25px 50px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 30px rgba(255,215,0,0.5);
+      ">
+        <div id="music-track" style="
+          font-family: 'VT323', monospace;
+          font-size: 2.5rem;
+          color: #FFD700;
+          text-shadow: 0 0 10px #FFD700;
+          margin-bottom: 10px;
+          font-weight: bold;
+        ">Track Name</div>
+        <div id="music-artist" style="
+          font-family: 'VT323', monospace;
+          font-size: 1.8rem;
+          color: #FFF;
+          text-shadow: 0 0 5px #000;
+        ">Artist Name</div>
+      </div>
+    </div>
   </div>
   <div id="controls">
     <div id="chd"><div id="chn">--</div><div id="chl">CH</div></div>
@@ -504,6 +695,215 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 </div>
 
 <button id="thm-btn" onclick="toggleThemes()">&#127912; THEME</button>
+<button id="browse-btn" onclick="toggleBrowse()">📋 ON-DEMAND</button>
+
+<div id="browse-overlay">
+  <div id="browse-header">
+    <div id="browse-title">📺 BROWSE CHANNELS</div>
+    <button id="browse-close" onclick="toggleBrowse()">CLOSE</button>
+  </div>
+  <div id="browse-content"></div>
+</div>
+
+<div id="game-overlay">
+  <div id="game-header">
+    <div id="game-title">🎮 LOADING GAME...</div>
+    <button id="game-exit" onclick="exitGame()">EXIT GAME</button>
+  </div>
+  <iframe id="game-frame" allowfullscreen allow="autoplay; fullscreen"></iframe>
+  
+  <!-- VIRTUAL GAMEPAD - ON-SCREEN CONTROLS -->
+  <div id="virtual-gamepad" style="
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 40px;
+    pointer-events: auto;
+    z-index: 10002;
+  ">
+    <!-- D-PAD (Left side) -->
+    <div style="position: relative; width: 180px; height: 180px;">
+      <button class="gamepad-btn" id="btn-up" style="
+        position: absolute;
+        top: 0;
+        left: 60px;
+        width: 60px;
+        height: 60px;
+        background: rgba(100,100,100,0.8);
+        border: 3px solid #FFD700;
+        border-radius: 8px;
+        color: #FFD700;
+        font-size: 2rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        transition: all 0.1s;
+      ">▲</button>
+      
+      <button class="gamepad-btn" id="btn-left" style="
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 60px;
+        height: 60px;
+        background: rgba(100,100,100,0.8);
+        border: 3px solid #FFD700;
+        border-radius: 8px;
+        color: #FFD700;
+        font-size: 2rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        transition: all 0.1s;
+      ">◀</button>
+      
+      <button class="gamepad-btn" id="btn-right" style="
+        position: absolute;
+        top: 60px;
+        left: 120px;
+        width: 60px;
+        height: 60px;
+        background: rgba(100,100,100,0.8);
+        border: 3px solid #FFD700;
+        border-radius: 8px;
+        color: #FFD700;
+        font-size: 2rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        transition: all 0.1s;
+      ">▶</button>
+      
+      <button class="gamepad-btn" id="btn-down" style="
+        position: absolute;
+        top: 120px;
+        left: 60px;
+        width: 60px;
+        height: 60px;
+        background: rgba(100,100,100,0.8);
+        border: 3px solid #FFD700;
+        border-radius: 8px;
+        color: #FFD700;
+        font-size: 2rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        transition: all 0.1s;
+      ">▼</button>
+      
+      <div style="
+        position: absolute;
+        bottom: -25px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        color: #FFD700;
+        font-family: 'VT323', monospace;
+        font-size: 1rem;
+      ">D-PAD</div>
+    </div>
+    
+    <!-- ACTION BUTTONS (Right side) -->
+    <div style="position: relative; width: 280px; height: 180px;">
+      <button class="gamepad-btn" id="btn-b" style="
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 70px;
+        height: 70px;
+        background: rgba(200,50,50,0.9);
+        border: 3px solid #FF4444;
+        border-radius: 50%;
+        color: #FFF;
+        font-size: 1.8rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        font-weight: bold;
+        transition: all 0.1s;
+      ">B</button>
+      
+      <button class="gamepad-btn" id="btn-a" style="
+        position: absolute;
+        top: 30px;
+        left: 90px;
+        width: 80px;
+        height: 80px;
+        background: rgba(50,200,50,0.9);
+        border: 3px solid #44FF44;
+        border-radius: 50%;
+        color: #FFF;
+        font-size: 2rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        font-weight: bold;
+        transition: all 0.1s;
+      ">A</button>
+      
+      <button class="gamepad-btn" id="btn-start" style="
+        position: absolute;
+        top: 130px;
+        left: 80px;
+        width: 100px;
+        height: 40px;
+        background: rgba(100,100,100,0.8);
+        border: 3px solid #FFD700;
+        border-radius: 20px;
+        color: #FFD700;
+        font-size: 1.2rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        transition: all 0.1s;
+      ">START</button>
+      
+      <button class="gamepad-btn" id="btn-select" style="
+        position: absolute;
+        top: 130px;
+        left: 190px;
+        width: 90px;
+        height: 40px;
+        background: rgba(100,100,100,0.8);
+        border: 3px solid #FFD700;
+        border-radius: 20px;
+        color: #FFD700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        font-family: 'VT323', monospace;
+        transition: all 0.1s;
+      ">SELECT</button>
+    </div>
+  </div>
+  
+  <!-- INSTRUCTIONS -->
+  <div style="
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.85);
+    border: 2px solid #00FF88;
+    border-radius: 8px;
+    padding: 15px 25px;
+    font-family: 'VT323', monospace;
+    color: #00FF88;
+    font-size: 1.3rem;
+    text-align: center;
+    pointer-events: none;
+    z-index: 10001;
+  ">
+    🎮 USE ON-SCREEN BUTTONS BELOW! 🎮
+  </div>
+</div>
+
+<style>
+.gamepad-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 20px currentColor;
+  background: rgba(255,255,255,0.3) !important;
+}
+.gamepad-btn:hover {
+  box-shadow: 0 0 15px currentColor;
+}
+</style>
+
 <div id="off-screen"><div id="off-dot"></div></div>
 <div id="thm-panel">
   <div id="thm-title">SELECT TV THEME</div>
@@ -567,7 +967,7 @@ const CHANNELS = [
   // ══════════════════════════════════════════════
   // WESTERN
   // ══════════════════════════════════════════════
-  { num:1, name:"Bonanza", cat:"Western", avgDur:2700, embedOnly:"bonanza-1959-1973-s-01e-01_202401", files:[{u:"",n:"Bonanza"}] },
+  // (Ch 1 - Bonanza removed - not working)
 
   // ══════════════════════════════════════════════
   // COMEDY
@@ -710,17 +1110,18 @@ const CHANNELS = [
   // ══════════════════════════════════════════════
   // YOUTUBE
   // ══════════════════════════════════════════════
-  { num:50, name:"YouTube",       cat:"YouTube", youtube:true, files:[{u:"",n:"YouTube"}] },
+  // REMOVED: Ch 50 YouTube (does not work)
 
   // ══════════════════════════════════════════════
   // LIVE - SCIFI & HORROR (Pluto)
   // ══════════════════════════════════════════════
   // STAR TREK CHANNELS - All the Trek you can handle! 🖖
-  { num:51, name:"Star Trek",          cat:"Live SciFi", pluto:"5efbd39f8c4ce900075d7698", files:[{u:"",n:"Star Trek"}] },
-  { num:52, name:"Star Trek: TNG",     cat:"Live SciFi", pluto:"634dacf51d90320007fcd5fa", files:[{u:"",n:"Star Trek TNG"}] },
-  { num:53, name:"Star Trek: DS9",     cat:"Live SciFi", pluto:"5efbd616e345c6000850a8dd", files:[{u:"",n:"Star Trek DS9"}] },
-  { num:54, name:"Star Trek: Voyager", cat:"Live SciFi", pluto:"5efbd628880edd0007a0351a", files:[{u:"",n:"Star Trek Voyager"}] },
-  { num:55, name:"Star Trek: Enterprise", cat:"Live SciFi", pluto:"60e0c6107a0e960007ac8ecc", files:[{u:"",n:"Star Trek Enterprise"}] },
+  // VERIFIED PLUTO TV IDS (Current as of 2024-2025)
+  { num:51, name:"Star Trek: TOS",          cat:"Live SciFi", pluto:"5efbd39f8c4ce900075d7698", files:[{u:"",n:"Star Trek TOS"}] },
+  { num:52, name:"Star Trek: TNG",          cat:"Live SciFi", pluto:"634dacf51d90320007fcd5fa", files:[{u:"",n:"Star Trek TNG"}] },
+  { num:53, name:"Star Trek: DS9",          cat:"Live SciFi", pluto:"5efbd616e345c6000850a8dd", files:[{u:"",n:"Star Trek DS9"}] },
+  { num:54, name:"Star Trek: Voyager",      cat:"Live SciFi", pluto:"5efbd628880edd0007a0351a", files:[{u:"",n:"Star Trek Voyager"}] },
+  { num:55, name:"Star Trek: Enterprise",   cat:"Live SciFi", pluto:"60e0c6107a0e960007ac8ecc", files:[{u:"",n:"Star Trek Enterprise"}] },
   
   // Other Sci-Fi Channels
   { num:56, name:"Stargate",           cat:"Live SciFi", pluto:"620bfa7df72827000703ddb1", files:[{u:"",n:"Stargate"}] },
@@ -857,7 +1258,7 @@ const CHANNELS = [
   // NEW CHANNELS - COMEDY
   // ══════════════════════════════════════════════════════════════
   { num:330, name:"Roseanne", cat:"Comedy", avgDur:1380, embedOnly:"roseanne_202507", files:[{u:"",n:"Roseanne"}] },
-  { num:331, name:"Joey", cat:"Comedy", avgDur:1380, embedOnly:"joey-complete-series_202210", files:[{u:"",n:"Joey"}] },
+  // REMOVED: Ch 331 Joey
   { num:332, name:"Family Matters", cat:"Comedy", avgDur:1380, embedOnly:"familymatters_202507", files:[{u:"",n:"Family Matters"}] },
   { num:333, name:"Everybody Loves Raymond", cat:"Comedy", avgDur:1380, embedOnly:"everybody-loves-raymond-complete-series_20251121_0430", files:[{u:"",n:"Everybody Loves Raymond"}] },
   { num:334, name:"The Golden Girls", cat:"Comedy", avgDur:1380, embedOnly:"the-golden-girls-complete-480p-x264", files:[{u:"",n:"The Golden Girls"}] },
@@ -901,6 +1302,7 @@ const CHANNELS = [
   { num:376, name:"Little Bill", cat:"Kids", avgDur:1380, embedOnly:"little-bill-complete-series", files:[{u:"",n:"Little Bill"}] },
   { num:377, name:"Sesame Street", cat:"Kids", avgDur:1800, embedOnly:"sesame-street-2000s", files:[{u:"",n:"Sesame Street"}] },
   { num:378, name:"My Little Pony", cat:"Kids", avgDur:1380, embedOnly:"my-little-pony-friendship-is-magic-season-1-2-complete-greek-dub", files:[{u:"",n:"My Little Pony"}] },
+  { num:379, name:"Battle of the Planets", cat:"Kids", avgDur:1380, embedOnly:"s-00-e-03-battle-of-the-planets-the-movie", files:[{u:"",n:"Battle of the Planets"}] },
 
   // ══════════════════════════════════════════════════════════════
   // NEW CHANNELS - SCIFI
@@ -945,7 +1347,7 @@ const CHANNELS = [
   // ══════════════════════════════════════════════════════════════
   // NEW CHANNELS - AUTOMOTIVE
   // ══════════════════════════════════════════════════════════════
-  { num:440, name:"Top Gear", cat:"Automotive", avgDur:3600, embedOnly:"top-gear-complete-clarkson-hammond-may", files:[{u:"",n:"Top Gear"}] },
+  // REMOVED: Ch 440 Top Gear
 
   // ══════════════════════════════════════════════════════════════
   // NETWORK MASTER CHANNELS - Auto-rotating by original network
@@ -960,7 +1362,7 @@ const CHANNELS = [
   
   { num:904, name:"🎌 Anime Action Network", cat:"Network Master", master:true, networkShows:["Get Ride AM Driver","Element Hunters","Get Backers","Paranoia Agent","Ghost Stories","Samurai Pizza Cats","Death Note","Dragon Ball Z"], avgDur:1380, files:[{u:"",n:"Anime Action Network"}] },
   
-  { num:905, name:"😂 Laugh Track TV", cat:"Network Master", master:true, networkShows:["Roseanne","Joey","Family Matters","Everybody Loves Raymond","The Golden Girls","Drew Carey Show","King of Queens","Leave It to Beaver","Home Improvement","In Living Color","That 80s Show","My Wife and Kids"], avgDur:1380, files:[{u:"",n:"Laugh Track TV"}] },
+  { num:905, name:"😂 Laugh Track TV", cat:"Network Master", master:true, networkShows:["Roseanne","Family Matters","Everybody Loves Raymond","The Golden Girls","Drew Carey Show","King of Queens","Leave It to Beaver","Home Improvement","In Living Color","That 80s Show","My Wife and Kids"], avgDur:1380, files:[{u:"",n:"Laugh Track TV"}] },
   
   { num:906, name:"📺 Classic Rerun Station", cat:"Network Master", master:true, networkShows:["Patty Duke Show","M*A*S*H","The Jeffersons","Gilligan's Island","The Wonder Years","The A-Team","Sherlock Holmes 1954"], avgDur:1380, files:[{u:"",n:"Classic Rerun Station"}] },
   
@@ -971,109 +1373,456 @@ const CHANNELS = [
   { num:909, name:"🎭 Prime Time Drama", cat:"Network Master", master:true, networkShows:["Party of Five","Live PD Wanted","NYPD Blue","Real Sex HBO"], avgDur:2700, files:[{u:"",n:"Prime Time Drama"}] },
 
   // ══════════════════════════════════════════════════════════════
-  // RAP MUSIC MASTER STATIONS - 3 Stations with Different Content
+  // RAP MUSIC MASTER STATIONS - 4 Stations with 141 Collections
   // ══════════════════════════════════════════════════════════════
   
-  // STATION 1: CLASSIC MIXTAPES (Ch 950)
-  { num:950, name:"🔥 Classic Mixtape Radio", cat:"Music", master:true, 
+  // STATION 1: CLASSIC RAP & MIXTAPES (Ch 950) - 35 collections
+  { num:950, name:"🔥 Classic Rap Radio", cat:"Music", master:true, 
     networkShows:[
-      "dedication-2-lil-wayne",
-      "lil-wayne-da-drought-2",
-      "the-champ-is-here-jadakiss",
-      "cole-world-sideline-story-jcole-itunes",
-      "the-drive-in-theatre-currensy",
-      "from-me-to-u-juelz",
-      "king-of-the-mischievous-south-vol.-2",
-      "14yogottiigotemftlilwayneandthebirdman",
-      "Papoose_collection",
-      "DJ_Green_Lantern_and_Jadakiss_-_Kiss_My_Ass_The_Champ_Is_Here_Pt.2",
-      "DJ_Green_Lantern_And_Jay-Z_-_Creative_Control-2010",
-      "Capone-N-Noreaga_and_DJ_Green_Lantern-_Camouflage_Season-2010",
-      "Nature-N-Noreaga_-_Queensbridge_2_Lefrak-2008",
-      "Suge_White_Presents_Jadakiss_and_Styles_P_-_Brothers-2012",
-      "DJ_Mystery_-_L.O.X._Classics-2021"
+      "RicNuttIse-bPresentsWelcomeToSyndiegoMixtapes","dedication-2-lil-wayne","tdolapt1bykazeloon",
+      "Hiphop-farwest_-_lil_d_-_liveFast_die_young","the-drive-in-theatre-currensy","kiz-mixtapes",
+      "Pastor_Troy_-_Crown_Royal_Legend-2013","14yogottiigotemftlilwayneandthebirdman",
+      "2-09-i-wanna-disc-2-east-coast-edition-kurupt_202305","from-me-to-u-juelz",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_HD_3-2011","VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_S.G._Vol_32-2010",
+      "DJ_Ty_Boogie_-_The_Greatest_Whoever_Done_It_13_-MixFiend-2007","VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_73-2011",
+      "cole-world-sideline-story-jcole-itunes","lil-peep-live-forever_202503","VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_86-2011",
+      "va-dj-chuck-t-down-south-slangin-vol.-51-bootleg-2008-fpuo","va-dj-chuck-t-down-south-slangin-vol.-48-bootleg-2008-fpuo",
+      "muslcecarchronicles","dj-lindo_20251212_2301","Gangsta_Grillz_The_Whole_Series__Covers",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_197-2017","RonaldBigMacdonaldKazeLoon","VA-Superstar_Jay_-_I_Am_Mixtapes_208-2018",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes-2014","FlexinNReppin2DatPiff.com","VA-Superstar_Jay_-_I_Am_Mixtapes_207-2018",
+      "mixtapes_202212","VA-Superstar_Jay_-_I_Am_Mixtapes_194-2016","VA-Superstar_Jay_-_I_Am_Mixtapes_186-2016",
+      "DJ_Stretch_-_Mixtapes_For_Dummyz_Vol_1_Feat._Project_Pat_and_Three_6_Mafia-2009",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_200-2017","VA-Superstar_Jay_-_I_Am_Mixtapes_147-2013","VA-Superstar_Jay_-_I_Am_Mixtapes_199-2017"
     ],
-    avgDur:2400, files:[{u:"",n:"Classic Mixtapes"}] 
+    avgDur:2400, files:[{u:"",n:"Classic Rap Radio"}] 
   },
   
-  // STATION 2: SUPERSTAR JAY'S I AM MIXTAPES (Ch 951)
+  // STATION 2: SUPERSTAR JAY & BIGGY JIGGY (Ch 951) - 35 collections
   { num:951, name:"💎 Superstar Jay Radio", cat:"Music", master:true,
     networkShows:[
-      "VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_73-2011",
-      "VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_86-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_197-2017",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_208-2018",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_207-2018",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_194-2016",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_186-2016",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_200-2017",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_147-2013",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_199-2017",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_100-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_211-2019",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_148-2013",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_185-2015",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_77-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_74-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_209_Mixtape_Creed-2018",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_183-2015",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_150-2013",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_76-2011",
-      "Superstar_Jay_-_I_Am_Mixtapes_71-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_132-2012",
-      "Superstar_Jay_-_I_Am_Mixtapes_85-2011",
-      "VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_63-2010",
-      "Superstar_Jay_-_I_Am_Mixtapes_92-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_161-2014",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_93-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_138-2013",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_126-2012",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_149-2013",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_104-2011",
-      "Superstar_Jay_-_I_Am_Mixtapes_94-2011",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_118_Hosted_By_Waka_Flocka-2012",
-      "Superstar_Jay_-_I_Am_Mixtapes_68_Hosted_By_Lil_Kim-2010",
-      "VA-Superstar_Jay_-_I_Am_Mixtapes_54_Hosted_By_Lamar_Odom-2010"
+      "hiphopmixtapes2032","VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes_6-2014","Exclusive_Tunes_100_-_Biggy_Jiggy_Mixtapes",
+      "lil-wayne-da-drought-2","VA-Superstar_Jay_-_I_Am_Mixtapes_100-2011","Exclusive_Tunes_S.G._15_-_Biggy_Jiggy_Mixtapes",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_2-2012","VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes_4-2014",
+      "Exclusive_Tunes_41_-_Biggy_Jiggy_Mixtapes","VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes_2-2014",
+      "Exclusive_Tunes_S.G._6_-_Biggy_Jiggy_Mixtapes","king-of-the-mischievous-south-vol.-2",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_3-2012","Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_S.G._47-2011",
+      "VA-DJ_Red_Skull__DJ_ASAP_and_DJ_Suspence_-_5_Star_Mixtapes-2018",
+      "DJ_Messiah_and_Lloyd_Banks-I_Am_Mixtapes_2_Punchline_King_Edition-2008-MF",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_HD_2-2011","Exclusive_Tunes_S.G._16_-_Biggy_Jiggy_Mixtapes",
+      "DJ_Ant-Lo_-_Radio_Play_7-2010","VA-Superstar_Jay_-_I_Am_Mixtapes_211-2019","VA-Superstar_Jay_-_I_Am_Mixtapes_148-2013",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_185-2015","VA-Superstar_Jay_-_I_Am_Mixtapes_77-2011",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_74-2011","VA-Superstar_Jay_-_I_Am_Mixtapes_209_Mixtape_Creed-2018",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_183-2015","VA-Superstar_Jay_-_I_Am_Mixtapes_150-2013",
+      "Exclusive_Tunes_S.G._7_-_Biggy_Jiggy_Mixtapes","VA-Superstar_Jay_-_I_Am_Mixtapes_76-2011",
+      "Superstar_Jay_-_I_Am_Mixtapes_71-2011","Exclusive_Tunes_S.G._13_-_Biggy_Jiggy_Mixtapes",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_98-2009","Obie_Trice_-_The_Fifth-2019",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_6-2012"
     ],
-    avgDur:2400, files:[{u:"",n:"I Am Mixtapes"}]
+    avgDur:2400, files:[{u:"",n:"Superstar Jay Radio"}] 
   },
   
-  // STATION 3: DJ GREEN LANTERN & EXCLUSIVE TUNES (Ch 952)
+  // STATION 3: DJ MASTERS COLLECTION (Ch 952) - 35 collections
   { num:952, name:"🌊 DJ Masters Radio", cat:"Music", master:true,
     networkShows:[
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_HD_3-2011",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_S.G._Vol_32-2010",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes-2014",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes_6-2014",
-      "Exclusive_Tunes_100_-_Biggy_Jiggy_Mixtapes",
-      "Exclusive_Tunes_S.G._15_-_Biggy_Jiggy_Mixtapes",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_2-2012",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes_4-2014",
-      "Exclusive_Tunes_41_-_Biggy_Jiggy_Mixtapes",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes_2-2014",
-      "Exclusive_Tunes_S.G._6_-_Biggy_Jiggy_Mixtapes",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_3-2012",
-      "Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_S.G._47-2011",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_HD_2-2011",
-      "Exclusive_Tunes_S.G._16_-_Biggy_Jiggy_Mixtapes",
-      "Exclusive_Tunes_S.G._7_-_Biggy_Jiggy_Mixtapes",
-      "Exclusive_Tunes_S.G._13_-_Biggy_Jiggy_Mixtapes",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_98-2009",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_6-2012",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_95-2009",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_96-2009",
-      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_4-2012",
-      "DJ_Green_Lantern_-_Master_Class-2011",
-      "Royce_Da_59-Bar_Exam_2_Mixed_By_DJ_Green_Lantern-2008",
-      "Royce_Da_5_9_-_The_Bar_Exam_4_Hosted_By_DJ_Green_Lantern-2017",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_132-2012","Superstar_Jay_-_I_Am_Mixtapes_85-2011",
+      "VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_63-2010","VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D-2012",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_S.G._Vol_32-2010","Superstar_Jay_-_I_Am_Mixtapes_92-2011",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_161-2014","VA-BIggy_Jiggy_Mixtapes_-_Exclusive_Tunes_97-2009",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_93-2011","VA-Superstar_Jay_-_I_Am_Mixtapes_138-2013",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_126-2012","VA-DJ_Messiah-I_Am_Mixtapes_Lil_Wayne_Freestyle_Edition-Bootleg-2008-GT4",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_95-2009","VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_96-2009",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_3D_4-2012","Superstar_Jay_-_I_Am_Mixtapes_68_Hosted_By_Lil_Kim-2010",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_54_Hosted_By_Lamar_Odom-2010","VA-Superstar_Jay_-_I_Am_Mixtapes_149-2013",
+      "VA-Biggy_Jiggy_Mixtapes_-_Exclusives_Tunes_S.G._23-2010","VA-Superstar_Jay_-_I_Am_Mixtapes_104-2011",
+      "Superstar_Jay_-_I_Am_Mixtapes_94-2011","VA-Biggy_Jiggy_Mixtapes_-_Exclusive_Tunes_S.G._30-2010",
+      "VA-Superstar_Jay_-_I_Am_Mixtapes_118_Hosted_By_Waka_Flocka-2012","Papoose_collection",
+      "Redman_-_Funk_From_Hell-2010","DJ_Critical_Hype_-_The_Art_Of_Kendrick_Lamar_Blends-2012",
+      "DJ_Green_Lantern_and_Jadakiss_-_Kiss_My_Ass_The_Champ_Is_Here_Pt.2",
+      "VA-Kochece_and_Jim_Jones_-_One_Eyed_Willy_Vol.2Bootleg-2006","VA-DJ_Hektik_-_Inspired_By_The_Streets_43-2019",
+      "Royce_Da_5_9_-_The_Bar_Exam_4_Hosted_By_DJ_Green_Lantern-2017","VA-J._Armz-How_To_Be_An_Mc_Vol.612009",
       "N.O.R.E._-_Crack_on_Steroids_Hosted_By_DJ_Green_Lantern-2012",
-      "Method_Man_And_Redman_-_Lights_Out_Mixed_By_DJ_Green_Lantern-2009",
-      "DJ_Green_Lantern_and_Don_Cannon_Present_B.o.B._-_B.o.B._Vs._Bobby_Ray_No_DJ_Versi",
-      "VA-DJ_Green_Lantern_-_Invasion_Radio_2K10-2010",
-      "VA-DJ_Holiday__DJ_Kutt_Throat_and_DJ_Green_Lantern_-_BET_Hip_Hop_Awards_2010_Invas",
-      "VA-DJ_Green_Lantern-I_Produced_That-Bootleg-2007_Bootleg_mixfiend"
+      "Method_Man_And_Redman_-_Lights_Out_Mixed_By_DJ_Green_Lantern-2009","Tape_Kingz_15th_Anniversary_Mixtape",
+      "VA-Tony_Touch-Hip_Hop_88-Bootleg-2009"
     ],
-    avgDur:2400, files:[{u:"",n:"DJ Exclusives"}]
+    avgDur:2400, files:[{u:"",n:"DJ Masters Radio"}] 
+  },
+  
+  // STATION 4: HIP HOP CLASSICS & ALBUMS (Ch 953) - 36 collections
+  { num:953, name:"🎤 Hip Hop Classics", cat:"Music", master:true,
+    networkShows:[
+      "DJ_Green_Lantern_and_Don_Cannon_Present_B.o.B._-_B.o.B._Vs._Bobby_Ray_No_DJ_Versi",
+      "DJ_Green_Lantern_-_Master_Class-2011","Suge_White_Presents_Jadakiss_and_Styles_P_-_Brothers-2012",
+      "Royce_Da_59-Bar_Exam_2_Mixed_By_DJ_Green_Lantern-2008","Nature-N-Noreaga_-_Queensbridge_2_Lefrak-2008",
+      "VA-DJ_Hood_and_DJ_Whiteowl_-_Kiss_That_Ass_Goodbye_Pt._1","DJ_Green_Lantern_And_Jay-Z_-_Creative_Control-2010",
+      "DJ_007_and_Jim_Jones-Pray_For_A_HustlaBootleg2010-","VA-DJ_Green_Lantern_-_Invasion_Radio_2K10-2010",
+      "the-champ-is-here-jadakiss","Capone-N-Noreaga_and_DJ_Green_Lantern-_Camouflage_Season-2010",
+      "VA-DJ_Holiday__DJ_Kutt_Throat_and_DJ_Green_Lantern_-_BET_Hip_Hop_Awards_2010_Invas",
+      "VA-DJ_Green_Lantern-I_Produced_That-Bootleg-2007_Bootleg_mixfiend",
+      "VA-DJ_Big_Mike_-_Soundtrack_To_The_Streets_2K20_Pt._3-2020","DJ_Mystery_-_L.O.X._Classics-2021",
+      "Kodak_Black_-_Unreleased-2016","01-rhymin-stealin","me-against-the-world_202510",
+      "stankonia_202511","1993-wu-tang-clan-enter-the-wu-tang-36-chambers",
+      "Boss_Hogg_Outlawz_-_Still_On_Da_Grind_2K10_2CD-2010","likefatherlikeson_202403",
+      "bad-vibes-forever_202409","liquid-swords-gza-wu-tang","doctors-advocate_202406",
+      "curtis_20240624","the-inspiration","Lil_Wayne_and_DJ_Drama_-_Dedication_5-2013",
+      "exclusive_202405","kings-of-crunk","timbaland-presents-shock-value",
+      "rolling-papers","bobs-04.-ms.-fat-booty","thug-pound-_-thug-pound_202501",
+      "the-infamous-mobb-deep_202409","the-blue-carpet-treatment",
+      "11.-emerica-feat.-young-life-and-chink-santana_202401"
+    ],
+    avgDur:2400, files:[{u:"",n:"Hip Hop Classics"}] 
+  },
+
+    // STATION 5: CLASSIC ROCK (Ch 954) - 141 collections
+  { num:954, name:"🎸 Classic Rock Radio", cat:"Music", master:true,
+    networkShows:[
+      "METEORA20",
+      "linkinparkhybridtheory_202007",
+      "deftones-all-songs",
+      "linkinpark-meteora_cd",
+      "led-zeppelin_202510",
+      "abbey-road_202512",
+      "the-rolling-stones_202510",
+      "1973-pink-floyd-the-dark-side-of-the-moon",
+      "nirvana-in-utero_20250729",
+      "bob-dylans-greatest-hits_202602",
+      "primus-tales-from-the-punchbowl",
+      "rock-80-90-gold-compilation",
+      "11-born-for-this_202601",
+      "elton-john.1974-10-05-inglewood-forum",
+      "van-halen_202511",
+      "nevermind_202410",
+      "VanMorrison-Moondance",
+      "john-lennon-rock-n-roll-with-bonus-tracks",
+      "the-golden-ear-rings-just-ear-rings-with-bonus-tracks",
+      "american-idiot_202510",
+      "warped-tour-2007-2",
+      "warped-tour-2007-1",
+      "jefferson-starship-winds-of-change",
+      "pink-floyd_202510",
+      "george-harrison_202511",
+      "jimi-hendrix_202511",
+      "pearl-jam_202510",
+      "simon-garfunkel_202511",
+      "1963-the-beatles-please-please-me",
+      "livinginthepastmfsldisc1",
+      "dropkick-murphys-the-meanest-of-times-cd-rip",
+      "mccartneydcc",
+      "rush_signals_mfsl",
+      "waitingforthesundcc",
+      "04-sugar-were-goin-down",
+      "phil-collins-hello-i-must-be-going-vinyl-rip",
+      "2-06-comfortably-numb_202602",
+      "20-losing-my-touch",
+      "golden-earring-1970",
+      "r.e.m._202511",
+      "r0ck_c4lifornian0",
+      "04-brick-by-boring-brick",
+      "iggy-the-stooges-head-on-2cds-1973",
+      "lo-mejor-de-ramstein",
+      "phil-collins_202511",
+      "c-1-every-planet-we-reach-is-dead",
+      "jefferson-starship-red-octopus",
+      "who-sell-out-mono",
+      "breakfastinamericasupertrampmfsl",
+      "duran-duran-flac",
+      "sinner_202409",
+      "audioslave-2002-flac",
+      "heavy-metal-remastered-expanded-edition-1974",
+      "the-police_202511",
+      "tom-petty_202511",
+      "leave-home",
+      "u2_20251017",
+      "boy_20251231",
+      "onthethresholdofadreammfsl",
+      "led-zeppelin-iii_202511",
+      "the-smashing-pumpkins-siamese-dream-1993",
+      "07-devil_202602",
+      "skillet-cd",
+      "07-no-jesus-christ_202601",
+      "golden-earring-eight-miles-high",
+      "santana_202510",
+      "1984-metallica-ride-the-lightning_202510",
+      "golden-earring-to-the-hilt",
+      "jefferson-starship-earth",
+      "matchbox-twenty_202511",
+      "symbols_202512",
+      "04.-i-need-you-tonight",
+      "bruce-springsteen_202510",
+      "alkirmetal",
+      "fleetwood-mac-1975-fleetwood-mac",
+      "05-the-fantasy",
+      "def-leppard_202511",
+      "06-track-06_202601",
+      "revolution-crue-001",
+      "sheryl-crow-pat-benatar-blondie-joan-jett",
+      "van-halen-van-halen-04-aint-talkin-bout-love",
+      "Toto-Toto",
+      "desensitized_20240929_1941",
+      "news-of-the-world_202601",
+      "oasis_20251121",
+      "ac-dc_202509",
+      "crazy-world-scorpions",
+      "eagles_202511",
+      "awake_202312",
+      "slave-to-the-grind",
+      "06-my-happy-ending_202512",
+      "box-car-racer",
+      "bob-seger_202511",
+      "blow-up-your-video",
+      "04-down-with-the-sickness_202601",
+      "hard-rock-classic-rock-deep-purple-discography-196-cd-3-web-1968-2021-aac-tracks",
+      "led-zeppelin-mothership",
+      "london-calling-1988-CD",
+      "1970-black-sabbath-paranoid_202510",
+      "1971-black-sabbath-master-of-reality_202510",
+      "acdc-highway-to-hell_202504",
+      "red-hot-chili-peppers_202511",
+      "the-smashing-pumpkins-mellon-collie-and-the-infinite-sadness-1995",
+      "03-aov",
+      "pantera-vulgar-display-of-power-vinyl-rip",
+      "primus-primate-demo-1984_202506",
+      "weezer-the-early-recordings",
+      "journey_202511",
+      "lenny-bwajp",
+      "1983-slayer-reign-in-blood",
+      "classic-rock-black-sabbath-vol.-4-1972-super-deluxe-4-cd-rhino-r-2-643817-usa-20",
+      "bleach_202601",
+      "05-the-good-ship-lifestyle",
+      "15.-portrait",
+      "12-photograph-live-in-atlanta",
+      "alanis-morissette-12-wake-up",
+      "14.-coma-white",
+      "16-elevate-aelonia-remix",
+      "bon-jovi_202511",
+      "mcrlifeonthemurderscene",
+      "rockmusic_201906",
+      "soundgarden-superunknown-1-9-9-4",
+      "tenacious-d-in-the-pick-of-destiny_soundtrack",
+      "various-artists-rockfiles-rockballads",
+      "11-piss-it-all-away_202601",
+      "00-ftl-25",
+      "08-what-if-i-was-nothing",
+      "audioslave-revelations-2006_202401",
+      "08-forest_202510",
+      "animals_20250923",
+      "ccr-3cd",
+      "gs_foo-fighters-the-colour-and-the-shape",
+      "the-sun-of-greece-o-arhigos-o-listis-kai-o-fonias-1974",
+      "pieceofmind_202001",
+      "16-biggest-hits_202302",
+      "vol3_thesubliminalverses",
+      "hawkwind-seeing-it-as-you-really-are",
+      "gorillazgsidesbotleg",
+      "deep-purple-1969",
+      "05-down-poison",
+      "BreakingBenjamin-2015DarkBeforeDawn_201506"
+    ],
+    avgDur:2400, files:[{u:"",n:"Classic Rock"}]
+  },
+
+  // STATION 6: FUNK & SOUL (Ch 955)
+  { num:955, name:"🕺 Funk & Soul Radio", cat:"Music", master:true,
+    networkShows:[
+      "beegeeshereatlast",
+      "bad_20260113",
+      "prince_20251023",
+      "bob_marley_catch_the-1995-mfsl"
+    ],
+    avgDur:2400, files:[{u:"",n:"Funk & Soul"}]
+  },
+
+  // STATION 7: ELECTRONIC - GENERAL (Ch 956)
+  { num:956, name:"🎛️ Electronic Radio", cat:"Music", master:true,
+    networkShows:[
+      "03.-daft-punk-giorgio-by-moroder",
+      
+      // Daft Punk
+      "daft-punk-random-access-memories-2013",
+      "daft-punk-discovery-2001",
+      "daft-punk-homework-1997",
+      "daft-punk-alive-2007",
+      "random-access-memories_202305",
+      "discovery_202401",
+      
+      // Kraftwerk
+      "kraftwerk_202511",
+      "kraftwerk-discography_202401",
+      "kraftwerk-the-man-machine",
+      "kraftwerk-computer-world-1981",
+      "kraftwerk-trans-europe-express-1977",
+      "kraftwerk-autobahn-1974",
+      
+      // The Prodigy
+      "the-prodigy_202509",
+      "the-prodigy-fat-of-the-land",
+      "the-prodigy-music-for-the-jilted",
+      
+      // Chemical Brothers
+      "chemical-brothers_202510",
+      "chemical-brothers-dig-your-own",
+      "chemical-brothers-surrender",
+      
+      // Massive Attack / Trip Hop
+      "massive-attack_202509",
+      "massive-attack-mezzanine",
+      "portishead_202508",
+      "portishead-dummy-1994",
+      "tricky-maxinquaye",
+      
+      // Moby
+      "moby_202511",
+      "moby-play-1999",
+      
+      // Fatboy Slim / Big Beat
+      "fatboy-slim_202506",
+      "fatboy-slim-youve-come-a-long",
+      
+      // Orbital / Techno
+      "orbital_202509",
+      "orbital-snivilisation",
+      "orbital-in-sides",
+      
+      // Underworld
+      "underworld_202510",
+      "underworld-second-toughest",
+      "underworld-dubnobasswithmyheadman",
+      
+      // Basement Jaxx / House
+      "basement-jaxx_202508",
+      "basement-jaxx-remedy",
+      
+      // Pioneers / Classic Electronic
+      "jean-michel-jarre_202401",
+      "jean-michel-jarre-oxygene",
+      "tangerine-dream_202509",
+      "tangerine-dream-phaedra",
+      "vangelis_202508",
+      "vangelis-blade-runner",
+      "klaus-schulze_202401",
+      "brian-eno-ambient_202305",
+      "wendy-carlos-switched-on-bach",
+      
+      // IDM / Experimental
+      "boards-of-canada-music-has-right",
+      "burial-untrue",
+      "four-tet-rounds",
+      
+      // Trance / Progressive
+      "dj-tiesto_202401",
+      "paul-oakenfold_202509",
+      "sasha-involver",
+      "digweed-live-in-argentina",
+      
+      // Techno / Detroit
+      "carl-cox-live_202401",
+      "richie-hawtin_202508",
+      "jeff-mills_202401",
+      "laurent-garnier_202509",
+      
+      // Other Classics
+      "bjork_202510",
+      
+      // NEW ADDITIONS
+      "03.-daft-punk-giorgio-by-moroder",
+      "juno-reactor"
+    ],
+    avgDur:2400, files:[{u:"",n:"Electronic"}]
+  },
+
+  // STATION 8: DRUM & BASS (Ch 957)
+  { num:957, name:"🥁 Drum & Bass Radio", cat:"Music", master:true,
+    networkShows:[
+      "rz100",
+      "good_looking_records-vinyl-eps",
+      "wipeoutost",
+      "wieput_fusion_soundtrack-2002"
+    ],
+    avgDur:2400, files:[{u:"",n:"Drum & Bass"}]
+  },
+
+  // STATION 9: 80s HITS (Ch 958)
+  { num:958, name:"📼 80s Hits Radio", cat:"Music", master:true,
+    networkShows:[
+      "te_20230213",
+      "wave-goodbye-to-the-80s"
+    ],
+    avgDur:2400, files:[{u:"",n:"80s Hits"}]
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // ACTIVE GENRE STATIONS
+  // ══════════════════════════════════════════════════════════════
+
+  // STATION 10: EURODANCE (Ch 959)
+  { num:959, name:"🕺 EuroDance Radio", cat:"Music", master:true,
+    networkShows:["90s-eurodance-part-ii-compiled-by-electro75-2018"],
+    avgDur:2400, files:[{u:"",n:"EuroDance"}]
+  },
+
+  // STATION 11: DUBSTEP (Ch 960)
+  { num:960, name:"🔊 Dubstep Radio", cat:"Music", master:true,
+    networkShows:["rz098"],
+    avgDur:2400, files:[{u:"",n:"Dubstep"}]
+  },
+
+  // STATION 12: SYNTHWAVE (Ch 961)
+  { num:961, name:"🌆 Synthwave Radio", cat:"Music", master:true,
+    networkShows:["synthwave-dreams-vol.-1-16"],
+    avgDur:2400, files:[{u:"",n:"Synthwave"}]
+  },
+
+  // STATION 13: HARDCORE/SPEEDCORE (Ch 962)
+  { num:962, name:"⚡ Hardcore Radio", cat:"Music", master:true,
+    networkShows:["rz046","rz137","WAR004","rz110"],
+    avgDur:2400, files:[{u:"",n:"Hardcore"}]
+  },
+
+  // STATION 14: AMBIENT (Ch 963)
+  { num:963, name:"🌌 Ambient Radio", cat:"Music", master:true,
+    networkShows:[
+      "rz123",
+      "rz016",
+      "matrix-soundtrack-collection",
+      "new-emotions-vol.1-15",
+      "v-a-adismal-music-collection",
+      "final-fantasy-vii-1997-ost",
+      "the-legend-of-zelda-ocarina-of-time-original-soundtrack"
+    ],
+    avgDur:2400, files:[{u:"",n:"Ambient"}]
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // FUTURE GENRE STATIONS - COMING SOON
+  // ══════════════════════════════════════════════════════════════
+
+  // STATION 15: JAZZ (Ch 964)
+  { num:964, name:"🎺 Jazz Radio - COMING SOON", cat:"Music", master:true,
+    networkShows:[],
+    avgDur:2400, files:[{u:"",n:"Jazz - COMING SOON"}]
+  },
+
+  // STATION 16: 1940s MUSIC (Ch 965)
+  { num:965, name:"📻 1940s Radio - COMING SOON", cat:"Music", master:true,
+    networkShows:[],
+    avgDur:2400, files:[{u:"",n:"1940s - COMING SOON"}]
+  },
+
+  // STATION 17: 1950s MUSIC (Ch 966)
+  { num:966, name:"🎸 1950s Radio - COMING SOON", cat:"Music", master:true,
+    networkShows:[],
+    avgDur:2400, files:[{u:"",n:"1950s - COMING SOON"}]
+  },
+
+  // STATION 18: 1960s MUSIC (Ch 967)
+  { num:967, name:"✌️ 1960s Radio - COMING SOON", cat:"Music", master:true,
+    networkShows:[],
+    avgDur:2400, files:[{u:"",n:"1960s - COMING SOON"}]
+  },
+
+  // STATION 19: 1970s MUSIC (Ch 968)
+  { num:968, name:"🕺 1970s Radio - COMING SOON", cat:"Music", master:true,
+    networkShows:[],
+    avgDur:2400, files:[{u:"",n:"1970s - COMING SOON"}]
   },
 
 ];
@@ -1122,7 +1871,10 @@ function getCurrentBroadcast(ch, files){
   if(ch.master){
     // MASTER CHANNEL - Fixed show rotation based on time
     const showList = ch.networkShows || [];
-    if(showList.length === 0) return null;
+    if(showList.length === 0){
+      console.warn('Master channel has no shows:', ch.name);
+      return null;
+    }
     
     const blockDuration = (ch.avgDur || 1380) + 60; // Show + 1 min commercial
     const totalBlocks = Math.floor(secondsSinceMidnight / blockDuration);
@@ -1134,7 +1886,14 @@ function getCurrentBroadcast(ch, files){
     const today = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
     const episodeSeed = (today + totalBlocks) % 1000;
     
-    console.log('Master broadcast:', showList[showIndex], 'block:', totalBlocks, 'time:', timeIntoBlock, 'seed:', episodeSeed);
+    console.log('📺 Master broadcast:', {
+      channel: ch.name,
+      show: showList[showIndex],
+      block: totalBlocks,
+      timeInBlock: Math.floor(timeIntoBlock),
+      isCommercial: isCommercial,
+      seed: episodeSeed
+    });
     
     return {
       showName: showList[showIndex],
@@ -1145,7 +1904,10 @@ function getCurrentBroadcast(ch, files){
     };
   } else {
     // REGULAR CHANNEL - Sequential episodes
-    if(!files || files.length === 0) return null;
+    if(!files || files.length === 0){
+      console.warn('Regular channel has no files:', ch.name);
+      return null;
+    }
     
     const blockDuration = (ch.avgDur || 1380) + 60; // Episode + 1 min commercial
     const totalBlocks = Math.floor(secondsSinceMidnight / blockDuration);
@@ -1153,7 +1915,13 @@ function getCurrentBroadcast(ch, files){
     const timeIntoBlock = secondsSinceMidnight % blockDuration;
     const isCommercial = timeIntoBlock >= (ch.avgDur || 1380);
     
-    console.log('Regular broadcast: Ep', episodeIndex, 'time:', timeIntoBlock);
+    console.log('📺 Regular broadcast:', {
+      channel: ch.name,
+      episode: episodeIndex + 1,
+      of: files.length,
+      timeInBlock: Math.floor(timeIntoBlock),
+      isCommercial: isCommercial
+    });
     
     return {
       episodeIndex: episodeIndex,
@@ -1181,6 +1949,9 @@ function updateLiveIndicator(){
   // Disable episode buttons for live streams (Pluto TV and HLS radio)
   const isLiveStream = ch && (ch.pluto || ch.hls);
   
+  // Hide LIVE/RESUME button for music channels (no live schedule)
+  const isMusicChannel = ch && ch.cat === "Music" && ch.master === true;
+  
   if(isLiveStream){
     // Live stream channels - no episode navigation
     if(prevEpBtn) { prevEpBtn.style.opacity = '0.3'; prevEpBtn.style.cursor = 'not-allowed'; }
@@ -1189,7 +1960,17 @@ function updateLiveIndicator(){
     return;
   }
   
-  // Show LIVE/RESUME button for regular channels
+  if(isMusicChannel){
+    // Music channels - hide LIVE/RESUME button (no live schedule)
+    liveBtn.style.display = 'none';
+    // Enable track skip buttons
+    if(prevEpBtn) { prevEpBtn.style.opacity = '1'; prevEpBtn.style.cursor = 'pointer'; }
+    if(nextEpBtn) { nextEpBtn.style.opacity = '1'; nextEpBtn.style.cursor = 'pointer'; }
+    player.controls = true; // Show controls on music
+    return;
+  }
+  
+  // Show LIVE/RESUME button for regular TV channels
   liveBtn.style.display = '';
   
   if(isLiveMode){
@@ -1231,10 +2012,25 @@ function updateLiveIndicator(){
 // Resume to live broadcast
 function resumeToLive(){
   if(isLiveMode) return; // Already live
-  console.log('Resuming to LIVE broadcast...');
+  console.log('========= RESUMING TO LIVE BROADCAST =========');
+  
+  // EXIT BROWSE MODE if active
+  if(browseMode){
+    console.log('Exiting browse mode to return to live');
+    browseMode = false;
+  }
+  
+  // Set live mode flag
   isLiveMode = true;
+  
+  // Update UI immediately
   updateLiveIndicator();
-  selectCh(curIdx); // Reload current channel with sync
+  
+  // Force reload channel with fresh sync calculation
+  loading = false; // Reset loading flag
+  selectCh(curIdx); // Reload current channel - will recalculate broadcast position
+  
+  console.log('Resumed to LIVE mode - channel will resync');
 }
 
 
@@ -1304,13 +2100,22 @@ async function fetchFiles(identifier){
     const r=await fetch('https://archive.org/metadata/'+identifier);
     const j=await r.json();
     const files=j.files.filter(f=>{
-      // Must be audio file
+      // Must be audio/video file
       if(!f.name) return false;
-      if(!f.name.endsWith('.mp4') && !f.name.endsWith('.ia.mp4') && 
-         !f.name.endsWith('.ogg') && !f.name.endsWith('.mp3') && 
-         !f.name.endsWith('.m4a')) return false;
       
-      // Skip thumbnails and samples
+      // Accept ALL common audio/video formats
+      const validExtensions = [
+        '.mp4', '.ia.mp4',     // Video
+        '.mp3', '.m4a', '.aac', // Audio (compressed)
+        '.ogg', '.oga',        // Ogg audio
+        '.flac', '.wav',       // Lossless audio
+        '.webm', '.mkv'        // Web formats
+      ];
+      
+      const hasValidExt = validExtensions.some(ext => f.name.toLowerCase().endsWith(ext));
+      if(!hasValidExt) return false;
+      
+      // Skip thumbnails, samples, metadata
       if(f.name.includes('_thumb') || f.name.includes('_sample')) return false;
       if(f.source === 'metadata') return false;
       
@@ -1319,25 +2124,34 @@ async function fetchFiles(identifier){
       if(nameLower.includes('skit')) return false;
       if(nameLower.includes('intro')) return false;
       if(nameLower.includes('outro')) return false;
+      if(nameLower.includes('interlude')) return false;
       
       // MUSIC FILTER: Skip tracks under 90 seconds (1:30)
       const length = parseFloat(f.length);
-      if(!isNaN(length) && length < 90) return false;
+      if(!isNaN(length) && length > 0 && length < 90) return false;
+      
+      // Skip files that are too large (over 500MB - likely won't play)
+      const size = parseFloat(f.size);
+      if(!isNaN(size) && size > 500000000) return false;
       
       return true;
     }).sort((a,b)=>{
-      const aScore=(a.name.endsWith('.ia.mp4')?1:0);
-      const bScore=(b.name.endsWith('.ia.mp4')?1:0);
-      return bScore-aScore||a.name.localeCompare(b.name);
+      // Prefer .mp4 and .mp3 (most compatible)
+      const aScore = (a.name.endsWith('.mp4') || a.name.endsWith('.mp3')) ? 2 : 
+                     (a.name.endsWith('.ia.mp4')) ? 1 : 0;
+      const bScore = (b.name.endsWith('.mp4') || b.name.endsWith('.mp3')) ? 2 : 
+                     (b.name.endsWith('.ia.mp4')) ? 1 : 0;
+      return bScore - aScore || a.name.localeCompare(b.name);
     });
     
-    console.log(`Fetched ${files.length} tracks from ${identifier} (filtered out skits/intros/outros and tracks < 90s)`);
+    console.log(`Fetched ${files.length} playable files from ${identifier} (filtered skits/intros/shorts)`);
     
     const result=files.map(f=>({
       u:'https://archive.org/download/'+identifier+'/'+encodeURIComponent(f.name),
       n:f.name.replace(/\.[^.]+$/,'').replace(/[-_.]/g,' ').trim(),
       dur: parseFloat(f.length) || 180
     }));
+    
     if(result.length) metaCache[identifier]=result;
     return result;
   }catch(e){
@@ -1362,6 +2176,14 @@ async function selectCh(idx){
   player.load();
   const old=document.getElementById('fallback-iframe');
   if(old){ old.src='about:blank'; old.remove(); }
+  
+  // Hide music overlay when switching to NON-music channels (will be re-shown if music channel)
+  const musicOverlay = document.getElementById('music-overlay');
+  if(musicOverlay && ch.cat !== 'Music'){
+    musicOverlay.style.display = 'none';
+    player.style.opacity = '1';
+    player.style.pointerEvents = 'auto';
+  }
 
   if(ch.pluto) screen.classList.add('theater');
   else screen.classList.remove('theater');
@@ -1380,6 +2202,14 @@ async function selectCh(idx){
 
   setTimeout(async()=>{
     setBar(85);
+    
+    // GAME CHANNEL LOGIC
+    if(ch.game && ch.gameId){
+      console.log('Loading game:', ch.gameId);
+      playGame(ch.gameId, ch.name);
+      loading = false;
+      return;
+    }
     
     // MASTER CHANNEL LOGIC - network-based rotation with SYNC
     if(ch.master){
@@ -1428,8 +2258,9 @@ async function selectCh(idx){
       console.log('Should be playing:', currentShowName);
       
       // Check if this is a music master channel (Archive.org IDs directly in networkShows)
-      const isMusicMaster = ch.networkShows && ch.networkShows.length > 0 && 
-                            ch.networkShows[0].includes('-') && !ch.networkShows[0].includes(' ');
+      // Music channels have cat:"Music" and master:true
+      const isMusicMaster = ch.cat === "Music" && ch.master === true && 
+                            ch.networkShows && ch.networkShows.length > 0;
       
       if(isMusicMaster){
         // MUSIC MASTER CHANNEL - simplified shuffle playback
@@ -1453,11 +2284,17 @@ async function selectCh(idx){
         
         console.log('Loaded', files.length, 'tracks from', currentShowName);
         
+        // Apply music genre background
+        applyMusicBackground(ch.name);
+        
         // Shuffle the tracks
         const shuffled = [...files].sort(() => Math.random() - 0.5);
         
         // Start from first track
         const firstTrack = shuffled[0];
+        
+        // Show music overlay for rap channels (AFTER firstTrack is defined)
+        showMusicOverlay(ch.name, firstTrack.n);
         
         curFiles = shuffled;
         curEpIdx = 0;
@@ -1481,6 +2318,9 @@ async function selectCh(idx){
           
           console.log('Next track:', nextTrack.n);
           document.getElementById('np-ep').textContent = currentShowName + ' - ' + nextTrack.n;
+          
+          // Update music overlay with new track
+          showMusicOverlay(ch.name, nextTrack.n);
           
           player.src = nextTrack.u;
           player.load();
@@ -1634,6 +2474,31 @@ async function selectCh(idx){
       
       // When episode ends, play commercial, then switch to different show
       player.onended = function(){
+        // CHECK IF IN BROWSE MODE - auto-play next episode without commercial
+        if(browseMode && curFiles && curEpIdx < curFiles.length - 1){
+          console.log('BROWSE MODE: Episode ended, playing next episode (no commercial)');
+          curEpIdx++;
+          const nextEp = curFiles[curEpIdx];
+          player.src = nextEp.u;
+          player.load();
+          player.onloadedmetadata = function(){
+            player.play().catch(err => console.error('Play error:', err));
+          };
+          document.getElementById('np-ep').textContent = nextEp.n || `Episode ${curEpIdx+1}`;
+          setStat(`BROWSE MODE: ${nextEp.n || 'Episode ' + (curEpIdx+1)}`);
+          return; // Don't run commercial logic
+        }
+        
+        // BROWSE MODE COMPLETE - reached end of series
+        if(browseMode && curFiles && curEpIdx >= curFiles.length - 1){
+          console.log('BROWSE MODE: Series complete, returning to live mode');
+          browseMode = false; // Exit browse mode
+          isLiveMode = true; // Return to live
+          updateLiveIndicator();
+          // Fall through to play commercial and continue to next show
+        }
+        
+        // REGULAR MODE or END OF BROWSE: play commercial and switch shows
         console.log('Episode ended, starting commercial break');
         playShortThenSwitchShow(idx);
       };
@@ -1938,6 +2803,8 @@ function playShort(){
   };
 }
 
+let lastCommercialIndex = -1; // Track last commercial to prevent immediate repeats
+
 function playShortThenSwitchShow(masterIdx){
   const player=document.getElementById('player');
   
@@ -1946,10 +2813,18 @@ function playShortThenSwitchShow(masterIdx){
   player.onended=null;
   player.onerror=null;
   
-  const short=SHORT_COMMERCIALS[Math.floor(Math.random()*SHORT_COMMERCIALS.length)];
+  // IMPROVED RANDOMIZATION - Prevent same commercial twice in a row
+  let commercialIndex;
+  do {
+    commercialIndex = Math.floor(Math.random() * SHORT_COMMERCIALS.length);
+  } while (commercialIndex === lastCommercialIndex && SHORT_COMMERCIALS.length > 1);
+  
+  lastCommercialIndex = commercialIndex;
+  const short = SHORT_COMMERCIALS[commercialIndex];
+  
   document.getElementById('np-ep').textContent='[ COMMERCIAL BREAK ]';
   
-  console.log('Playing commercial:', short.n, 'Duration:', short.dur);
+  console.log('Playing commercial:', short.n, 'Duration:', short.dur, 'Index:', commercialIndex);
   
   player.src=short.u;
   player.load();
@@ -2011,21 +2886,41 @@ function prevEp(){
     return;
   }
   
-  // Switch to ON DEMAND if needed
+  // Calculate previous episode/track
+  curEpIdx = (curEpIdx - 1 + curFiles.length) % curFiles.length;
+  const nextItem = curFiles[curEpIdx];
+  
+  console.log('Going to:', nextItem.n, 'at index:', curEpIdx);
+  
+  const player = document.getElementById('player');
+  
+  // MUSIC CHANNELS: Skip instantly (no commercial)
+  const isMusicChannel = ch.cat === "Music" && ch.master === true;
+  
+  if(isMusicChannel){
+    console.log('Music channel - skipping track instantly (no commercial)');
+    player.style.display = 'block';
+    document.getElementById('np-ep').textContent = nextItem.n || `Track ${curEpIdx + 1}`;
+    
+    // Update music overlay with new track
+    showMusicOverlay(ch.name, nextItem.n);
+    
+    player.src = nextItem.u;
+    player.load();
+    player.onloadedmetadata = function(){
+      player.play().catch(err => console.error('Play error:', err));
+    };
+    return;
+  }
+  
+  // TV CHANNELS: Switch to ON DEMAND if needed, play commercial
   if(isLiveMode){
     isLiveMode = false;
     updateLiveIndicator();
     console.log('Switched to ON DEMAND mode');
   }
   
-  // Calculate previous episode
-  curEpIdx = (curEpIdx - 1 + curFiles.length) % curFiles.length;
-  const nextEpisode = curFiles[curEpIdx];
-  
-  console.log('Going to episode:', nextEpisode.n, 'at index:', curEpIdx);
-  
   // Play commercial then episode
-  const player = document.getElementById('player');
   const commercial = SHORT_COMMERCIALS[Math.floor(Math.random() * SHORT_COMMERCIALS.length)];
   
   // Ensure player visible
@@ -2042,7 +2937,7 @@ function prevEp(){
   // When commercial ends, play episode
   player.onended = () => {
     console.log('Commercial done, playing episode');
-    playEp(nextEpisode);
+    playEp(nextItem);
   };
 }
 
@@ -2064,21 +2959,41 @@ function nextEp(){
     return;
   }
   
-  // Switch to ON DEMAND if needed
+  // Calculate next episode/track
+  curEpIdx = (curEpIdx + 1) % curFiles.length;
+  const nextItem = curFiles[curEpIdx];
+  
+  console.log('Going to:', nextItem.n, 'at index:', curEpIdx);
+  
+  const player = document.getElementById('player');
+  
+  // MUSIC CHANNELS: Skip instantly (no commercial)
+  const isMusicChannel = ch.cat === "Music" && ch.master === true;
+  
+  if(isMusicChannel){
+    console.log('Music channel - skipping track instantly (no commercial)');
+    player.style.display = 'block';
+    document.getElementById('np-ep').textContent = nextItem.n || `Track ${curEpIdx + 1}`;
+    
+    // Update music overlay with new track
+    showMusicOverlay(ch.name, nextItem.n);
+    
+    player.src = nextItem.u;
+    player.load();
+    player.onloadedmetadata = function(){
+      player.play().catch(err => console.error('Play error:', err));
+    };
+    return;
+  }
+  
+  // TV CHANNELS: Switch to ON DEMAND if needed, play commercial
   if(isLiveMode){
     isLiveMode = false;
     updateLiveIndicator();
     console.log('Switched to ON DEMAND mode');
   }
   
-  // Calculate next episode
-  curEpIdx = (curEpIdx + 1) % curFiles.length;
-  const nextEpisode = curFiles[curEpIdx];
-  
-  console.log('Going to episode:', nextEpisode.n, 'at index:', curEpIdx);
-  
   // Play commercial then episode
-  const player = document.getElementById('player');
   const commercial = SHORT_COMMERCIALS[Math.floor(Math.random() * SHORT_COMMERCIALS.length)];
   
   // Ensure player visible
@@ -2095,7 +3010,7 @@ function nextEp(){
   // When commercial ends, play episode
   player.onended = () => {
     console.log('Commercial done, playing episode');
-    playEp(nextEpisode);
+    playEp(nextItem);
   };
 }
 
@@ -2103,8 +3018,1155 @@ function nextEp(){
 
 function nextCh(){selectCh((curIdx+1)%CHANNELS.length);}
 function prevCh(){selectCh((curIdx-1+CHANNELS.length)%CHANNELS.length);}
-function toggleGuide(){document.getElementById('gov').classList.toggle('show');}
+
+// Apply music genre background
+function applyMusicBackground(channelName){
+  const player = document.getElementById('player');
+  // Remove all music backgrounds
+  player.classList.remove('music-bg-rap','music-bg-rock','music-bg-funk','music-bg-electronic','music-bg-ambient','music-bg-default');
+  
+  const name = channelName.toLowerCase();
+  if(name.includes('rap') || name.includes('hip hop')){
+    player.classList.add('music-bg-rap');
+  } else if(name.includes('rock')){
+    player.classList.add('music-bg-rock');
+  } else if(name.includes('funk') || name.includes('soul')){
+    player.classList.add('music-bg-funk');
+  } else if(name.includes('electronic') || name.includes('drum') || name.includes('dubstep') || name.includes('techno')){
+    player.classList.add('music-bg-electronic');
+  } else if(name.includes('ambient') || name.includes('synthwave')){
+    player.classList.add('music-bg-ambient');
+  } else {
+    player.classList.add('music-bg-default');
+  }
+}
+
+// Show music overlay with background image and track info
+function showMusicOverlay(channelName, trackName){
+  const overlay = document.getElementById('music-overlay');
+  const trackEl = document.getElementById('music-track');
+  const artistEl = document.getElementById('music-artist');
+  const infoBox = document.getElementById('music-info');
+  const player = document.getElementById('player');
+  
+  const name = channelName.toLowerCase();
+  
+  // Always show overlay for ALL music channels
+  overlay.style.display = 'block';
+  
+  // Hide video player (we just want audio)
+  player.style.opacity = '0';
+  player.style.pointerEvents = 'none';
+  
+  // Parse track name to extract artist and song
+  let artist = 'Unknown Artist';
+  let song = trackName;
+  
+  // Try to parse common formats
+  if(trackName.includes(' - ')){
+    const parts = trackName.split(' - ');
+    if(parts.length >= 2){
+      // Remove track number if present
+      artist = parts[0].replace(/^\d+\s*/, '').trim();
+      song = parts[1].replace(/\.(mp3|flac|wav|ogg)$/i, '').trim();
+    }
+  } else {
+    // Just clean up the filename
+    song = trackName.replace(/^\d+\s*/, '').replace(/\.(mp3|flac|wav|ogg)$/i, '').trim();
+  }
+  
+  trackEl.textContent = song;
+  artistEl.textContent = artist;
+  
+  // GENRE-SPECIFIC STYLING
+  if(name.includes('rap') || name.includes('hip hop')){
+    // RAP/HIP-HOP - Gold & Black with Rap United background
+    overlay.style.backgroundImage = 'url(/mnt/user-data/uploads/Classic_hiphop_radio.png)';
+    overlay.style.backgroundColor = '';
+    infoBox.style.borderColor = '#FFD700';
+    infoBox.style.boxShadow = '0 0 30px rgba(255,215,0,0.5)';
+    trackEl.style.color = '#FFD700';
+    trackEl.style.fontFamily = "'Press Start 2P', monospace";
+    trackEl.style.fontSize = '2rem';
+    trackEl.style.textShadow = '0 0 10px #FFD700, 2px 2px 0 #000';
+    artistEl.style.color = '#FFF';
+    artistEl.style.fontFamily = "'VT323', monospace";
+    artistEl.style.fontSize = '1.8rem';
+    artistEl.style.textShadow = '0 0 5px #000, 1px 1px 0 #000';
+    
+  } else if(name.includes('rock')){
+    // ROCK - Red & White with dark gradient
+    overlay.style.backgroundImage = 'linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #000 100%)';
+    overlay.style.backgroundColor = '';
+    infoBox.style.borderColor = '#FF3333';
+    infoBox.style.boxShadow = '0 0 30px rgba(255,50,50,0.5)';
+    trackEl.style.color = '#FF3333';
+    trackEl.style.fontFamily = "'Permanent Marker', cursive";
+    trackEl.style.fontSize = '2.5rem';
+    trackEl.style.textShadow = '3px 3px 0 #000, 0 0 20px #FF3333';
+    artistEl.style.color = '#FFF';
+    artistEl.style.fontFamily = "'Rock Salt', cursive";
+    artistEl.style.fontSize = '1.6rem';
+    artistEl.style.textShadow = '2px 2px 0 #000';
+    
+  } else if(name.includes('funk') || name.includes('soul')){
+    // FUNK/SOUL - Purple & Gold with groovy vibe
+    overlay.style.backgroundImage = 'linear-gradient(135deg, #2a0a4a 0%, #4a2a0a 50%, #000 100%)';
+    overlay.style.backgroundColor = '';
+    infoBox.style.borderColor = '#9D4EDD';
+    infoBox.style.boxShadow = '0 0 30px rgba(157,78,221,0.5)';
+    trackEl.style.color = '#FFD700';
+    trackEl.style.fontFamily = "'Pacifico', cursive";
+    trackEl.style.fontSize = '2.3rem';
+    trackEl.style.textShadow = '0 0 15px #9D4EDD, 2px 2px 0 #000';
+    artistEl.style.color = '#9D4EDD';
+    artistEl.style.fontFamily = "'VT323', monospace";
+    artistEl.style.fontSize = '1.8rem';
+    artistEl.style.textShadow = '0 0 10px #FFD700, 1px 1px 0 #000';
+    
+  } else if(name.includes('electronic') || name.includes('drum') || name.includes('dubstep') || name.includes('techno')){
+    // ELECTRONIC - Cyan & Magenta with cyberpunk vibe
+    overlay.style.backgroundImage = 'linear-gradient(135deg, #001a4a 0%, #004a8a 50%, #000 100%)';
+    overlay.style.backgroundColor = '';
+    infoBox.style.borderColor = '#00FFFF';
+    infoBox.style.boxShadow = '0 0 30px rgba(0,255,255,0.5), 0 0 60px rgba(255,0,255,0.3)';
+    trackEl.style.color = '#00FFFF';
+    trackEl.style.fontFamily = "'Orbitron', sans-serif";
+    trackEl.style.fontSize = '2.2rem';
+    trackEl.style.textShadow = '0 0 20px #00FFFF, 0 0 40px #FF00FF';
+    artistEl.style.color = '#FF00FF';
+    artistEl.style.fontFamily = "'Rajdhani', sans-serif";
+    artistEl.style.fontSize = '1.7rem';
+    artistEl.style.textShadow = '0 0 15px #FF00FF';
+    
+  } else if(name.includes('ambient') || name.includes('synthwave')){
+    // AMBIENT/SYNTHWAVE - Pink & Purple with dreamy vibe
+    overlay.style.backgroundImage = 'linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 50%, #000 100%)';
+    overlay.style.backgroundColor = '';
+    infoBox.style.borderColor = '#FF6EC7';
+    infoBox.style.boxShadow = '0 0 30px rgba(255,110,199,0.5)';
+    trackEl.style.color = '#FF6EC7';
+    trackEl.style.fontFamily = "'Raleway', sans-serif";
+    trackEl.style.fontSize = '2.4rem';
+    trackEl.style.textShadow = '0 0 25px #FF6EC7, 0 0 50px #9D4EDD';
+    artistEl.style.color = '#9D4EDD';
+    artistEl.style.fontFamily = "'Nunito', sans-serif";
+    artistEl.style.fontSize = '1.7rem';
+    artistEl.style.textShadow = '0 0 20px #9D4EDD';
+    
+  } else {
+    // DEFAULT MUSIC - White & Blue
+    overlay.style.backgroundImage = 'linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 50%, #000 100%)';
+    overlay.style.backgroundColor = '';
+    infoBox.style.borderColor = '#00E5FF';
+    infoBox.style.boxShadow = '0 0 30px rgba(0,229,255,0.5)';
+    trackEl.style.color = '#00E5FF';
+    trackEl.style.fontFamily = "'VT323', monospace";
+    trackEl.style.fontSize = '2.5rem';
+    trackEl.style.textShadow = '0 0 15px #00E5FF';
+    artistEl.style.color = '#FFF';
+    artistEl.style.fontFamily = "'VT323', monospace";
+    artistEl.style.fontSize = '1.8rem';
+    artistEl.style.textShadow = '0 0 5px #000';
+  }
+  
+  console.log('Music overlay shown:', artist, '-', song);
+}
+
+// Calculate next 2 hours of programming for a channel
+function getNext2Hours(ch){
+  const schedule = [];
+  const now = Date.now();
+  const secondsSinceMidnight = Math.floor((now / 1000) % 86400);
+  
+  if(ch.pluto || ch.hls){
+    // Live streams - just show "LIVE 24/7"
+    return [{time: 'LIVE 24/7', show: 'Continuous Live Stream', duration: '∞'}];
+  }
+  
+  if(ch.game){
+    // Game channels - show ready to play
+    return [{time: 'ANYTIME', show: '🎮 Ready to Play', duration: '∞'}];
+  }
+  
+  const blockDuration = (ch.avgDur || 1380) + 60; // Show/episode + 1 min commercial
+  let currentTime = secondsSinceMidnight;
+  const twoHoursInSeconds = 2 * 60 * 60; // 2 hours
+  const endTime = currentTime + twoHoursInSeconds;
+  
+  if(ch.master && ch.cat !== 'Music'){
+    // TV MASTER CHANNELS - rotating shows
+    const showList = ch.networkShows || [];
+    if(showList.length === 0) return [{time: 'N/A', show: 'No schedule', duration: 'N/A'}];
+    
+    while(currentTime < endTime && schedule.length < 8){
+      const totalBlocks = Math.floor(currentTime / blockDuration);
+      const showIndex = totalBlocks % showList.length;
+      const timeIntoBlock = currentTime % blockDuration;
+      const showName = showList[showIndex];
+      
+      // Calculate start time for this show
+      const blockStartTime = totalBlocks * blockDuration;
+      const showStartSeconds = blockStartTime;
+      const showEndSeconds = blockStartTime + ch.avgDur;
+      
+      const startDate = new Date(now - secondsSinceMidnight * 1000 + showStartSeconds * 1000);
+      const endDate = new Date(now - secondsSinceMidnight * 1000 + showEndSeconds * 1000);
+      
+      const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+      const durationMins = Math.floor(ch.avgDur / 60);
+      
+      schedule.push({
+        time: timeStr,
+        show: `📺 ${showName}`,
+        duration: `${durationMins} min`
+      });
+      
+      currentTime = blockStartTime + blockDuration;
+    }
+  } else if(ch.cat === 'Music' && ch.master){
+    // MUSIC CHANNELS - show album rotation
+    const albumList = ch.networkShows || [];
+    if(albumList.length === 0) return [{time: 'N/A', show: 'No albums', duration: 'N/A'}];
+    
+    while(currentTime < endTime && schedule.length < 8){
+      const totalBlocks = Math.floor(currentTime / blockDuration);
+      const albumIndex = totalBlocks % albumList.length;
+      const albumName = albumList[albumIndex];
+      
+      const blockStartTime = totalBlocks * blockDuration;
+      const startDate = new Date(now - secondsSinceMidnight * 1000 + blockStartTime * 1000);
+      
+      const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+      const durationMins = Math.floor(ch.avgDur / 60);
+      
+      schedule.push({
+        time: timeStr,
+        show: `🎵 ${albumName.substring(0, 35)}`,
+        duration: `${durationMins} min`
+      });
+      
+      currentTime = blockStartTime + blockDuration;
+    }
+  } else {
+    // REGULAR CHANNELS - episode rotation (we don't have files loaded, so show generic)
+    let episodeNum = Math.floor(currentTime / blockDuration) % 20; // Assume 20 episodes
+    
+    while(currentTime < endTime && schedule.length < 8){
+      const blockStartTime = Math.floor(currentTime / blockDuration) * blockDuration;
+      const startDate = new Date(now - secondsSinceMidnight * 1000 + blockStartTime * 1000);
+      
+      const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+      const durationMins = Math.floor(ch.avgDur / 60);
+      
+      schedule.push({
+        time: timeStr,
+        show: `Episode ${(episodeNum % 20) + 1}`,
+        duration: `${durationMins} min`
+      });
+      
+      currentTime = blockStartTime + blockDuration;
+      episodeNum++;
+    }
+  }
+  
+  return schedule;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CABLE-STYLE TV GUIDE SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+let guideMode = 'grid'; // 'grid' or 'detail'
+let selectedGuideChannel = null;
+let guideRefreshInterval = null;
+
+// Toggle guide (NEW cable-style guide)
+function toggleGuide(){
+  const guideOverlay = document.getElementById('guide-overlay');
+  if(!guideOverlay) {
+    createGuideOverlay();
+    return;
+  }
+  
+  if(guideOverlay.style.display === 'block'){
+    guideOverlay.style.display = 'none';
+    guideMode = 'grid';
+    selectedGuideChannel = null;
+    // Stop auto-refresh
+    if(guideRefreshInterval){
+      clearInterval(guideRefreshInterval);
+      guideRefreshInterval = null;
+    }
+  } else {
+    guideOverlay.style.display = 'block';
+    selectedGuideChannel = curIdx; // Start with current channel
+    renderGuide();
+    // Start auto-refresh every minute
+    if(guideRefreshInterval) clearInterval(guideRefreshInterval);
+    guideRefreshInterval = setInterval(() => {
+      if(guideOverlay.style.display === 'block'){
+        renderGuide();
+      }
+    }, 60000); // Refresh every 60 seconds
+  }
+}
+
+// Create guide overlay structure
+function createGuideOverlay(){
+  const overlay = document.createElement('div');
+  overlay.id = 'guide-overlay';
+  overlay.style.cssText = `
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 10000;
+    overflow: hidden;
+  `;
+  
+  overlay.innerHTML = `
+    <div id="guide-container" style="
+      width: 90%;
+      max-width: 1200px;
+      height: 90%;
+      margin: 5% auto;
+      background: var(--gc-bg);
+      border: 3px solid var(--gc-border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    ">
+      <div id="guide-header" style="
+        background: var(--cnt-color);
+        color: #000;
+        padding: 15px 20px;
+        font-family: 'VT323', monospace;
+        font-size: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid var(--gc-border);
+      ">
+        <span id="guide-title">📺 SINISTER TV GUIDE</span>
+        <button onclick="toggleGuide()" style="
+          background: #000;
+          color: var(--cnt-color);
+          border: 2px solid var(--cnt-color);
+          padding: 5px 15px;
+          font-family: 'VT323', monospace;
+          font-size: 1.5rem;
+          cursor: pointer;
+          border-radius: 4px;
+        ">✕ CLOSE</button>
+      </div>
+      
+      <div id="guide-genre-nav" style="
+        background: rgba(0,0,0,0.3);
+        padding: 10px;
+        border-bottom: 2px solid var(--gc-border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        overflow-x: auto;
+      "></div>
+      
+      <div id="guide-content" style="
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      "></div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  renderGuide();
+}
+
+// Render guide based on mode
+function renderGuide(){
+  const content = document.getElementById('guide-content');
+  if(!content) return;
+  
+  if(guideMode === 'grid'){
+    renderGridView(content);
+  } else {
+    renderDetailView(content);
+  }
+}
+
+// Scroll to category in guide
+function scrollToCategory(categoryName){
+  const categoryId = 'guide-cat-' + categoryName.replace(/\s+/g, '-').toLowerCase();
+  const element = document.getElementById(categoryId);
+  if(element){
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Render grid view
+function renderGridView(container){
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+  
+  document.getElementById('guide-title').textContent = `📺 SINISTER TV GUIDE - ${timeStr}`;
+  
+  // Group channels by category
+  const categories = {};
+  CHANNELS.forEach((ch, idx) => {
+    if(!categories[ch.cat]) categories[ch.cat] = [];
+    categories[ch.cat].push({...ch, idx: idx});
+  });
+  
+  // Sort categories (put Games and Music near the end, Network Masters at end)
+  const sortedCats = Object.keys(categories).sort((a, b) => {
+    if(a === 'Network Master') return 1;
+    if(b === 'Network Master') return -1;
+    if(a === 'Music') return 1;
+    if(b === 'Music') return -1;
+    if(a === 'Games') return 1;
+    if(b === 'Games') return -1;
+    return a.localeCompare(b);
+  });
+  
+  // POPULATE GENRE NAVIGATION BUTTONS
+  const genreNav = document.getElementById('guide-genre-nav');
+  if(genreNav){
+    let navHTML = '';
+    sortedCats.forEach(catName => {
+      navHTML += `
+        <button onclick="scrollToCategory('${catName}')" style="
+          background: var(--gc-bg);
+          color: var(--gc-color);
+          border: 2px solid var(--gc-border);
+          padding: 6px 15px;
+          font-family: 'VT323', monospace;
+          font-size: 1.2rem;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: all 0.2s;
+          white-space: nowrap;
+        " onmouseover="this.style.background='var(--cnt-color)'; this.style.color='#000';" 
+           onmouseout="this.style.background='var(--gc-bg)'; this.style.color='var(--gc-color)';">
+          ${catName.toUpperCase()}
+        </button>
+      `;
+    });
+    genreNav.innerHTML = navHTML;
+  }
+  
+  let html = `
+    <div style="font-family: 'VT323', monospace; color: var(--gc-color);">
+      <div style="
+        display: grid;
+        grid-template-columns: 80px 1fr 1fr 120px;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255,255,255,0.05);
+        border: 2px solid var(--gc-border);
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+        font-weight: bold;
+      ">
+        <div>CH</div>
+        <div>NOW PLAYING</div>
+        <div>UP NEXT</div>
+        <div>ACTION</div>
+      </div>
+  `;
+  
+  // Render each category
+  sortedCats.forEach(catName => {
+    const channels = categories[catName];
+    
+    // Category header with ID for scrolling
+    const categoryId = 'guide-cat-' + catName.replace(/\s+/g, '-').toLowerCase();
+    html += `
+      <div id="${categoryId}" style="
+        background: var(--cnt-color);
+        color: #000;
+        padding: 8px 10px;
+        margin: 15px 0 5px 0;
+        font-size: 1.4rem;
+        font-weight: bold;
+        border-radius: 4px;
+      ">
+        ${catName.toUpperCase()}
+      </div>
+    `;
+    
+    // Channels in this category
+    channels.forEach(ch => {
+      const idx = ch.idx;
+      const broadcast = getCurrentBroadcast(ch, null);
+      const isSelected = idx === selectedGuideChannel;
+      const isCurrent = idx === curIdx;
+      
+      let nowPlaying = '...';
+      let upNext = '...';
+      
+      if(ch.pluto || ch.hls){
+        nowPlaying = '[LIVE STREAM]';
+        upNext = '[LIVE STREAM]';
+      } else if(ch.game){
+        // GAME CHANNELS
+        nowPlaying = '🎮 Ready to Play';
+        upNext = 'Click to Start Game';
+      } else if(ch.master && ch.cat !== 'Music'){
+        // TV MASTER CHANNELS - show rotating shows
+        if(broadcast){
+          nowPlaying = `📺 ${broadcast.showName}`;
+          const nextShowIdx = (broadcast.showIndex + 1) % ch.networkShows.length;
+          upNext = `→ ${ch.networkShows[nextShowIdx]}`;
+        } else {
+          nowPlaying = ch.name;
+          upNext = 'Network Programming';
+        }
+      } else if(ch.cat === 'Music' && ch.master){
+        // MUSIC CHANNELS - show album info
+        if(broadcast){
+          const currentAlbum = ch.networkShows[broadcast.episodeSeed % ch.networkShows.length];
+          nowPlaying = `🎵 ${currentAlbum.substring(0, 30)}...`;
+          const nextAlbum = ch.networkShows[(broadcast.episodeSeed + 1) % ch.networkShows.length];
+          upNext = `→ ${nextAlbum.substring(0, 25)}...`;
+        } else {
+          nowPlaying = `🎵 ${ch.name}`;
+          upNext = 'Shuffled Playlist';
+        }
+      } else {
+        // REGULAR CHANNELS - show channel name since we don't have files loaded
+        nowPlaying = ch.name;
+        upNext = 'Episodes Available';
+      }
+      
+      html += `
+        <div onclick="selectedGuideChannel = ${idx}; renderGuide();" style="
+          display: grid;
+          grid-template-columns: 80px 1fr 1fr 120px;
+          gap: 10px;
+          padding: 12px 10px;
+          background: ${isSelected ? 'var(--cnt-color)' : 'rgba(255,255,255,0.02)'};
+          color: ${isSelected ? '#000' : 'var(--gc-color)'};
+          border: 2px solid ${isCurrent ? 'var(--logo-glow)' : 'transparent'};
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.2s;
+          margin-bottom: 5px;
+        ">
+          <div style="font-weight: bold;">${ch.num}${isCurrent ? ' ⭐' : ''}</div>
+          <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nowPlaying}</div>
+          <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${upNext}</div>
+          <div>
+            <button onclick="event.stopPropagation(); guideMode='detail'; selectedGuideChannel=${idx}; renderGuide();" style="
+              background: ${isSelected ? '#000' : 'var(--gc-bg)'};
+            color: ${isSelected ? 'var(--cnt-color)' : 'var(--gc-color)'};
+            border: 2px solid ${isSelected ? 'var(--cnt-color)' : 'var(--gc-border)'};
+            padding: 4px 10px;
+            font-family: 'VT323', monospace;
+            cursor: pointer;
+            font-size: 1.1rem;
+          ">▶ Details</button>
+        </div>
+      </div>
+    `;
+      
+      // EXPANDED SCHEDULE - Show next 2 hours when channel is selected
+      if(isSelected){
+        const schedule = getNext2Hours(ch);
+        html += `
+          <div style="
+            background: rgba(0,0,0,0.3);
+            border-left: 4px solid var(--cnt-color);
+            margin: 0 0 10px 90px;
+            padding: 15px;
+            font-size: 1.1rem;
+          ">
+            <div style="
+              font-size: 1.3rem;
+              font-weight: bold;
+              margin-bottom: 10px;
+              color: var(--cnt-color);
+            ">📅 NEXT 2 HOURS:</div>
+            <div style="display: grid; grid-template-columns: 100px 1fr 80px; gap: 10px;">
+        `;
+        
+        schedule.forEach((item, i) => {
+          html += `
+            <div style="color: ${i === 0 ? 'var(--cnt-color)' : 'var(--gc-color)'}; font-weight: ${i === 0 ? 'bold' : 'normal'};">${item.time}</div>
+            <div style="color: ${i === 0 ? 'var(--cnt-color)' : 'var(--gc-color)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.show}</div>
+            <div style="color: ${i === 0 ? 'var(--cnt-color)' : 'var(--gc-color)'}; opacity: 0.7;">${item.duration}</div>
+          `;
+        });
+        
+        html += `
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+              <button onclick="event.stopPropagation(); selectCh(${idx}); toggleGuide();" style="
+                background: var(--cnt-color);
+                color: #000;
+                border: none;
+                padding: 8px 20px;
+                font-family: 'VT323', monospace;
+                font-size: 1.3rem;
+                cursor: pointer;
+                border-radius: 4px;
+              ">🔄 SWITCH TO THIS CHANNEL</button>
+              
+              <button onclick="event.stopPropagation(); guideMode='detail'; renderGuide();" style="
+                background: var(--gc-bg);
+                color: var(--gc-color);
+                border: 2px solid var(--gc-border);
+                padding: 8px 20px;
+                font-family: 'VT323', monospace;
+                font-size: 1.3rem;
+                cursor: pointer;
+                border-radius: 4px;
+              ">📋 MORE INFO</button>
+            </div>
+          </div>
+        `;
+      }
+    });  // Close channels.forEach
+  });  // Close sortedCats.forEach
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// Render detail view  
+function renderDetailView(container){
+  if(selectedGuideChannel === null) {
+    guideMode = 'grid';
+    renderGridView(container);
+    return;
+  }
+  
+  const ch = CHANNELS[selectedGuideChannel];
+  const broadcast = getCurrentBroadcast(ch, null);
+  
+  document.getElementById('guide-title').textContent = `Ch ${ch.num} - ${ch.name}`;
+  
+  let html = `
+    <div style="font-family: 'VT323', monospace; color: var(--gc-color); font-size: 1.4rem;">
+      <button onclick="guideMode='grid'; renderGuide();" style="
+        background: var(--gc-bg);
+        color: var(--gc-color);
+        border: 2px solid var(--gc-border);
+        padding: 8px 20px;
+        font-family: 'VT323', monospace;
+        font-size: 1.3rem;
+        cursor: pointer;
+        margin-bottom: 20px;
+      ">◀ BACK TO GRID</button>
+      
+      <div style="
+        background: rgba(255,255,255,0.05);
+        border: 2px solid var(--gc-border);
+        padding: 20px;
+        margin-bottom: 20px;
+      ">
+        <div style="font-size: 2rem; color: var(--cnt-color); margin-bottom: 15px;">
+          ● NOW PLAYING
+        </div>
+  `;
+  
+  if(ch.pluto || ch.hls){
+    html += `<div style="font-size: 1.6rem; margin-bottom: 10px;">LIVE STREAM - 24/7</div>`;
+  } else if(ch.master && ch.cat !== 'Music'){
+    if(broadcast){
+      const nextShowIdx = (broadcast.showIndex + 1) % ch.networkShows.length;
+      html += `
+        <div style="font-size: 1.8rem; margin-bottom: 10px;">
+          📺 ${broadcast.showName}
+        </div>
+        <div style="color: rgba(255,255,255,0.7); margin-top: 20px; font-size: 1.5rem;">
+          📺 UP NEXT: ${ch.networkShows[nextShowIdx]}
+        </div>
+      `;
+    }
+  } else if(ch.cat === 'Music' && ch.master){
+    if(broadcast){
+      const currentAlbum = ch.networkShows[broadcast.episodeSeed % ch.networkShows.length];
+      const nextAlbum = ch.networkShows[(broadcast.episodeSeed + 1) % ch.networkShows.length];
+      html += `
+        <div style="font-size: 1.8rem; margin-bottom: 10px;">
+          🎵 ${currentAlbum}
+        </div>
+        <div style="color: rgba(255,255,255,0.7); margin-top: 20px; font-size: 1.5rem;">
+          🎵 UP NEXT: ${nextAlbum}
+        </div>
+      `;
+    }
+  } else {
+    html += `<div style="font-size: 1.6rem;">Episode ${broadcast ? broadcast.episodeIndex + 1 : '...'}</div>`;
+  }
+  
+  html += `
+      </div>
+      
+      <div style="margin-top: 30px;">
+        <button onclick="selectCh(${selectedGuideChannel}); toggleGuide();" style="
+          background: var(--cnt-color);
+          color: #000;
+          border: none;
+          padding: 12px 30px;
+          font-family: 'VT323', monospace;
+          font-size: 1.6rem;
+          cursor: pointer;
+          margin-right: 10px;
+        ">🔄 SWITCH TO THIS CHANNEL</button>
+        
+        <button onclick="toggleBrowse(); toggleGuide();" style="
+          background: var(--gc-bg);
+          color: var(--gc-color);
+          border: 2px solid var(--gc-border);
+          padding: 12px 30px;
+          font-family: 'VT323', monospace;
+          font-size: 1.6rem;
+          cursor: pointer;
+        ">📋 BROWSE ALL EPISODES</button>
+      </div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+}
+
 function toggleThemes(){document.getElementById('thm-panel').classList.toggle('show');}
+
+let browseQueue = []; // Queue of episodes to play
+let browseMode = false; // Are we in browse/binge mode?
+let gameActive = false; // Is a game currently playing?
+
+function toggleBrowse(){
+  const overlay=document.getElementById('browse-overlay');
+  const isShowing=overlay.classList.toggle('show');
+  if(isShowing){
+    // Rebuild menu every time so new games show up
+    buildBrowseMenu();
+  }
+}
+
+function playGame(gameId, gameName){
+  gameActive = true;
+  const overlay = document.getElementById('game-overlay');
+  const frame = document.getElementById('game-frame');
+  const title = document.getElementById('game-title');
+  const player = document.getElementById('player');
+  
+  // PAUSE AND MUTE TV/MUSIC
+  if(player && !player.paused){
+    player.pause();
+    console.log('TV paused for game');
+  }
+  if(player){
+    player.muted = true;
+    console.log('TV muted for game');
+  }
+  
+  // Set game title
+  title.textContent = `🎮 ${gameName}`;
+  
+  // Show game overlay
+  overlay.classList.add('show');
+  
+  console.log(`🎮 Loading game: ${gameName} (${gameId})`);
+  
+  // Use Archive.org's built-in emulator
+  const embedUrl = `https://archive.org/embed/${gameId}`;
+  frame.src = embedUrl;
+  
+  frame.onload = function(){
+    console.log('✓ Game loaded - Virtual gamepad activated!');
+    
+    // Auto-focus and click the iframe after load
+    setTimeout(() => {
+      frame.focus();
+      frame.click();
+      console.log('✓ Game focused and clicked');
+    }, 1000);
+    
+    // SETUP VIRTUAL GAMEPAD BUTTON HANDLERS
+    const setupGamepadButton = (buttonId, keyCode, keyName) => {
+      const btn = document.getElementById(buttonId);
+      if(!btn) return;
+      
+      // Mouse down - press key
+      btn.onmousedown = (e) => {
+        e.preventDefault();
+        console.log(`🎮 Button pressed: ${buttonId} → ${keyName}`);
+        
+        // Focus iframe first
+        frame.focus();
+        
+        // Try to send keydown event to iframe
+        try {
+          const event = new KeyboardEvent('keydown', {
+            key: keyName,
+            code: keyName,
+            keyCode: keyCode,
+            which: keyCode,
+            bubbles: true,
+            cancelable: true
+          });
+          
+          // Try multiple targets
+          frame.contentWindow.document.dispatchEvent(event);
+          frame.contentDocument.dispatchEvent(event);
+          document.dispatchEvent(event);
+        } catch(err){
+          console.log('Dispatching to document instead');
+        }
+      };
+      
+      // Mouse up - release key
+      btn.onmouseup = (e) => {
+        e.preventDefault();
+        
+        try {
+          const event = new KeyboardEvent('keyup', {
+            key: keyName,
+            code: keyName,
+            keyCode: keyCode,
+            which: keyCode,
+            bubbles: true,
+            cancelable: true
+          });
+          
+          frame.contentWindow.document.dispatchEvent(event);
+          frame.contentDocument.dispatchEvent(event);
+          document.dispatchEvent(event);
+        } catch(err){}
+      };
+      
+      // Also handle touch for mobile
+      btn.ontouchstart = btn.onmousedown;
+      btn.ontouchend = btn.onmouseup;
+    };
+    
+    // Map all gamepad buttons
+    setupGamepadButton('btn-up', 38, 'ArrowUp');
+    setupGamepadButton('btn-down', 40, 'ArrowDown');
+    setupGamepadButton('btn-left', 37, 'ArrowLeft');
+    setupGamepadButton('btn-right', 39, 'ArrowRight');
+    setupGamepadButton('btn-a', 88, 'x');        // X key = A button
+    setupGamepadButton('btn-b', 90, 'z');        // Z key = B button
+    setupGamepadButton('btn-start', 13, 'Enter'); // Enter = Start
+    setupGamepadButton('btn-select', 65, 'a');    // A key = Select
+    
+    console.log('✓ Virtual gamepad buttons connected!');
+    console.log('🎮 Click the on-screen buttons to play!');
+  };
+}
+
+function exitGame(){
+  gameActive = false;
+  const overlay = document.getElementById('game-overlay');
+  const frame = document.getElementById('game-frame');
+  const player = document.getElementById('player');
+  
+  // Remove keyboard handlers
+  if(window.gameKeyHandler){
+    document.removeEventListener('keydown', window.gameKeyHandler);
+    document.removeEventListener('keyup', window.gameKeyHandler);
+    window.gameKeyHandler = null;
+  }
+  
+  // UNMUTE AND RESUME TV/MUSIC
+  if(player){
+    player.muted = false;
+    console.log('TV unmuted after game');
+    
+    // Resume playing if there was content
+    if(player.src && player.paused){
+      player.play().catch(err => {
+        console.log('Could not auto-resume TV (user interaction required):', err);
+      });
+      console.log('TV resumed after game');
+    }
+  }
+  
+  // Clear iframe
+  frame.src = '';
+  
+  // Hide overlay
+  overlay.classList.remove('show');
+  
+  console.log('Game exited');
+}
+
+async function buildBrowseMenu(){
+  const content=document.getElementById('browse-content');
+  
+  // Show loading spinner with animation
+  content.innerHTML=`
+    <div class="browse-loading">
+      <div class="browse-spinner"></div>
+      <div style="font-family:'VT323',monospace;font-size:2rem;color:var(--np-color);">
+        Loading shows...
+      </div>
+    </div>
+  `;
+  
+  const categories={};
+  
+  // Filter to ONLY single-show channels (not masters, not live streams, not music, not YouTube)
+  const singleShowChannels = CHANNELS.filter(ch => {
+    return !ch.master &&          // Not a network master
+           !ch.pluto &&           // Not a live stream
+           ch.cat !== 'Music' &&  // Not a music station
+           !ch.youtube &&         // Not YouTube
+           ch.embedOnly;          // Has an Archive.org ID
+  });
+  
+  // Group by category
+  singleShowChannels.forEach(ch=>{
+    const cat=ch.cat||'Other';
+    if(!categories[cat])categories[cat]=[];
+    categories[cat].push(ch);
+  });
+  
+  // Build HTML
+  let html='';
+  
+  // ═══════════════════════════════════════════════════════════
+  // 📺 CONTINUE WATCHING SECTION
+  // ═══════════════════════════════════════════════════════════
+  const watchHistory = getWatchHistory();
+  if(watchHistory.length > 0){
+    html += `<div class="browse-category">`;
+    html += `<div class="browse-cat-title">📺 CONTINUE WATCHING</div>`;
+    html += `<div class="browse-grid">`;
+    
+    // Show last 6 watched shows
+    watchHistory.slice(0, 6).forEach(item => {
+      const channel = CHANNELS.find(c => c.num === item.channelNum);
+      if(channel){
+        html += `<div class="browse-card continue-watching-card" onclick="startBingeMode(${item.channelNum}, ${item.lastEpisode})">`;
+        html += `<div class="browse-ch-num">Ch ${item.channelNum}</div>`;
+        html += `<div class="browse-ch-name">${item.showName}</div>`;
+        html += `<div class="browse-ch-info">Resume from EP ${item.lastEpisode + 1}</div>`;
+        html += `<div class="browse-ch-click">▶ Continue watching →</div>`;
+        html += `</div>`;
+      }
+    });
+    
+    html += `</div></div>`;
+  }
+  // ═══════════════════════════════════════════════════════════
+  
+  // ═══════════════════════════════════════════════════════════
+  // 🎮 GAMES SECTION - ADD YOUR WORKING GAMES HERE!
+  // ═══════════════════════════════════════════════════════════
+  const GAMES = [
+    // WORKING GAMES:
+    {id: 'paperboy_nes', name: 'Paperboy (NES)'},
+    
+    // ADD MORE WORKING GAMES BELOW:
+    // {id: 'archive-id-here', name: 'Game Name Here'},
+  ];
+  
+  if(GAMES.length > 0){
+    html += `<div class="browse-category">`;
+    html += `<div class="browse-cat-title">🎮 GAMES</div>`;
+    html += `<div class="browse-grid">`;
+    
+    GAMES.forEach(game => {
+      html += `<div class="browse-card" onclick="playGame('${game.id}','${game.name}')">`;
+      html += `<div class="browse-ch-num">🎮 GAME</div>`;
+      html += `<div class="browse-ch-name">${game.name}</div>`;
+      html += `<div class="browse-ch-info">Emulated Game</div>`;
+      html += `<div class="browse-ch-click">Click to play →</div>`;
+      html += `</div>`;
+    });
+    
+    html += `</div></div>`;
+  }
+  // ═══════════════════════════════════════════════════════════
+  
+  for(const catName of Object.keys(categories).sort()){
+    const channels=categories[catName];
+    html+=`<div class="browse-category">`;
+    html+=`<div class="browse-cat-title">${catName.toUpperCase()}</div>`;
+    html+=`<div class="browse-grid">`;
+    
+    for(const ch of channels){
+      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num})">`;
+      html+=`<div class="browse-ch-num">Ch ${ch.num}</div>`;
+      html+=`<div class="browse-ch-name">${ch.name}</div>`;
+      html+=`<div class="browse-ch-info">${ch.cat||'TV Show'}</div>`;
+      html+=`<div class="browse-ch-click">Click to browse episodes →</div>`;
+      html+=`</div>`;
+    }
+    
+    html+=`</div></div>`;
+  }
+  
+  content.innerHTML=html;
+}
+
+async function openShowDetails(chNum){
+  const content=document.getElementById('browse-content');
+  const ch=CHANNELS.find(c=>c.num===chNum);
+  if(!ch)return;
+  
+  // Show loading
+  content.innerHTML=`
+    <div style="text-align:center;padding:40px;">
+      <div style="font-family:'Press Start 2P';font-size:1rem;color:var(--got-color);margin-bottom:20px;">
+        Loading ${ch.name}...
+      </div>
+      <div style="font-family:VT323;font-size:1.6rem;color:var(--np-color);">
+        Fetching episodes from Archive.org
+      </div>
+    </div>
+  `;
+  
+  // Fetch episodes from Archive.org
+  let episodes=[];
+  try{
+    episodes=await fetchFiles(ch.embedOnly);
+  }catch(e){
+    console.error('Error fetching episodes:',e);
+  }
+  
+  if(!episodes||episodes.length===0){
+    content.innerHTML=`
+      <div style="padding:40px;text-align:center;">
+        <div style="font-family:'Press Start 2P';font-size:1rem;color:var(--got-color);margin-bottom:20px;">
+          No episodes found for ${ch.name}
+        </div>
+        <button onclick="buildBrowseMenu()" style="font-family:VT323;font-size:1.6rem;padding:8px 16px;
+          background:var(--btn-bg);border:2px solid var(--btn-border);color:var(--btn-color);
+          cursor:pointer;border-radius:4px;">← Back to Browse</button>
+      </div>
+    `;
+    return;
+  }
+  
+  // Build episode list view
+  const lastWatched = getLastWatchedEpisode(ch.name);
+  
+  let html=`
+    <div class="show-detail-header">
+      <button class="back-btn" onclick="buildBrowseMenu()">← BACK</button>
+      <div class="show-detail-title">
+        <div class="show-title">${ch.name}</div>
+        <div class="show-subtitle">Channel ${ch.num} • ${episodes.length} Episodes</div>
+      </div>
+      <button class="play-channel-btn" onclick="startBingeMode(${ch.num},0)">▶ PLAY FROM START</button>
+    </div>
+    
+    <div class="episode-grid">
+  `;
+  
+  episodes.forEach((ep,idx)=>{
+    const isLastWatched = lastWatched !== null && idx === lastWatched;
+    const continueClass = isLastWatched ? ' last-watched-ep' : '';
+    const continueLabel = isLastWatched ? ' 🔵 CONTINUE' : '▶ BINGE FROM HERE';
+    
+    html+=`
+      <div class="episode-card${continueClass}" onclick="startBingeMode(${ch.num},${idx})">
+        <div class="episode-num">EP ${idx+1}${isLastWatched ? ' • LAST WATCHED' : ''}</div>
+        <div class="episode-name">${ep.n}</div>
+        <div class="episode-duration">${Math.floor(ep.dur/60)}:${String(Math.floor(ep.dur%60)).padStart(2,'0')}</div>
+        <div class="episode-play">${continueLabel}</div>
+      </div>
+    `;
+  });
+  
+  html+=`</div>`;
+  content.innerHTML=html;
+}
+
+function startBingeMode(chNum, startEpIdx){
+  // Close browse menu
+  toggleBrowse();
+  
+  // Find the channel
+  const channelIdx = CHANNELS.findIndex(c => c.num === chNum);
+  if(channelIdx === -1) return;
+  
+  const ch = CHANNELS[channelIdx];
+  
+  // Set browse mode flag
+  browseMode = true;
+  
+  // TRACK WATCH HISTORY
+  saveWatchHistory(ch.name, startEpIdx, ch.num);
+  
+  // Switch to channel
+  selectCh(channelIdx);
+  
+  // Wait for channel to load, then start from selected episode
+  setTimeout(() => {
+    if(curFiles && curFiles[startEpIdx]){
+      curEpIdx = startEpIdx;
+      const player = document.getElementById('player');
+      player.src = curFiles[startEpIdx].u;
+      player.load();
+      player.play();
+      document.getElementById('np-ep').textContent = curFiles[startEpIdx].n || `Episode ${startEpIdx+1}`;
+      setStat(`BROWSE MODE: ${curFiles[startEpIdx].n || 'Episode ' + (startEpIdx+1)}`);
+      
+      console.log(`BROWSE MODE ACTIVATED: Starting from Episode ${startEpIdx+1}`);
+    }
+  }, 500);
+}
+
+// WATCH HISTORY TRACKING
+function saveWatchHistory(showName, episodeIdx, channelNum){
+  try {
+    // Get existing history
+    let history = JSON.parse(localStorage.getItem('sinister-watch-history') || '[]');
+    
+    // Add/update this show
+    const existing = history.findIndex(h => h.showName === showName);
+    const watchData = {
+      showName: showName,
+      lastEpisode: episodeIdx,
+      channelNum: channelNum,
+      timestamp: Date.now()
+    };
+    
+    if(existing >= 0){
+      history[existing] = watchData;
+    } else {
+      history.unshift(watchData);
+    }
+    
+    // Keep only last 20 shows
+    history = history.slice(0, 20);
+    
+    localStorage.setItem('sinister-watch-history', JSON.stringify(history));
+  } catch(e) {
+    console.error('Error saving watch history:', e);
+  }
+}
+
+function getWatchHistory(){
+  try {
+    return JSON.parse(localStorage.getItem('sinister-watch-history') || '[]');
+  } catch(e) {
+    return [];
+  }
+}
+
+function getLastWatchedEpisode(showName){
+  const history = getWatchHistory();
+  const show = history.find(h => h.showName === showName);
+  return show ? show.lastEpisode : null;
+}
+
+function jumpToChannel(num){
+  toggleBrowse();
+  selectCh(CHANNELS.findIndex(c=>c.num===num));
+}
+
 
 const THEMES=['','sears','jcpenney','zenith','trinitron','spaceage','neon','midnight','bloodmoon','ocean','terminal','halloween','christmas','newyear','valentines','aqua','sunset','purple','lime','amber','magenta','copper','ice','forest'];
 function setTheme(t){
@@ -2144,36 +4206,32 @@ let numberBuffer = '';
 let numberTimeout = null;
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key==='ArrowUp')nextCh();
-  if(e.key==='ArrowLeft'||e.key==='ArrowDown')prevCh();
+  // GAME MODE: Allow all keyboard input to pass through to game iframe
+  if(gameActive){
+    // Let game handle all keys
+    // ESC still exits game
+    if(e.key === 'Escape'){
+      exitGame();
+      e.preventDefault();
+      return;
+    }
+    // All other keys pass through to game
+    return;
+  }
+  
+  // TV MODE: Only ESC to close menus
   if(e.key==='Escape'){
     document.getElementById('gov').classList.remove('show');
     document.getElementById('thm-panel').classList.remove('show');
+    const browseOverlay = document.getElementById('browse-overlay');
+    if(browseOverlay) browseOverlay.classList.remove('show');
     numberBuffer = '';
     if(numberTimeout) clearTimeout(numberTimeout);
   }
   
-  // Direct number entry
-  if(e.key >= '0' && e.key <= '9'){
-    numberBuffer += e.key;
-    showOSDNumber(numberBuffer);
-    
-    if(numberTimeout) clearTimeout(numberTimeout);
-    numberTimeout = setTimeout(()=>{
-      const targetNum = parseInt(numberBuffer);
-      const targetIdx = CHANNELS.findIndex(ch => ch.num === targetNum);
-      if(targetIdx >= 0){
-        selectCh(targetIdx);
-      } else {
-        // Flash error
-        const osd = document.getElementById('osd');
-        osd.textContent = 'CH ' + numberBuffer + ' - NOT FOUND';
-        osd.classList.add('show');
-        setTimeout(()=>osd.classList.remove('show'), 1500);
-      }
-      numberBuffer = '';
-    }, 1500);
-  }
+  // ARROW KEYS & NUMBER KEYS DISABLED FOR TV
+  // Use on-screen buttons to change channels
+  // Keyboard reserved for games only
 });
 
 function showOSDNumber(num){
