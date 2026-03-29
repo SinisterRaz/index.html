@@ -939,6 +939,85 @@ const B = "https://archive.org/download/";
 // SHORT RETRO COMMERCIALS - 30-60 SECONDS (80s-2000s era only)
 // PLAYS BETWEEN SHOW ENDING AND NEXT VIDEO STARTING
 // AUTO-SKIPS AT 60 SEC MARK
+// Commercial collections - will fetch all videos from these collections dynamically
+const COMMERCIAL_COLLECTIONS = [
+  "Collectionof90sCommercials",
+  "commercialpack1",
+  "Vintage_Commercials_Advertisements_80s",
+  "USATVCommercialCollection",
+  "earlyjan1995commercials",
+  "1999variouscommercials",
+  "1990variouscommercials",
+  "1994variouscommercials",
+  "1998variouscommercials",
+  "1993variouscommercials",
+  "1997variouscommercials",
+  "1996VariousCommercials",
+  "2000VariousCommercials",
+  "2002variouscommercials",
+  "2010VariousCommercials",
+  "2009VariousCommercials",
+  "2005variouscommercials",
+  "2001VariousCommercials",
+  "2003variouscomercials",
+  "2014VariousCommercials",
+  "2013_USA_TV_Commercials"
+];
+
+// Cache for all commercials
+let allCommercials = [];
+let commercialsFetched = false;
+let commercialFetchInProgress = false;
+
+// Fetch all commercials from collections (max 2 minutes each) - runs in background
+async function fetchAllCommercials(){
+  if(commercialsFetched || commercialFetchInProgress) return;
+  commercialFetchInProgress = true;
+  
+  console.log('Starting to fetch commercials from', COMMERCIAL_COLLECTIONS.length, 'collections...');
+  
+  for(const collection of COMMERCIAL_COLLECTIONS){
+    try {
+      const files = await fetchFiles(collection);
+      if(files && files.length > 0){
+        // Filter to only videos under 2 minutes (120 seconds)
+        const shortAds = files.filter(f => {
+          const dur = f.dur || 60;
+          return dur > 5 && dur <= 120; // Between 5 seconds and 2 minutes
+        });
+        allCommercials.push(...shortAds);
+        console.log('✓ Added', shortAds.length, 'commercials from', collection, '(Total:', allCommercials.length + ')');
+      }
+    } catch(e){
+      console.warn('Could not fetch from', collection, '-', e.message);
+    }
+  }
+  
+  commercialsFetched = true;
+  console.log('🎬 TOTAL COMMERCIALS LOADED:', allCommercials.length);
+}
+
+// Get 2 random commercials for a commercial break
+function getTwoRandomCommercials(){
+  // Use fetched commercials if available, otherwise use fallback
+  const pool = allCommercials.length > 2 ? allCommercials : SHORT_COMMERCIALS;
+  
+  if(pool.length < 2){
+    console.warn('Not enough commercials, using first 2 from fallback');
+    return SHORT_COMMERCIALS.slice(0, 2);
+  }
+  
+  // Pick 2 random different commercials
+  const first = pool[Math.floor(Math.random() * pool.length)];
+  let second;
+  do {
+    second = pool[Math.floor(Math.random() * pool.length)];
+  } while(second === first && pool.length > 1);
+  
+  return [first, second];
+}
+
+// Fallback commercials if collections fail to load
 const SHORT_COMMERCIALS = [
   {u: "https://archive.org/download/Collectionof90sCommercials/90s%20Commercials%20-%20S01.E1.mp4", n:"90s Ad - E1", dur:31},
   {u: "https://archive.org/download/Collectionof90sCommercials/90s%20Commercials%20-%20S01.E10.mp4", n:"90s Ad - E10", dur:30},
@@ -1095,16 +1174,12 @@ const CHANNELS = [
   // ══════════════════════════════════════════════
   // MOVIES
   // ══════════════════════════════════════════════
-  { num:43, name:"Horror Cinema",  cat:"Movies", avgDur:5400, embedOnly:"SciFi_Horror",             files:[{u:"",n:"Horror Films"}] },
   { num:44, name:"Sci-Fi Cinema",  cat:"Movies", avgDur:5400, embedOnly:"TheManInTheWhiteSuit1951", files:[{u:"",n:"Sci-Fi Films"}] },
   { num:45, name:"Western Cinema", cat:"Movies", avgDur:5400, embedOnly:"johnwaynewesterns",        files:[{u:"",n:"Western Films"}] },
-  { num:46, name:"Film Noir",      cat:"Movies", avgDur:5400, embedOnly:"film_noir",               files:[{u:"",n:"Film Noir"}] },
-  { num:47, name:"VHS Movie Night",cat:"Movies", avgDur:5400, embedOnly:"vhsmovies",               files:[{u:"",n:"VHS Movies"}] },
 
   // ══════════════════════════════════════════════
   // AUTOMOTIVE
   // ══════════════════════════════════════════════
-  { num:48, name:"Top Gear S22",  cat:"Automotive", avgDur:3600, embedOnly:"top-gear-s22",      files:[{u:"",n:"Top Gear"}] },
   { num:49, name:"Monster Jam",   cat:"Automotive", avgDur:3600, embedOnly:"classicmonsterjam", files:[{u:"",n:"Monster Jam"}] },
 
   // ══════════════════════════════════════════════
@@ -1117,81 +1192,24 @@ const CHANNELS = [
   // ══════════════════════════════════════════════
   // STAR TREK CHANNELS - All the Trek you can handle! 🖖
   // VERIFIED PLUTO TV IDS (Current as of 2024-2025)
-  { num:51, name:"Star Trek: TOS",          cat:"Live SciFi", pluto:"5efbd39f8c4ce900075d7698", files:[{u:"",n:"Star Trek TOS"}] },
-  { num:52, name:"Star Trek: TNG",          cat:"Live SciFi", pluto:"634dacf51d90320007fcd5fa", files:[{u:"",n:"Star Trek TNG"}] },
-  { num:53, name:"Star Trek: DS9",          cat:"Live SciFi", pluto:"5efbd616e345c6000850a8dd", files:[{u:"",n:"Star Trek DS9"}] },
-  { num:54, name:"Star Trek: Voyager",      cat:"Live SciFi", pluto:"5efbd628880edd0007a0351a", files:[{u:"",n:"Star Trek Voyager"}] },
-  { num:55, name:"Star Trek: Enterprise",   cat:"Live SciFi", pluto:"60e0c6107a0e960007ac8ecc", files:[{u:"",n:"Star Trek Enterprise"}] },
   
   // Other Sci-Fi Channels
-  { num:56, name:"Stargate",           cat:"Live SciFi", pluto:"620bfa7df72827000703ddb1", files:[{u:"",n:"Stargate"}] },
-  { num:57, name:"Doctor Who Classic", cat:"Live SciFi", pluto:"5ce4475cd43850831ca91ce7", files:[{u:"",n:"Doctor Who"}] },
-  { num:58, name:"Twilight Zone Live", cat:"Live SciFi", pluto:"5b4fc274694c027be6ed3eea", files:[{u:"",n:"Twilight Zone"}] },
-  { num:59, name:"MST3000",            cat:"Live SciFi", pluto:"545943f1c9f133a519bbac92", files:[{u:"",n:"MST3000"}] },
-  { num:60, name:"Godzilla Live",      cat:"Live SciFi", pluto:"6452c8cee1979c0008608e27", files:[{u:"",n:"Godzilla"}] },
-  { num:61, name:"Pluto SciFi",        cat:"Live SciFi", pluto:"5b4fc274694c027be6ed3eea", files:[{u:"",n:"Pluto SciFi"}] },
-  { num:62, name:"Pluto Horror",       cat:"Live SciFi", pluto:"569546031a619b8f07ce6e25", files:[{u:"",n:"Pluto Horror"}] },
-  { num:63, name:"Pluto Terror",       cat:"Live SciFi", pluto:"5c6dc88fcd232425a6e0f06e", files:[{u:"",n:"Pluto Terror"}] },
-  { num:64, name:"Universal Monsters", cat:"Live SciFi", pluto:"65a9b20f0c7ff50008d3a3b6", files:[{u:"",n:"Universal Monsters"}] },
-  { num:65, name:"RiffTrax",           cat:"Live SciFi", pluto:"58d947b9e420d8656ee101ab", files:[{u:"",n:"RiffTrax"}] },
 
   // ══════════════════════════════════════════════
   // LIVE - WESTERNS & CLASSICS (Pluto)
   // ══════════════════════════════════════════════
-  { num:66, name:"Western TV",        cat:"Live Western", pluto:"5e8df4bc16e34700077e77d3", files:[{u:"",n:"Western TV"}] },
-  { num:67, name:"Gunsmoke",          cat:"Live Western", pluto:"60f75771dfc72a00071fd0e0", files:[{u:"",n:"Gunsmoke"}] },
-  { num:68, name:"The Rifleman",      cat:"Live Western", pluto:"5e825550e758c700077b0aef", files:[{u:"",n:"The Rifleman"}] },
-  { num:69, name:"Rawhide",           cat:"Live Western", pluto:"634f307c7a068e00072c9982", files:[{u:"",n:"Rawhide"}] },
-  { num:70, name:"Wanted Dead/Alive", cat:"Live Western", pluto:"6089788de5c8410007808e26", files:[{u:"",n:"Wanted Dead or Alive"}] },
-  { num:71, name:"Pluto Westerns",    cat:"Live Western", pluto:"5b4e94282d4ec87bdcbb87cd", files:[{u:"",n:"Pluto Westerns"}] },
 
   // ══════════════════════════════════════════════
   // LIVE - SITCOMS & CLASSICS (Pluto)
   // ══════════════════════════════════════════════
-  { num:69, name:"I Love Lucy",       cat:"Live Classic", pluto:"634f3011f4fff20007431641" },
-  { num:70, name:"Andy Griffith",     cat:"Live Classic", pluto:"60f75178e7f8aa0007e9c259" },
-  { num:71, name:"Addams Family",     cat:"Live Classic", pluto:"5d81607ab737153ea3c1c80e" },
-  { num:72, name:"Happy Days",        cat:"Live Classic", pluto:"5f7794162a4559000781fc12" },
-  { num:73, name:"Beverly Hillbillies",cat:"Live Classic",pluto:"5f7796e470510900070d4e3d" },
-  { num:74, name:"Three\'s Company", cat:"Live Classic", pluto:"5ef3977e5d773400077de284" },
-  { num:75, name:"Family Ties",       cat:"Live Classic", pluto:"5f77939a630f530007dde654" },
-  { num:76, name:"The Love Boat",     cat:"Live Classic", pluto:"5f7794a788d29000079d2f07" },
-  { num:77, name:"Dynasty",           cat:"Live Classic", pluto:"64d1606b4c5ed80008e3b8b9" },
-  { num:78, name:"Little House",      cat:"Live Classic", pluto:"654933ac986ad20008a1f406" },
-  { num:79, name:"Classic TV Comedy", cat:"Live Classic", pluto:"5f15e32b297f96000768f928" },
-  { num:80, name:"Sitcom Legends",    cat:"Live Classic", pluto:"633354b63df9700007f6a1b7" },
-  { num:81, name:"Mission Impossible",cat:"Live Classic", pluto:"5f77977bd924d80007eee60c" },
-  { num:82, name:"Perry Mason",       cat:"Live Classic", pluto:"6197086891ddd4000739941a" },
-  { num:83, name:"Murder She Wrote",  cat:"Live Classic", pluto:"6549337183595c000815ad05" },
-  { num:84, name:"Matlock",           cat:"Live Classic", pluto:"60f754f98185580007eb0754" },
-  { num:85, name:"Unsolved Mysteries",cat:"Live Classic", pluto:"5cc28d4db5f4824b1bc6c3c7" },
-  { num:86, name:"Bob Ross",          cat:"Live Classic", pluto:"5f36d726234ce10007784f2a" },
 
   // ══════════════════════════════════════════════
   // LIVE - MOVIES (Pluto)
   // ══════════════════════════════════════════════
-  { num:87, name:"Classic Movies",    cat:"Live Movies", pluto:"561c5b0dada51f8004c4d855" },
-  { num:88, name:"80s Rewind",        cat:"Live Movies", pluto:"5ca525b650be2571e3943c63" },
-  { num:89, name:"90s Throwback",     cat:"Live Movies", pluto:"5f4d86f519358a00072b978e" },
-  { num:90, name:"Pluto Action",      cat:"Live Movies", pluto:"561d7d484dc7c8770484914a" },
-  { num:91, name:"Pluto Thrillers",   cat:"Live Movies", pluto:"5b4e69e08291147bd04a9fd7" },
-  { num:92, name:"Pluto Cult Films",  cat:"Live Movies", pluto:"5c665db3e6c01b72c4977bc2" },
-  { num:93, name:"Flicks of Fury",    cat:"Live Movies", pluto:"58e55b14ad8e9c364d55f717" },
-  { num:94, name:"Pluto Docs",        cat:"Live Movies", pluto:"5b85a7582921777994caea63" },
 
   // ══════════════════════════════════════════════
   // LIVE - COMEDY (Pluto)
   // ══════════════════════════════════════════════
-  { num:95, name:"Comedy Central Anim",cat:"Live Comedy", pluto:"5f99e24636d67d0007a94e6d" },
-  { num:96, name:"British Comedy",    cat:"Live Comedy", pluto:"60f870184865da00074210ee" },
-  { num:97, name:"Stand Up",          cat:"Live Comedy", pluto:"5637d31f319573e26b64040b" },
-
-  // ══════════════════════════════════════════════
-  // LIVE - NEWS (Pluto + HLS)
-  // ══════════════════════════════════════════════
-  { num:98,  name:"CBS News Live",  cat:"Live News", pluto:"5f4efc5f9db8a30007c53e7c" },
-  { num:99,  name:"NASA TV",        cat:"Live News", hls:"https://nasa-i.akamaihd.net/hls/live/253565/NASA-NTV1-Public/master.m3u8" },
-  { num:100, name:"ABC News Live",  cat:"Live News", hls:"https://content.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be.m3u8" },
 
   // ══════════════════════════════════════════════
   // RADIO (last)
@@ -1247,7 +1265,6 @@ const CHANNELS = [
   { num:320, name:"Patty Duke Show", cat:"Classic TV", avgDur:1380, embedOnly:"the-patty-duke-show-the-complete-series-1963-1966", files:[{u:"",n:"The Patty Duke Show"}] },
   { num:321, name:"M*A*S*H", cat:"Classic TV", avgDur:1380, embedOnly:"mash-complete-series_202511", files:[{u:"",n:"M*A*S*H"}] },
   { num:322, name:"The Jeffersons", cat:"Classic TV", avgDur:1380, embedOnly:"the-jeffersons-Lando18", files:[{u:"",n:"The Jeffersons"}] },
-  { num:323, name:"Gilligan's Island", cat:"Classic TV", avgDur:1380, embedOnly:"gilligans-island-complete-tv-series", files:[{u:"",n:"Gilligan's Island"}] },
   { num:324, name:"The Wonder Years", cat:"Classic TV", avgDur:1380, embedOnly:"the-wonder-years-complete-series", files:[{u:"",n:"The Wonder Years"}] },
   { num:325, name:"The A-Team", cat:"Classic TV", avgDur:2700, embedOnly:"the-a-team-s-01", files:[{u:"",n:"The A-Team"}] },
   { num:326, name:"Lone Ranger Western", cat:"Western", avgDur:1380, embedOnly:"LoneRanger_Lando18", files:[{u:"",n:"The Lone Ranger"}] },
@@ -1275,7 +1292,7 @@ const CHANNELS = [
   // ══════════════════════════════════════════════════════════════
   { num:350, name:"Monster Squad", cat:"Kids", avgDur:1380, embedOnly:"monster-squad-complete-series-1976", files:[{u:"",n:"Monster Squad"}] },
   { num:351, name:"Spider-Man TAS", cat:"Kids", avgDur:1380, embedOnly:"spider-mantheanimatedseries", files:[{u:"",n:"Spider-Man: The Animated Series"}] },
-  { num:352, name:"The Boondocks", cat:"Kids", avgDur:1380, embedOnly:"the-boondocks_202410", files:[{u:"",n:"The Boondocks"}] },
+  { num:352, name:"The Boondocks", cat:"Adult Animation", avgDur:1380, embedOnly:"the-boondocks_202410", files:[{u:"",n:"The Boondocks"}] },
   { num:353, name:"Schoolhouse Rock", cat:"Kids", avgDur:600, embedOnly:"schoolhouse-rock-30th", files:[{u:"",n:"Schoolhouse Rock"}] },
   { num:354, name:"Beavis & Butt-Head", cat:"Kids", avgDur:1380, embedOnly:"beavis-and-butthead-king-turd-collection", files:[{u:"",n:"Beavis and Butt-Head"}] },
   { num:355, name:"Dick Tracy Show", cat:"Kids", avgDur:1380, embedOnly:"Dick_Tracy_Lando18", files:[{u:"",n:"The Dick Tracy Show"}] },
@@ -1464,7 +1481,108 @@ const CHANNELS = [
   
   { num:908, name:"📚 Knowledge Kids Network", cat:"Network Master", master:true, networkShows:["Sesame Street","Schoolhouse Rock","Bill Nye the Science Guy","Magic School Bus","Reading Rainbow","Arthur","Bob the Builder","Thomas the Tank Engine"], avgDur:1380, files:[{u:"",n:"Knowledge Kids Network"}] },
   
-  { num:909, name:"🎭 Prime Time Drama", cat:"Network Master", master:true, networkShows:["Party of Five","Live PD Wanted","NYPD Blue","Real Sex HBO"], avgDur:2700, files:[{u:"",n:"Prime Time Drama"}] },
+  { num:909, name:"🎭 Prime Time Drama", cat:"Network Master", master:true, networkShows:["Party of Five","Live PD Wanted","NYPD Blue"], avgDur:2700, files:[{u:"",n:"Prime Time Drama"}] },
+
+  { num:910, name:"🔞 SpiceXXX Network", cat:"Adult", master:true, 
+    networkShows:[
+      "hborealsex","laguna-beach-bikini-bash-bikini-bash","palm-spring-bikini-bash-bikini-bash","beverly-hills-bikini-contest",
+      "california-swimsuit-spectacular-vhs","nitro-girls-swimsuit-calendar-special-vhs","si-swimsuit-97-vhs",
+      "sports-illustrated-2000-swimsuit-video-vhs","sports-illustrated-swimsuit-issue-2007",
+      "california-foxhunt-lingerie-contest","sports-illustrated-swimsuit-1998-vhs",
+      "sports-illustrated-1995-swimsuit-video-vhs","sports-illustrated-30th-anniversary-swimsuit-video",
+      "sports-illustrated-1999-swimsuit-video-vhs","sports-illustrated-the-1993-swimsuit-video-vhs",
+      "sports-illustrated-swimsuit-2005-vhs","sports-illustrated-swimsuit-2010-vhs",
+      "sports-illustrated-swimsuit-2002-vhs","sports-illustrated-2002-swimsuit-video-vhs",
+      "sports-illustrated-1996-swimsuit-video-vhs","sports-illustrated-swimsuit-issue-2001",
+      "hooters-island-paradise-vhs","sports-illustrated-swimsuit-2003-vhs",
+      "dazzling-women-of-sport-the-making-of-sport-magazines-91-swimsuit-issue-vhs",
+      "the-best-of-the-sports-illustrated-swimsuit-model-search-vhs-2005",
+      "sports-illustrated-the-making-of-the-1995-swimsuit-issue-video-vhs",
+      "the-best-of-the-sports-illustrated-swimsuit-model-search-featurette-vhs-2005",
+      "sports-illustrated-25th-anniversary-swimsuit-video-1989","capture-a-1684",
+      "girls-gone-wild-tv-spot","girls-gone-wild-mardi-gras-college-co-eds-2000-vhs",
+      "girls-gone-wild-college-spring-break-1999-vhs","americas-funniest-home-videos-uncensored",
+      "Girls_Girls_Girls","playboyvideopartyjokes",
+      "playboy-workout-with-jeana-tomasino-and-victoria-cooke-1983",
+      "6_Hours_of_Amateur_and_Pro_Porn","Random_Sets_of_Adult_Films_and_Materials",
+      "nina-hartley-pool-sex-video","Up_and_Cummers_3","encounters-h-264-master",
+      "sensualrealitycomputerescapes1996","WarmUpToTraciLordsExerciseVideo1990",
+      "playboy-video-magazine-11","temping-trios","playboygirlsoftheinternet",
+      "playboy-wet-wild-iv","playboy1989videoplaymatecalendar","playboy-channel-late-1986-my-vhsrip",
+      "playboy-sexy-lingerie-ii","playboy-video-magazine-3","howtohavecybersexontheinternet1996",
+      "tasha-lane-playboy-video","krista-fox-playboy-video-2","carla-blake-playboy-video-2",
+      "susie-grey-playboy-video","tanya-reed-playboy-video","krista-fox-playboy-video",
+      "penthouse-productions-movies-collection","blonde-heaven-1995-tvrip-xvi-d-maestro-cg",
+      "TheVistaGroup-90sLateNightAdultHotlineCommercialsVol1","ultra-flesh-1980-1080p",
+      "98_20220403/8.mp4","2016-07-04-girls-of-electric-blue-vol.-1",
+      "playboy-video-playmate-calendar-2003","playboy-video-playmate-calendar-1991","california-girls-vhd-1983"
+    ], avgDur:3600, files:[{u:"",n:"SpiceXXX Network"}] },
+
+  { num:911, name:"🚀 Sci-Fi Movies", cat:"Movies Master", master:true,
+    networkShows:[
+      "house_on_haunted_hill_ipod","dr..-jekyll.-and.-mr..-hyde.-1931","lastmanonearth-1964",
+      "the.-fly.-1958","the.angry.red.planet.1959","the.amazing.colossal.man.1967",
+      "the-monolith-monsters","plan.-9.-from.-outer.-space.-1957","the-x-from-outer-space",
+      "TheBrainThatWouldntDie_165","dr.-jekyll-sister-hyde-1971","PrisonersOfTheLostUniverse1983",
+      "big-trouble-little-china","apocalypse-now-1979","forbidden.-planet.-1956_202512",
+      "scanners-1981-1080p","jason-and-the-argonauts-1963","the-day-the-earth-stood-still-1951_202106",
+      "earth-vs-the-flying-saucers-color","Inner_Sanctum_movie","reefer_madness1938",
+      "invasion-of-the-body-snatchers-1956-colorized","Cosmos_War_of_the_Planets"
+    ], avgDur:5400, files:[{u:"",n:"Sci-Fi Movies"}] },
+
+  { num:912, name:"🎃 Frightnight Horror Network", cat:"Movies Master", master:true,
+    networkShows:[
+      "BloodyPitOfHorror","my.-bloody.-valentine.-1981.-dc.-remastered.-1080p.-blu-ray.x-265-rarbg",
+      "CarnivalofSouls","the.-wicker.-man.-1973","night-of-the-living-dead-1968-english",
+      "dracula.-1931","vampire-ecstasy-1973","salems-lot-1979_202411",
+      "children.-of.-the.-corn.-1984","carrie-1976_202409","tales.-from.-the.-crypt.-1972",
+      "TheGhoul","Horror_Hotel","the.-bride.-of.-frankenstein.-1935",
+      "dawn-of-the-dead-1978_202512","dead-of-night_20210519","the-thirsty-dead-1974",
+      "SistersofDeath","Grave_of_the_Vampire_movie","mystery.-of.-the.-wax.-museum.-1933",
+      "the.-blob.-1958","the-vampires-night-orgy-1974",
+      "sisters.-1972.720p.-blu-ray.x-264-838479055489","TheTerror",
+      "the.-curse.-of.-the.-mummys.-tomb.-1964","Bowery_at_Midnight","King_of_the_Zombies",
+      "TheMostDangerousGame","the-curse-of-frankenstein-1957_202406",
+      "house-of-frankenstein-1944_202106","Fog_island_1945","flatliners-1990",
+      "frankenstein-meets-the-wolf-man-1943_202106","dracula-prince-of-darkness-1966_20240606",
+      "the-oblong-box-1969","white_zombie","the-curse-of-the-werewolf","werewolf.of.london",
+      "the-fall-of-the-house-of-usher","LittleShopOfHorrors_201606","scars-of-dracula_202107",
+      "the-creature-walks-among-us","dark-tales-of-japan","the-town-that-dreaded-sundown-1976_202406",
+      "thinner-1996_202511","house-of-wax-1953_202510","manos_the_hands_of_fate",
+      "lake.-of.-the.-dead.-1958","monster-on-campus","sweeney.todd",
+      "the-legend-of-hell-house-1973","TheGhostTrain","the-watcher-in-the-woods-1980_202412",
+      "the.unholy.night.1929","TheBeachGirlsAndTheMonster","AtomAgeVampire",
+      "hellhole.-1985.1080p.-blu-ray.-h-264.-aac-rarbg",
+      "y-2-mate.is-satans-cheerleaders-1977-stwnpjg-io-pq-1080p-1637125171901",
+      "house.-of.-1-000.-dolls.-1967.1080p.-blu-ray.x-264-yts.-ag",
+      "y-2-mate.is-madman-1981-full-movie.-ythtsed-y-8-uy-720p-1629086770196",
+      "taxi-driver-film-and-analysis","creepshow-1982_202510","creepshow-2-1983",
+      "ChildrenShouldntPlayWithDeadThings_201501"
+    ], avgDur:5400, files:[{u:"",n:"Frightnight Horror"}] },
+
+  { num:913, name:"🎄 Christmas Movie Network", cat:"Movies Master", master:true,
+    networkShows:[
+      "RudolphTheRedNosedReindeer1964_201812","rudolphs-shiny-new-year-1976_202203",
+      "the-year-without-a-santa-claus-1974_202203","RudolphAndFrostysChristmasInJuly1979",
+      "twas-the-night-before-christmas-1974-full-movie-freedownloadvideo.net"
+    ], avgDur:3600, files:[{u:"",n:"Christmas Movies"}] },
+
+  { num:914, name:"💥 Action Movie Network", cat:"Movies Master", master:true,
+    networkShows:["robocop-1987_202311"], avgDur:5400, files:[{u:"",n:"Action Movies"}] },
+
+  { num:915, name:"🎬 Animated Movie Network", cat:"Movies Master", master:true,
+    networkShows:["an-american-tail-fievel-goes-west-2003-dvd"], avgDur:5400, files:[{u:"",n:"Animated Movies"}] },
+
+  { num:916, name:"😂 Comedy Movie Network", cat:"Movies Master", master:true,
+    networkShows:[
+      "CC_1914_02_02_MakingALiving","abbott-and-costello-meet-frankenstein","while-the-cats-away...-1972",
+      "dr-goldfoot-and-the-bikini-machine_202205","TheOver-the-HillGangRidesAgain","TheOvertheHillGang",
+      "CC_1916_12_04_TheRink","CharlieChaplin","CC_1916_10_02_ThePawnshop"
+    ], avgDur:5400, files:[{u:"",n:"Comedy Movies"}] },
+
+  { num:917, name:"🎮 Game Show Marathon", cat:"Network Master", master:true, networkShows:["Brainsurge","Family Feud 1976","Supermarket Sweep"], avgDur:1800, files:[{u:"",n:"Game Show Marathon"}] },
+
+  { num:918, name:"📺 Daytime TV", cat:"Network Master", master:true, networkShows:["Jerry Springer","Steve Wilkos"], avgDur:2700, files:[{u:"",n:"Daytime TV"}] },
 
   // ══════════════════════════════════════════════════════════════
   // RAP MUSIC MASTER STATIONS - 4 Stations with 141 Collections
@@ -1922,68 +2040,14 @@ const CHANNELS = [
   // ══════════════════════════════════════════════
   // LIVE - SPORTS (Pluto)
   // ══════════════════════════════════════════════
-  { num:103, name:"NFL Channel",           cat:"Live Sports", pluto:"5f45689d0a1e3c0007464d15" },
-  { num:104, name:"beIN SPORTS XTRA",      cat:"Live Sports", pluto:"5e84ed49f47d600007faf44d" },
-  { num:105, name:"Stadium",               cat:"Live Sports", pluto:"5f85b5f6ad926f00075a91ed" },
-  { num:106, name:"Pluto Sports",          cat:"Live Sports", pluto:"5cb0cae7a461406ffe3f5213" },
-  { num:107, name:"FOX Sports",            cat:"Live Sports", pluto:"5a1f02b5d09b72040001fb8e" },
-  { num:108, name:"Fubo Sports Network",   cat:"Live Sports", pluto:"5f197ed1be0bdd0007ec4e8e" },
-  { num:109, name:"Glory Kickboxing",      cat:"Live Sports", pluto:"5d1636e38adf2f0009030c69" },
-  { num:110, name:"WWE",                   cat:"Live Sports", pluto:"5b4fb95a0e2b777993dd64e4" },
-  { num:111, name:"Impact Wrestling",      cat:"Live Sports", pluto:"5dad07b62af99e0009ed0452" },
-  { num:112, name:"PGA Tour",              cat:"Live Sports", pluto:"5fa5a0ac4b078f00077ac611" },
-  { num:113, name:"MLB Classic Games",     cat:"Live Sports", pluto:"62538d2f229f4b0007c1b39b" },
-  { num:114, name:"Bellator MMA",          cat:"Live Sports", pluto:"59b722526996084038c01e1d" },
-  { num:115, name:"PokerGO",               cat:"Live Sports", pluto:"5f9bbdd9c516930007fc6c16" },
 
   // ══════════════════════════════════════════════
   // LIVE - GAME SHOWS (Pluto)
   // ══════════════════════════════════════════════
-  { num:116, name:"Game Show Central",     cat:"Live Game Shows", pluto:"5ebc519fc40fcd0007bb85f2" },
-  { num:117, name:"The Price is Right",    cat:"Live Game Shows", pluto:"5d8db948aa218a0009aa4646" },
-  { num:118, name:"Deal or No Deal",       cat:"Live Game Shows", pluto:"5d8dae6ec1c5a900097e45b6" },
-  { num:119, name:"Wipeout",               cat:"Live Game Shows", pluto:"5f45ba7c9c6f320007cd36d0" },
 
   // ══════════════════════════════════════════════
   // LIVE - ESPAÑOL (Pluto TV Spanish Channels)
   // ══════════════════════════════════════════════
-  { num:120, name:"Cine Estelar",          cat:"Live Español", pluto:"5e984a72e6c3640007a5bb8f" },
-  { num:121, name:"Cine Suspenso",         cat:"Live Español", pluto:"5f4d863779f89a00076d83d2" },
-  { num:122, name:"Cine Acción",           cat:"Live Español", pluto:"5f4d8653b7a18700072d8d18" },
-  { num:123, name:"Cine Romance",          cat:"Live Español", pluto:"5f4d8687f62d2900072ba51f" },
-  { num:124, name:"Cine Comedia",          cat:"Live Español", pluto:"5f4d864be872820007cf0d60" },
-  { num:125, name:"Cine Clásico",          cat:"Live Español", pluto:"5f4d8648f62d2900072ba514" },
-  { num:126, name:"Cine Terror",           cat:"Live Español", pluto:"5f4d865fb7a18700072d8d20" },
-  { num:127, name:"Cine Drama",            cat:"Live Español", pluto:"5f4d862e79f89a00076d83c5" },
-  { num:128, name:"Telemundo",             cat:"Live Español", pluto:"5cf96dad1652631e36d2999b" },
-  { num:129, name:"Documentales",          cat:"Live Español", pluto:"5f4d876ef62d2900072ba53a" },
-  { num:130, name:"Telenovelas",           cat:"Live Español", pluto:"5cf96d351652631e36d27665" },
-  { num:131, name:"Estrella TV",           cat:"Live Español", pluto:"5cf96f52cec5b100098f55bc" },
-  { num:132, name:"El Gourmet",            cat:"Live Español", pluto:"5dccfb85c0a1e00009db4bc0" },
-  { num:133, name:"Comedy Central Latino", cat:"Live Español", pluto:"5fb5925a6e3305000713d3fd" },
-  { num:134, name:"MTV Pluto TV Español",  cat:"Live Español", pluto:"5f4d85fb79f89a00076d83b1" },
-  { num:135, name:"Nickclásico",           cat:"Live Español", pluto:"60d88bcf61009c0007a2c7dc" },
-  { num:136, name:"Nick Jr. Español",      cat:"Live Español", pluto:"5f4d87c2b720b60007f82d55" },
-  { num:137, name:"Chapulín Colorado",     cat:"Live Español", pluto:"5f4d84edb7a18700072d8d02" },
-  { num:138, name:"Chavo del Ocho",        cat:"Live Español", pluto:"5f4d874642d2890007309579" },
-  { num:139, name:"Novelas Turcas",        cat:"Live Español", pluto:"5f4d87b7b720b60007f82d50" },
-  { num:140, name:"Novelas Inolvidables",  cat:"Live Español", pluto:"5f4d879642d289000730957e" },
-  { num:141, name:"Anime Acción",          cat:"Live Español", pluto:"61bc4e5b19c8a30007ad1d12" },
-  { num:142, name:"Dragon Ball",           cat:"Live Español", pluto:"5f4d8bbcb720b60007f82da5" },
-  { num:143, name:"Dragon Ball Z",         cat:"Live Español", pluto:"5f4d8ce8b720b60007f82dfe" },
-  { num:144, name:"Dragon Ball Super",     cat:"Live Español", pluto:"5f4d8c9e79f89a00076d843e" },
-  { num:145, name:"Yu-Gi-Oh!",             cat:"Live Español", pluto:"5f4d8d3879f89a00076d8449" },
-  { num:146, name:"Los Caballeros del Zodiaco", cat:"Live Español", pluto:"5f4d8ded79f89a00076d8463" },
-  { num:147, name:"Naruto",                cat:"Live Español", pluto:"5f4d8e83b720b60007f82e43" },
-  { num:148, name:"Ranma 1/2",             cat:"Live Español", pluto:"5f4d8f80b720b60007f82e84" },
-  { num:149, name:"Inuyasha",              cat:"Live Español", pluto:"5f4d8eb679f89a00076d8477" },
-  { num:150, name:"Dr. Simi",              cat:"Live Español", pluto:"5f4d8fa979f89a00076d8498" },
-  { num:151, name:"Películas Romance",     cat:"Live Español", pluto:"5f4d883f79f89a00076d8423" },
-  { num:152, name:"¡TA-TA-TA-CHÁN!",       cat:"Live Español", pluto:"60e1e3f434c20d0007802fe9" },
-  { num:153, name:"Comedia Risa",          cat:"Live Español", pluto:"5f4d892e79f89a00076d842c" },
-  { num:154, name:"Bandamax",              cat:"Live Español", pluto:"5f4d901679f89a00076d84a3" },
-  { num:155, name:"Zona Clásicos",         cat:"Live Español", pluto:"5f4d909fb720b60007f82eac" },
-  { num:156, name:"Deportes",              cat:"Live Español", pluto:"5f4d8f56b720b60007f82e7f" }
 
 ];
 
@@ -1997,6 +2061,12 @@ let currentMasterShow=null; // Track current show on master channels
 // Prevent pausing on master channels in LIVE mode
 document.addEventListener('DOMContentLoaded', function(){
   const player = document.getElementById('player');
+  
+  // Pre-fetch commercials in background
+  console.log('Starting to fetch commercials from collections...');
+  fetchAllCommercials().then(() => {
+    console.log('Commercials ready!');
+  });
   
   player.addEventListener('pause', function(e){
     const ch = CHANNELS[curIdx];
@@ -2323,7 +2393,10 @@ async function fetchFiles(identifier){
 }
 
 async function selectCh(idx){
-  if(loading)return;
+  if(loading){
+    console.warn('Already loading, please wait...');
+    return;
+  }
   loading=true;curIdx=idx;
   const ch=CHANNELS[idx];
   
@@ -2421,96 +2494,89 @@ async function selectCh(idx){
       
       // Check if this is a music master channel (Archive.org IDs directly in networkShows)
       // Music channels have cat:"Music" and master:true
-      const isMusicMaster = ch.cat === "Music" && ch.master === true && 
-                            ch.networkShows && ch.networkShows.length > 0;
+      // Movie masters have cat:"Movies Master" or cat:"Adult" and master:true
+      const isDirectArchiveMaster = (ch.cat === "Music" || ch.cat === "Movies Master" || ch.cat === "Adult") && 
+                                     ch.master === true && 
+                                     ch.networkShows && ch.networkShows.length > 0;
       
-      if(isMusicMaster){
-        // MUSIC MASTER CHANNEL - simplified shuffle playback
-        console.log('Music master channel - loading from:', currentShowName);
-        setStat('LOADING MIXTAPE: '+currentShowName.toUpperCase());
+      if(isDirectArchiveMaster){
+        // DIRECT ARCHIVE MASTER CHANNEL - with scheduled rotation and commercials
+        const contentType = ch.cat === "Music" ? "MIXTAPE" : "MOVIE";
+        console.log('Direct archive master channel - loading from:', currentShowName);
+        setStat('LOADING '+contentType+': '+currentShowName.toUpperCase());
         
         let files = await fetchFiles(currentShowName);
         if(!files || !files.length){
           console.error('No files found for:', currentShowName);
-          setStat('NO TRACKS FOUND - TRYING NEXT...');
-          // Try next mixtape in rotation
+          setStat('NO CONTENT FOUND - TRYING NEXT...');
+          // Try next item in rotation
           const nextShowIndex = (broadcast.showIndex + 1) % ch.networkShows.length;
           const nextShow = ch.networkShows[nextShowIndex];
           files = await fetchFiles(nextShow);
           if(!files || !files.length){
-            setStat('MIXTAPE ERROR');
+            setStat('CONTENT ERROR');
             loading=false;
             return;
           }
         }
         
-        console.log('Loaded', files.length, 'tracks from', currentShowName);
+        console.log('Loaded', files.length, 'files from', currentShowName);
         
-        // Apply music genre background
-        applyMusicBackground(ch.name);
+        // Apply background for music channels
+        if(ch.cat === "Music"){
+          applyMusicBackground(ch.name);
+        }
         
-        // Shuffle the tracks
-        const shuffled = [...files].sort(() => Math.random() - 0.5);
+        // Use episode seed for daily variety (same as TV show masters)
+        const episodeIndex = isLiveMode ? (broadcast.episodeSeed % files.length) : 0;
+        const episode = files[episodeIndex];
         
-        // Start from first track
-        const firstTrack = shuffled[0];
-        
-        // Show music overlay for rap channels (AFTER firstTrack is defined)
-        showMusicOverlay(ch.name, firstTrack.n);
-        
-        curFiles = shuffled;
-        curEpIdx = 0;
+        curFiles = files;
+        curEpIdx = episodeIndex;
         currentMasterShow = currentShowName;
         
-        document.getElementById('np-ep').textContent = currentShowName;
+        // Show music overlay for music channels
+        if(ch.cat === "Music"){
+          showMusicOverlay(ch.name, episode.n);
+        }
+        
+        console.log('Master channel synced:', currentShowName, '-', episode.n, 'position:', broadcast.timeIntoBlock);
+        
+        document.getElementById('np-ep').textContent = currentShowName + ' - ' + episode.n;
         player.style.display='block';
-        player.src = firstTrack.u;
+        
+        // Clear all previous event handlers
+        player.oncanplay=null;
+        player.onended=null;
+        player.onerror=null;
+        player.onloadedmetadata=null;
+        
+        player.src = episode.u;
         player.load();
         
-        player.onloadedmetadata = function(){
-          console.log('Playing:', firstTrack.n);
-          player.play().catch(err => console.error('Play error:', err));
-        };
-        
-        player.onended = function(){
-          console.log('Track ended, going to next track (no commercial)');
-          // Go to next track
-          curEpIdx = (curEpIdx + 1) % curFiles.length;
-          const nextTrack = curFiles[curEpIdx];
+        player.addEventListener('loadedmetadata', function onM(){
+          player.removeEventListener('loadedmetadata', onM);
+          console.log('Episode loaded, seeking to:', broadcast.timeIntoBlock);
           
-          console.log('Next track:', nextTrack.n);
-          document.getElementById('np-ep').textContent = currentShowName + ' - ' + nextTrack.n;
-          
-          // Update music overlay with new track
-          showMusicOverlay(ch.name, nextTrack.n);
-          
-          player.src = nextTrack.u;
-          player.load();
-          player.onloadedmetadata = function(){
-            player.play().catch(err => console.error('Play error:', err));
-          };
-        };
-        
-        player.onerror = function(e){
-          console.error('Track error, skipping to next:', e);
-          // Skip to next track on error
-          curEpIdx = (curEpIdx + 1) % curFiles.length;
-          if(curEpIdx === 0){
-            // Looped back to start, reload to get fresh mixtape
-            loading = false;
-            selectCh(idx);
-            return;
+          // SYNC: Seek to current position if in LIVE mode
+          if(isLiveMode && broadcast.timeIntoBlock > 0){
+            player.currentTime = broadcast.timeIntoBlock;
           }
-          const nextTrack = curFiles[curEpIdx];
           
-          console.log('Error recovery, trying:', nextTrack.n);
-          document.getElementById('np-ep').textContent = currentShowName + ' - ' + nextTrack.n;
-          
-          player.src = nextTrack.u;
-          player.load();
-          player.onloadedmetadata = function(){
-            player.play().catch(err => console.error('Play error:', err));
-          };
+          player.play().catch(err => console.error('Play error:', err));
+        });
+        
+        // When episode ends, play commercial then reload to get next scheduled item
+        player.onended = function(){
+          console.log('Episode ended, starting commercial break');
+          playShortThenSwitchShow(idx);
+        };
+        
+        // Handle errors
+        player.onerror = function(){
+          console.error('Episode error, reloading channel');
+          loading=false;
+          selectCh(idx);
         };
         
         ssoff();setBar(100);
@@ -2991,58 +3057,67 @@ function playShortThenSwitchShow(masterIdx){
   player.onended=null;
   player.onerror=null;
   
-  // IMPROVED RANDOMIZATION - Prevent same commercial twice in a row
-  let commercialIndex;
-  do {
-    commercialIndex = Math.floor(Math.random() * SHORT_COMMERCIALS.length);
-  } while (commercialIndex === lastCommercialIndex && SHORT_COMMERCIALS.length > 1);
+  // Get 2 random commercials (synchronous now)
+  const twoCommercials = getTwoRandomCommercials();
   
-  lastCommercialIndex = commercialIndex;
-  const short = SHORT_COMMERCIALS[commercialIndex];
+  console.log('Playing 2-commercial break:', twoCommercials.map(c => c.n).join(', '));
   
-  document.getElementById('np-ep').textContent='[ COMMERCIAL BREAK ]';
+  let currentCommercialIndex = 0;
   
-  console.log('Playing commercial:', short.n, 'Duration:', short.dur, 'Index:', commercialIndex);
-  
-  player.src=short.u;
-  player.load();
-  
-  // Play commercial when ready
-  player.oncanplay=function(){
-    console.log('Commercial can play, starting...');
-    player.play().catch(err => console.error('Play error:', err));
-  };
-  
-  // Force skip to end of commercial after duration + buffer
-  const timeout=setTimeout(()=>{
-    console.log('Commercial timeout reached, current time:', player.currentTime, 'duration:', short.dur);
-    if(player.currentTime < short.dur){
-      player.currentTime = short.dur;
+  function playNextCommercial(){
+    if(currentCommercialIndex >= twoCommercials.length){
+      // Both commercials done, return to show
+      console.log('Commercial break complete, switching to new show');
+      player.oncanplay=null;
+      player.onended=null;
+      player.onerror=null;
+      loading=false;
+      selectCh(masterIdx);
+      return;
     }
-  },(short.dur+2)*1000);
-
-  // When commercial ends, switch to different show
-  player.onended=function(){
-    console.log('Commercial ended, switching to new show');
-    clearTimeout(timeout);
-    player.oncanplay=null;
-    player.onended=null;
-    player.onerror=null;
-    // Reset loading flag and select same master channel (which picks new random show)
-    loading=false;
-    selectCh(masterIdx);
-  };
+    
+    const commercial = twoCommercials[currentCommercialIndex];
+    document.getElementById('np-ep').textContent=`[ COMMERCIAL BREAK ${currentCommercialIndex + 1}/2 ]`;
+    
+    console.log(`Playing commercial ${currentCommercialIndex + 1}/2:`, commercial.n);
+    
+    player.src=commercial.u;
+    player.load();
+    
+    // Play commercial when ready
+    player.oncanplay=function(){
+      console.log('Commercial can play, starting...');
+      player.play().catch(err => console.error('Play error:', err));
+    };
+    
+    // Force skip to end of commercial after duration + buffer
+    const dur = commercial.dur || 60;
+    const timeout=setTimeout(()=>{
+      console.log('Commercial timeout reached, current time:', player.currentTime, 'duration:', dur);
+      if(player.currentTime < dur - 1){
+        player.currentTime = dur;
+      }
+    },(dur + 2)*1000);
   
-  // Handle errors
-  player.onerror=function(){
-    console.error('Commercial error, skipping to next show');
-    clearTimeout(timeout);
-    player.oncanplay=null;
-    player.onended=null;
-    player.onerror=null;
-    loading=false;
-    selectCh(masterIdx);
-  };
+    // When commercial ends, play next commercial or return to show
+    player.onended=function(){
+      console.log(`Commercial ${currentCommercialIndex + 1} ended`);
+      clearTimeout(timeout);
+      currentCommercialIndex++;
+      playNextCommercial();
+    };
+    
+    // Handle errors
+    player.onerror=function(){
+      console.error('Commercial error, skipping to next');
+      clearTimeout(timeout);
+      currentCommercialIndex++;
+      playNextCommercial();
+    };
+  }
+  
+  // Start playing the first commercial
+  playNextCommercial();
 }
 
 
@@ -3352,7 +3427,7 @@ function showMusicOverlay(channelName, trackName){
 }
 
 // Calculate next 2 hours of programming for a channel
-function getNext2Hours(ch){
+async function getNext2Hours(ch){
   const schedule = [];
   const now = Date.now();
   const secondsSinceMidnight = Math.floor((now / 1000) % 86400);
@@ -3427,24 +3502,35 @@ function getNext2Hours(ch){
       currentTime = blockStartTime + blockDuration;
     }
   } else {
-    // REGULAR CHANNELS - episode rotation (we don't have files loaded, so show generic)
-    let episodeNum = Math.floor(currentTime / blockDuration) % 20; // Assume 20 episodes
-    
-    while(currentTime < endTime && schedule.length < 8){
-      const blockStartTime = Math.floor(currentTime / blockDuration) * blockDuration;
-      const startDate = new Date(now - secondsSinceMidnight * 1000 + blockStartTime * 1000);
-      
-      const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
-      const durationMins = Math.floor(ch.avgDur / 60);
-      
-      schedule.push({
-        time: timeStr,
-        show: `Episode ${(episodeNum % 20) + 1}`,
-        duration: `${durationMins} min`
-      });
-      
-      currentTime = blockStartTime + blockDuration;
-      episodeNum++;
+    // REGULAR CHANNELS - fetch actual files and show real episodes
+    try {
+      const files = await fetchFiles(ch.embedOnly || ch.files);
+      if(files && files.length > 0){
+        while(currentTime < endTime && schedule.length < 8){
+          const totalBlocks = Math.floor(currentTime / blockDuration);
+          const episodeIndex = totalBlocks % files.length;
+          const episode = files[episodeIndex];
+          
+          const blockStartTime = totalBlocks * blockDuration;
+          const startDate = new Date(now - secondsSinceMidnight * 1000 + blockStartTime * 1000);
+          
+          const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+          const durationMins = Math.floor(ch.avgDur / 60);
+          
+          schedule.push({
+            time: timeStr,
+            show: episode.n,
+            duration: `${durationMins} min`
+          });
+          
+          currentTime = blockStartTime + blockDuration;
+        }
+      } else {
+        return [{time: 'N/A', show: 'No episodes available', duration: 'N/A'}];
+      }
+    } catch(e) {
+      console.warn('Could not fetch schedule for', ch.name);
+      return [{time: 'N/A', show: 'Schedule unavailable', duration: 'N/A'}];
     }
   }
   
@@ -3571,9 +3657,9 @@ function renderGuide(){
   if(!content) return;
   
   if(guideMode === 'grid'){
-    renderGridView(content);
+    renderGridView(content).catch(err => console.error('Guide error:', err));
   } else {
-    renderDetailView(content);
+    renderDetailView(content).catch(err => console.error('Guide error:', err));
   }
 }
 
@@ -3587,7 +3673,7 @@ function scrollToCategory(categoryName){
 }
 
 // Render grid view
-function renderGridView(container){
+async function renderGridView(container){
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
   
@@ -3658,7 +3744,7 @@ function renderGridView(container){
   `;
   
   // Render each category
-  sortedCats.forEach(catName => {
+  for(const catName of sortedCats) {
     const channels = categories[catName];
     
     // SORT CHANNELS ALPHABETICALLY BY NAME WITHIN EACH CATEGORY
@@ -3681,7 +3767,7 @@ function renderGridView(container){
     `;
     
     // Channels in this category
-    channels.forEach(ch => {
+    for(const ch of channels) {
       const idx = ch.idx;
       const broadcast = getCurrentBroadcast(ch, null);
       const isSelected = idx === selectedGuideChannel;
@@ -3719,13 +3805,24 @@ function renderGridView(container){
           upNext = 'Shuffled Playlist';
         }
       } else {
-        // REGULAR CHANNELS - show channel name since we don't have files loaded
-        nowPlaying = ch.name;
-        upNext = 'Episodes Available';
+        // REGULAR CHANNELS - use getCurrentBroadcast data
+        if(broadcast && broadcast.showName){
+          // getCurrentBroadcast has show info
+          nowPlaying = `${ch.name}: ${broadcast.showName}`;
+          const nextEpIdx = (broadcast.episodeIndex + 1) % (broadcast.totalEpisodes || 20);
+          upNext = `Next Episode`;
+        } else if(broadcast && broadcast.episodeIndex !== undefined){
+          // We have episode index but no name
+          nowPlaying = `${ch.name}`;
+          upNext = `Programming`;
+        } else {
+          nowPlaying = ch.name;
+          upNext = 'Episodes Available';
+        }
       }
       
       html += `
-        <div onclick="selectedGuideChannel = ${idx}; renderGuide();" style="
+        <div onclick="selectedGuideChannel = ${idx}; renderGuide();" data-ch="${idx}" style="
           display: grid;
           grid-template-columns: 80px 1fr 1fr 120px;
           gap: 10px;
@@ -3739,8 +3836,8 @@ function renderGridView(container){
           margin-bottom: 5px;
         ">
           <div style="font-weight: bold;">${ch.num}${isCurrent ? ' ⭐' : ''}</div>
-          <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nowPlaying}</div>
-          <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${upNext}</div>
+          <div class="now-playing" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nowPlaying}</div>
+          <div class="up-next" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${upNext}</div>
           <div>
             <button onclick="event.stopPropagation(); guideMode='detail'; selectedGuideChannel=${idx}; renderGuide();" style="
               background: ${isSelected ? '#000' : 'var(--gc-bg)'};
@@ -3757,7 +3854,7 @@ function renderGridView(container){
       
       // EXPANDED SCHEDULE - Show next 2 hours when channel is selected
       if(isSelected){
-        const schedule = getNext2Hours(ch);
+        const schedule = await getNext2Hours(ch);
         html += `
           <div style="
             background: rgba(0,0,0,0.3);
@@ -3811,18 +3908,18 @@ function renderGridView(container){
           </div>
         `;
       }
-    });  // Close channels.forEach
-  });  // Close sortedCats.forEach
+    }  // Close channels for loop
+  }  // Close sortedCats for loop
   
   html += '</div>';
   container.innerHTML = html;
 }
 
 // Render detail view  
-function renderDetailView(container){
+async function renderDetailView(container){
   if(selectedGuideChannel === null) {
     guideMode = 'grid';
-    renderGridView(container);
+    await renderGridView(container);
     return;
   }
   
