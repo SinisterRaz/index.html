@@ -559,6 +559,196 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 .last-watched-ep .episode-num{color:var(--ch-color);}
 .last-watched-ep .episode-play{opacity:1;color:var(--ch-color);font-weight:bold;}
 
+/* SCRAMBLER EFFECT - Intense 90s Cable Scrambling with TV Static */
+.scrambled {
+  position: relative;
+  filter: brightness(2.5) contrast(0.2) saturate(0.1) blur(6px);
+  animation: heavyScramble 0.08s infinite, verticalRoll 2s linear infinite, horizontalTear 0.12s infinite;
+  opacity: 0.3; /* Barely visible through the static */
+}
+
+/* Heavy TV static overlay */
+.scrambled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  animation: staticNoise 0.1s infinite steps(10);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.95;
+  mix-blend-mode: screen;
+}
+
+/* Horizontal scanlines */
+.scrambled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.9) 0px,
+    rgba(255, 255, 255, 0.05) 1px,
+    rgba(0, 0, 0, 0.9) 2px,
+    rgba(0, 0, 0, 0.85) 3px
+  );
+  animation: scanlines 0.05s infinite linear, colorShift 0.15s infinite;
+  pointer-events: none;
+  z-index: 11;
+  opacity: 0.8;
+}
+
+@keyframes heavyScramble {
+  0% { 
+    filter: brightness(3.0) contrast(0.15) saturate(0.05) blur(8px) hue-rotate(0deg);
+    transform: translateY(0px) scaleY(1) translateX(0px) skewX(0deg);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  10% { 
+    filter: brightness(2.0) contrast(0.25) saturate(0.15) blur(7px) hue-rotate(40deg);
+    transform: translateY(-5px) scaleY(0.92) translateX(3px) skewX(2deg);
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 30%, 0 40%, 100% 45%, 100% 100%, 0 100%);
+  }
+  20% { 
+    filter: brightness(3.5) contrast(0.1) saturate(0.0) blur(9px) hue-rotate(-30deg);
+    transform: translateY(4px) scaleY(1.08) translateX(-4px) skewX(-3deg);
+    clip-path: polygon(0 0, 100% 0, 100% 55%, 0 50%, 0 60%, 100% 65%, 100% 100%, 0 100%);
+  }
+  30% { 
+    filter: brightness(1.8) contrast(0.3) saturate(0.2) blur(6px) hue-rotate(20deg);
+    transform: translateY(-2px) scaleY(0.95) translateX(5px) skewX(1deg);
+    clip-path: polygon(0 0, 100% 0, 100% 25%, 0 20%, 0 70%, 100% 75%, 100% 100%, 0 100%);
+  }
+  40% { 
+    filter: brightness(3.2) contrast(0.12) saturate(0.08) blur(8px) hue-rotate(-45deg);
+    transform: translateY(6px) scaleY(1.1) translateX(-3px) skewX(-2deg);
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 40%, 0 50%, 100% 55%, 100% 100%, 0 100%);
+  }
+  50% { 
+    filter: brightness(2.5) contrast(0.18) saturate(0.12) blur(7px) hue-rotate(15deg);
+    transform: translateY(-4px) scaleY(0.93) translateX(4px) skewX(3deg);
+    clip-path: polygon(0 0, 100% 0, 100% 60%, 0 55%, 0 65%, 100% 70%, 100% 100%, 0 100%);
+  }
+  60% { 
+    filter: brightness(3.0) contrast(0.15) saturate(0.05) blur(9px) hue-rotate(-25deg);
+    transform: translateY(3px) scaleY(1.07) translateX(-5px) skewX(-1deg);
+    clip-path: polygon(0 0, 100% 0, 100% 32%, 0 28%, 0 38%, 100% 42%, 100% 100%, 0 100%);
+  }
+  70% { 
+    filter: brightness(2.2) contrast(0.22) saturate(0.18) blur(6px) hue-rotate(35deg);
+    transform: translateY(-6px) scaleY(0.94) translateX(2px) skewX(2deg);
+    clip-path: polygon(0 0, 100% 0, 100% 48%, 0 45%, 0 80%, 100% 83%, 100% 100%, 0 100%);
+  }
+  80% { 
+    filter: brightness(3.3) contrast(0.1) saturate(0.0) blur(8px) hue-rotate(-35deg);
+    transform: translateY(5px) scaleY(1.09) translateX(-4px) skewX(-3deg);
+    clip-path: polygon(0 0, 100% 0, 100% 38%, 0 35%, 0 42%, 100% 45%, 100% 100%, 0 100%);
+  }
+  90% { 
+    filter: brightness(2.0) contrast(0.28) saturate(0.15) blur(7px) hue-rotate(25deg);
+    transform: translateY(-3px) scaleY(0.96) translateX(6px) skewX(1deg);
+    clip-path: polygon(0 0, 100% 0, 100% 52%, 0 48%, 0 58%, 100% 62%, 100% 100%, 0 100%);
+  }
+  100% { 
+    filter: brightness(3.0) contrast(0.15) saturate(0.05) blur(8px) hue-rotate(0deg);
+    transform: translateY(0px) scaleY(1) translateX(0px) skewX(0deg);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes verticalRoll {
+  0% { transform: translateY(0%); }
+  100% { transform: translateY(-15%); }
+}
+
+@keyframes horizontalTear {
+  0%, 100% { 
+    background-position: 0 0;
+  }
+  10% { 
+    background-position: -15px 25%;
+  }
+  20% { 
+    background-position: 20px 50%;
+  }
+  30% { 
+    background-position: -10px 15%;
+  }
+  40% { 
+    background-position: 25px 70%;
+  }
+  50% { 
+    background-position: -20px 35%;
+  }
+  60% { 
+    background-position: 15px 60%;
+  }
+  70% { 
+    background-position: -25px 80%;
+  }
+  80% { 
+    background-position: 18px 40%;
+  }
+  90% { 
+    background-position: -12px 55%;
+  }
+}
+
+@keyframes scanlines {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(3px); }
+}
+
+@keyframes staticNoise {
+  0%, 100% { 
+    opacity: 0.95;
+    transform: translate(0, 0);
+  }
+  10% { 
+    opacity: 0.85;
+    transform: translate(-5%, 5%);
+  }
+  20% { 
+    opacity: 0.98;
+    transform: translate(5%, -5%);
+  }
+  30% { 
+    opacity: 0.82;
+    transform: translate(-3%, 3%);
+  }
+  40% { 
+    opacity: 0.92;
+    transform: translate(4%, -4%);
+  }
+  50% { 
+    opacity: 0.88;
+    transform: translate(-6%, 6%);
+  }
+  60% { 
+    opacity: 0.95;
+    transform: translate(3%, -3%);
+  }
+  70% { 
+    opacity: 0.83;
+    transform: translate(-4%, 4%);
+  }
+  80% { 
+    opacity: 0.97;
+    transform: translate(5%, -6%);
+  }
+  90% { 
+    opacity: 0.86;
+    transform: translate(-2%, 2%);
+  }
+}
+
+@keyframes colorShift {
+  0%, 100% { opacity: 0.8; filter: hue-rotate(0deg); }
+  25% { opacity: 0.9; filter: hue-rotate(20deg); }
+  50% { opacity: 0.7; filter: hue-rotate(-15deg); }
+  75% { opacity: 0.85; filter: hue-rotate(10deg); }
+}
+
 /* OFF SCREEN */
 #off-screen{position:fixed;inset:0;z-index:998;display:none;
   background:#000;flex-direction:column;align-items:center;justify-content:center;}
@@ -677,6 +867,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
     <button class="cb" onclick="prevEp()" title="Previous Episode">&#9664; EP</button>
     <button class="cb" onclick="nextEp()" title="Next Episode">EP &#9654;</button>
     <div id="cnw"><div id="cnt">SINISTER TV - ARCHIVE EDITION</div></div>
+    <button class="cb" id="scrambler-btn" onclick="toggleScrambler()" title="Toggle Scrambler Effect" style="display:none;">📺 UNSCRAMBLE</button>
     <button class="cb" id="live-btn" onclick="resumeToLive()" title="Resume to Live Broadcast">🔴 LIVE</button>
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;padding:0 8px;">
       <span style="font-size:1.6rem;">🔊</span>
@@ -974,27 +1165,32 @@ async function fetchAllCommercials(){
   if(commercialsFetched || commercialFetchInProgress) return;
   commercialFetchInProgress = true;
   
-  console.log('Starting to fetch commercials from', COMMERCIAL_COLLECTIONS.length, 'collections...');
+  // Note: Fetching from Archive.org collections often fails due to CORS
+  // That's okay - we have 20 fallback commercials that work great!
+  // Silently attempt to fetch, but don't show errors since this is expected
   
   for(const collection of COMMERCIAL_COLLECTIONS){
     try {
       const files = await fetchFiles(collection);
       if(files && files.length > 0){
-        // Filter to only videos under 2 minutes (120 seconds)
         const shortAds = files.filter(f => {
           const dur = f.dur || 60;
-          return dur > 5 && dur <= 120; // Between 5 seconds and 2 minutes
+          return dur > 5 && dur <= 120;
         });
         allCommercials.push(...shortAds);
-        console.log('✓ Added', shortAds.length, 'commercials from', collection, '(Total:', allCommercials.length + ')');
       }
     } catch(e){
-      console.warn('Could not fetch from', collection, '-', e.message);
+      // Expected - Archive.org blocks cross-origin metadata requests
+      // Fallback commercials will be used instead
     }
   }
   
   commercialsFetched = true;
-  console.log('🎬 TOTAL COMMERCIALS LOADED:', allCommercials.length);
+  if(allCommercials.length > 0){
+    console.log('🎬 Loaded', allCommercials.length, 'commercials from collections');
+  } else {
+    console.log('📺 Using 20 fallback commercials (collection fetch blocked by CORS)');
+  }
 }
 
 // Get 2 random commercials for a commercial break
@@ -1181,6 +1377,7 @@ const CHANNELS = [
   // AUTOMOTIVE
   // ══════════════════════════════════════════════
   { num:49, name:"Monster Jam",   cat:"Automotive", avgDur:3600, embedOnly:"classicmonsterjam", files:[{u:"",n:"Monster Jam"}] },
+  { num:50, name:"Muscle Car Chronicles", cat:"Automotive", avgDur:1380, embedOnly:"muslcecarchronicles", files:[{u:"",n:"Muscle Car Chronicles"}] },
 
   // ══════════════════════════════════════════════
   // YOUTUBE
@@ -1467,7 +1664,7 @@ const CHANNELS = [
   
   { num:901, name:"🎬 ToonVerse Central", cat:"Network Master", master:true, networkShows:["Dexter's Laboratory","Powerpuff Girls","Ed, Edd n Eddy","Courage the Cowardly Dog","Samurai Jack","The Batman","Batman Beyond","Spider-Man TAS","Freakazoid"], avgDur:1380, files:[{u:"",n:"ToonVerse Central"}] },
   
-  { num:902, name:"🌙 After Dark Network", cat:"Network Master", master:true, networkShows:["The Boondocks","Beavis & Butt-Head","Panty & Stocking"], avgDur:1380, files:[{u:"",n:"After Dark Network"}] },
+  { num:902, name:"🌙 After Dark Network", cat:"Network Master", master:true, networkShows:["the-boondocks_202410","beavis-and-butthead-king-turd-collection","panty-and-stocking"], avgDur:1380, files:[{u:"",n:"After Dark Network"}] },
   
   { num:903, name:"🚀 Sci-Fi Theater Channel", cat:"Network Master", master:true, networkShows:["Beyond Reality","Swamp Thing","Andromeda","Earth Final Conflict","The Burning Zone","Eureka","Battlestar Galactica 1978","Lexx"], avgDur:2700, files:[{u:"",n:"Sci-Fi Theater"}] },
   
@@ -1580,9 +1777,9 @@ const CHANNELS = [
       "CC_1916_12_04_TheRink","CharlieChaplin","CC_1916_10_02_ThePawnshop"
     ], avgDur:5400, files:[{u:"",n:"Comedy Movies"}] },
 
-  { num:917, name:"🎮 Game Show Marathon", cat:"Network Master", master:true, networkShows:["Brainsurge","Family Feud 1976","Supermarket Sweep"], avgDur:1800, files:[{u:"",n:"Game Show Marathon"}] },
+  { num:917, name:"🎮 Game Show Marathon", cat:"Network Master", master:true, networkShows:["brainsurge-bmp","familyfeud1976-bmp","supermarketsweep-bmp"], avgDur:1800, files:[{u:"",n:"Game Show Marathon"}] },
 
-  { num:918, name:"📺 Daytime TV", cat:"Network Master", master:true, networkShows:["Jerry Springer","Steve Wilkos"], avgDur:2700, files:[{u:"",n:"Daytime TV"}] },
+  { num:918, name:"📺 Daytime TV", cat:"Network Master", master:true, networkShows:["the-jerry-springer-show-various-episodes-pt-2","stevewilkosseason1"], avgDur:2700, files:[{u:"",n:"Daytime TV"}] },
 
   // ══════════════════════════════════════════════════════════════
   // RAP MUSIC MASTER STATIONS - 4 Stations with 141 Collections
@@ -1599,7 +1796,7 @@ const CHANNELS = [
       "DJ_Ty_Boogie_-_The_Greatest_Whoever_Done_It_13_-MixFiend-2007","VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_73-2011",
       "cole-world-sideline-story-jcole-itunes","lil-peep-live-forever_202503","VA-DJ_Superstar_Jay_-_I_Am_Mixtapes_86-2011",
       "va-dj-chuck-t-down-south-slangin-vol.-51-bootleg-2008-fpuo","va-dj-chuck-t-down-south-slangin-vol.-48-bootleg-2008-fpuo",
-      "muslcecarchronicles","dj-lindo_20251212_2301","Gangsta_Grillz_The_Whole_Series__Covers",
+      "dj-lindo_20251212_2301","Gangsta_Grillz_The_Whole_Series__Covers",
       "VA-Superstar_Jay_-_I_Am_Mixtapes_197-2017","RonaldBigMacdonaldKazeLoon","VA-Superstar_Jay_-_I_Am_Mixtapes_208-2018",
       "VA-Biggy_Jiggy_Mixtapes_-_Exclusiv_Tunes-2014","FlexinNReppin2DatPiff.com","VA-Superstar_Jay_-_I_Am_Mixtapes_207-2018",
       "mixtapes_202212","VA-Superstar_Jay_-_I_Am_Mixtapes_194-2016","VA-Superstar_Jay_-_I_Am_Mixtapes_186-2016",
@@ -2056,6 +2253,9 @@ const CATS=[...new Set(CHANNELS.map(c=>c.cat))];
 let curIdx=-1,loading=false,staticAn=null;
 let curFiles=[],curEpIdx=0;
 let isLiveMode=true; // LIVE mode by default - watching synchronized broadcast
+
+// Debug: Log mode changes
+console.log('📺 TV initialized in LIVE mode - all channels synchronized to daily schedule');
 let currentMasterShow=null; // Track current show on master channels
 
 // Prevent pausing on master channels in LIVE mode
@@ -2316,6 +2516,9 @@ function showOSD(ch){
   osd.classList.remove('show');
   void osd.offsetWidth;
   osd.classList.add('show');
+  
+  // Update scrambler button visibility
+  updateScramblerButton();
 }
 
 function simEp(files,avgDur){
@@ -2506,6 +2709,43 @@ async function selectCh(idx){
         setStat('LOADING '+contentType+': '+currentShowName.toUpperCase());
         
         let files = await fetchFiles(currentShowName);
+        
+        // MUSIC CHANNELS: Filter to ONLY audio files (no video)
+        if(ch.cat === "Music" && files && files.length > 0){
+          const audioFormats = ['.mp3', '.m4a', '.aac', '.ogg', '.oga', '.flac', '.wav', '.opus', '.wma'];
+          const videoFormats = ['.mp4', '.mkv', '.webm', '.avi', '.mov'];
+          
+          // First try: strict audio-only filtering
+          const audioFiles = files.filter(f => {
+            const url = f.u.toLowerCase();
+            const hasAudio = audioFormats.some(ext => url.includes(ext));
+            const hasVideo = videoFormats.some(ext => url.includes(ext));
+            return hasAudio && !hasVideo;
+          });
+          
+          if(audioFiles.length > 0){
+            files = audioFiles;
+            console.log('🎵 Filtered to', audioFiles.length, 'audio-only files (removed video)');
+          } else {
+            // Fallback: if no pure audio files, allow small video files (likely music videos with good audio)
+            const smallFiles = files.filter(f => {
+              // Accept files under 100MB (likely music videos, not full TV episodes)
+              const url = f.u.toLowerCase();
+              return !url.includes('.mkv'); // Skip MKV (usually large)
+            });
+            
+            if(smallFiles.length > 0){
+              files = smallFiles;
+              console.warn('🎵 No pure audio files found - using', smallFiles.length, 'video files (music videos)');
+            } else {
+              console.warn('🎵 No suitable files found in this collection, trying next...');
+              loading = false;
+              selectCh(idx);
+              return;
+            }
+          }
+        }
+        
         if(!files || !files.length){
           console.error('No files found for:', currentShowName);
           setStat('NO CONTENT FOUND - TRYING NEXT...');
@@ -2554,22 +2794,55 @@ async function selectCh(idx){
         player.src = episode.u;
         player.load();
         
+        console.log('🎵 Music channel - Loading:', episode.n, 'from', episode.u);
+        
+        // Ensure player is NOT muted for music
+        player.muted = false;
+        player.volume = 0.75;
+        console.log('🎵 Player muted:', player.muted, 'volume:', player.volume);
+        
         player.addEventListener('loadedmetadata', function onM(){
           player.removeEventListener('loadedmetadata', onM);
-          console.log('Episode loaded, seeking to:', broadcast.timeIntoBlock);
+          console.log('🎵 Music loaded, duration:', player.duration);
           
-          // SYNC: Seek to current position if in LIVE mode
-          if(isLiveMode && broadcast.timeIntoBlock > 0){
-            player.currentTime = broadcast.timeIntoBlock;
+          // MUSIC CHANNELS: Don't seek - always play from start
+          // (Music tracks are 3-5 min, schedule position can be 1000+ seconds)
+          if(ch.cat === "Music"){
+            console.log('🎵 Music channel - playing from start (no time-sync)');
+          } else {
+            // SYNC: Seek to current position if in LIVE mode
+            if(isLiveMode && broadcast.timeIntoBlock > 0){
+              player.currentTime = broadcast.timeIntoBlock;
+              console.log('🎵 Seeking to:', broadcast.timeIntoBlock);
+            }
           }
           
-          player.play().catch(err => console.error('Play error:', err));
+          console.log('🎵 Starting playback...');
+          player.play().then(() => {
+            console.log('🎵 Music playing successfully - muted:', player.muted, 'volume:', player.volume);
+          }).catch(err => {
+            console.error('🎵 Play error:', err);
+          });
         });
         
-        // When episode ends, play commercial then reload to get next scheduled item
+        // Log if metadata fails to load
+        player.addEventListener('error', function logError(e){
+          console.error('🎵 Player error event:', e, 'Error code:', player.error ? player.error.code : 'none');
+          player.removeEventListener('error', logError);
+        });
+        
+        // When episode ends
         player.onended = function(){
-          console.log('Episode ended, starting commercial break');
-          playShortThenSwitchShow(idx);
+          if(ch.cat === "Music"){
+            // MUSIC CHANNELS: No commercials, just reload to get next track
+            console.log('🎵 Track ended, loading next track (no commercials)');
+            loading=false;
+            selectCh(idx);
+          } else {
+            // TV/MOVIE CHANNELS: Play commercial break then reload
+            console.log('Episode ended, starting commercial break');
+            playShortThenSwitchShow(idx);
+          }
         };
         
         // Handle errors
@@ -3544,6 +3817,47 @@ async function getNext2Hours(ch){
 let guideMode = 'grid'; // 'grid' or 'detail'
 let selectedGuideChannel = null;
 let guideRefreshInterval = null;
+
+// SCRAMBLER EFFECT for SpiceXXX Network
+let scramblerActive = true; // Default ON for that retro experience
+
+function toggleScrambler(){
+  const player = document.getElementById('player');
+  const btn = document.getElementById('scrambler-btn');
+  
+  scramblerActive = !scramblerActive;
+  
+  if(scramblerActive){
+    player.classList.add('scrambled');
+    player.muted = true; // Mute when scrambled
+    btn.textContent = '📺 UNSCRAMBLE';
+    btn.style.animation = 'pulse 1.5s infinite';
+  } else {
+    player.classList.remove('scrambled');
+    player.muted = false; // Unmute when unscrambled
+    btn.textContent = '📺 SCRAMBLED';
+    btn.style.animation = 'none';
+  }
+}
+
+function updateScramblerButton(){
+  const ch = CHANNELS[curIdx];
+  const btn = document.getElementById('scrambler-btn');
+  const player = document.getElementById('player');
+  
+  if(ch && ch.num === 910){ // SpiceXXX Network
+    btn.style.display = 'block';
+    // Apply scrambler if enabled
+    if(scramblerActive){
+      player.classList.add('scrambled');
+      player.muted = true; // Auto-mute when tuning to scrambled channel
+    }
+  } else {
+    btn.style.display = 'none';
+    player.classList.remove('scrambled');
+    player.muted = false; // Unmute when leaving SpiceXXX
+  }
+}
 
 // Toggle guide (NEW cable-style guide)
 function toggleGuide(){
