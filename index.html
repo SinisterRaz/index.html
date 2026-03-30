@@ -2306,13 +2306,17 @@ function getCurrentBroadcast(ch, files){
       return null;
     }
     
-    const blockDuration = (ch.avgDur || 1380) + 60; // Show + 1 min commercial
+    // MUSIC CHANNELS: Short track rotation (3 min avg), no commercials
+    // TV/MOVIE CHANNELS: Long show blocks with commercials
+    const isMusicChannel = ch.cat === "Music";
+    const blockDuration = isMusicChannel ? 180 : ((ch.avgDur || 1380) + 60); // Music: 3min tracks, TV: show + 1min commercial
+    
     const totalBlocks = Math.floor(secondsSinceMidnight / blockDuration);
     const showIndex = totalBlocks % showList.length;
     const timeIntoBlock = secondsSinceMidnight % blockDuration;
-    const isCommercial = timeIntoBlock >= (ch.avgDur || 1380);
+    const isCommercial = isMusicChannel ? false : (timeIntoBlock >= (ch.avgDur || 1380));
     
-    // Daily episode seeding - same random episode for everyone on same day
+    // Daily episode seeding - same track/episode for everyone on same day/time block
     const today = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
     const episodeSeed = (today + totalBlocks) % 1000;
     
@@ -2391,11 +2395,11 @@ function updateLiveIndicator(){
   }
   
   if(isMusicChannel){
-    // Music channels - hide LIVE/RESUME button (no live schedule)
+    // Music channels - synchronized radio, no skipping allowed
     liveBtn.style.display = 'none';
-    // Enable track skip buttons
-    if(prevEpBtn) { prevEpBtn.style.opacity = '1'; prevEpBtn.style.cursor = 'pointer'; }
-    if(nextEpBtn) { nextEpBtn.style.opacity = '1'; nextEpBtn.style.cursor = 'pointer'; }
+    // Disable track skip buttons (everyone hears same thing)
+    if(prevEpBtn) { prevEpBtn.style.opacity = '0.3'; prevEpBtn.style.cursor = 'not-allowed'; }
+    if(nextEpBtn) { nextEpBtn.style.opacity = '0.3'; nextEpBtn.style.cursor = 'not-allowed'; }
     player.controls = true; // Show controls on music
     return;
   }
@@ -2767,7 +2771,7 @@ async function selectCh(idx){
           applyMusicBackground(ch.name);
         }
         
-        // Use episode seed for daily variety (same as TV show masters)
+        // Use episode seed for daily variety (same for everyone on same day/time)
         const episodeIndex = isLiveMode ? (broadcast.episodeSeed % files.length) : 0;
         const episode = files[episodeIndex];
         
@@ -2834,8 +2838,8 @@ async function selectCh(idx){
         // When episode ends
         player.onended = function(){
           if(ch.cat === "Music"){
-            // MUSIC CHANNELS: No commercials, just reload to get next track
-            console.log('🎵 Track ended, loading next track (no commercials)');
+            // MUSIC CHANNELS: Reload to get next scheduled track (synchronized for everyone)
+            console.log('🎵 Track ended, loading next scheduled track (no commercials)');
             loading=false;
             selectCh(idx);
           } else {
@@ -3406,6 +3410,13 @@ function prevEp(){
     return;
   }
   
+  // Block for synchronized music channels
+  const isMusicChannel = ch && ch.cat === "Music" && ch.master === true;
+  if(isMusicChannel){
+    console.log('Blocked: Music channel - synchronized radio (no skipping)');
+    return;
+  }
+  
   // Must have files
   if(!curFiles || curFiles.length === 0){
     console.log('Blocked: No files loaded');
@@ -3419,9 +3430,6 @@ function prevEp(){
   console.log('Going to:', nextItem.n, 'at index:', curEpIdx);
   
   const player = document.getElementById('player');
-  
-  // MUSIC CHANNELS: Skip instantly (no commercial)
-  const isMusicChannel = ch.cat === "Music" && ch.master === true;
   
   if(isMusicChannel){
     console.log('Music channel - skipping track instantly (no commercial)');
@@ -3479,6 +3487,13 @@ function nextEp(){
     return;
   }
   
+  // Block for synchronized music channels
+  const isMusicChannel = ch && ch.cat === "Music" && ch.master === true;
+  if(isMusicChannel){
+    console.log('Blocked: Music channel - synchronized radio (no skipping)');
+    return;
+  }
+  
   // Must have files
   if(!curFiles || curFiles.length === 0){
     console.log('Blocked: No files loaded');
@@ -3492,9 +3507,6 @@ function nextEp(){
   console.log('Going to:', nextItem.n, 'at index:', curEpIdx);
   
   const player = document.getElementById('player');
-  
-  // MUSIC CHANNELS: Skip instantly (no commercial)
-  const isMusicChannel = ch.cat === "Music" && ch.master === true;
   
   if(isMusicChannel){
     console.log('Music channel - skipping track instantly (no commercial)');
