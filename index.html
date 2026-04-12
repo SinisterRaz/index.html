@@ -349,7 +349,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 #static{position:absolute;inset:0;z-index:21;display:none;}
 #sc{width:100%;height:100%;}
 #controls{background:var(--brand-bg);border-top:1px solid var(--brand-border);
-  padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;z-index:10;}
+  padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;z-index:500;position:relative;}
 #chd{background:#000;border:1px solid var(--brand-border);border-radius:3px;padding:3px 8px;
   min-width:52px;text-align:center;flex-shrink:0;}
 #chn{font-size:2.4rem;color:var(--ch-color);text-shadow:0 0 8px var(--ch-glow),0 0 16px var(--ch-glow);
@@ -445,7 +445,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 
 /* BROWSE OVERLAY */
 #browse-overlay{position:fixed;top:0;left:0;width:100%;height:100%;
-  background:var(--gov-bg);z-index:300;display:none;overflow-y:auto;padding:60px 20px 20px 20px;
+  background:var(--gov-bg);z-index:1000;display:none;overflow-y:auto;padding:60px 20px 20px 20px;
   opacity:0;transition:opacity 0.3s ease;}
 #browse-overlay.show{display:block;animation:fadeIn 0.3s ease forwards;}
 
@@ -529,8 +529,8 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 .continue-watching-card .browse-ch-info{color:var(--ch-color);font-weight:bold;}
 
 /* SHOW DETAILS VIEW */
-.show-detail-header{position:sticky;top:60px;background:var(--brand-bg);
-  border-bottom:2px solid var(--brand-border);padding:15px 20px;margin:-60px -20px 20px -20px;
+.show-detail-header{position:sticky;top:0;background:var(--brand-bg);
+  border-bottom:2px solid var(--brand-border);padding:15px 20px;margin:0 -20px 20px -20px;
   display:flex;align-items:center;justify-content:space-between;gap:20px;
   box-shadow:0 2px 10px rgba(0,0,0,0.5);z-index:299;}
 .back-btn,.play-channel-btn{background:var(--btn-bg);border:2px solid var(--btn-border);
@@ -767,7 +767,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 }
 
 /* OFF SCREEN */
-#off-screen{position:fixed;inset:0;z-index:998;display:none;
+#off-screen{position:fixed;inset:0;z-index:400;display:none;
   background:#000;flex-direction:column;align-items:center;justify-content:center;}
 #off-screen.show{display:flex;}
 #off-dot{width:3px;height:3px;background:#fff;border-radius:50%;
@@ -892,7 +892,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
         style="width:80px;height:6px;cursor:pointer;accent-color:var(--ch-color);">
     </div>
     <button class="cb" onclick="toggleGuide()">&#9776; GUIDE</button>
-    <button class="cb" id="off-btn" onclick="toggleOff()" title="Power Off">&#9711;</button>
+    <button class="cb on" id="off-btn" onclick="toggleOff()" title="Power On">⏻</button>
   </div>
   <div id="gbar"></div>
   <div id="gov">
@@ -908,7 +908,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 <button id="settings-btn" onclick="toggleSettings()">⚙️ SETTINGS</button>
 
 <!-- WATCH PARTY OVERLAY -->
-<div id="party-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;padding:40px;">
+<div id="party-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;padding:40px;overflow-y:auto;">
   <div style="max-width:600px;margin:0 auto;font-family:'VT323',monospace;color:#fff;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
       <h2 style="font-size:2.5rem;color:#00ff88;">📡 WATCH PARTY</h2>
@@ -1223,7 +1223,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 }
 </style>
 
-<div id="off-screen"><div id="off-dot"></div></div>
+<div id="off-screen" class="show"><div id="off-dot"></div></div>
 <div id="thm-panel">
   <div id="thm-title">SELECT TV THEME</div>
   <div class="thm on"  onclick="setTheme('')"          ><div class="thm-dot" style="background:#00e5ff"></div>Sinister (Default)</div>
@@ -2982,8 +2982,22 @@ async function selectCh(idx){
           applyMusicBackground(ch.name);
         }
         
-        // Use episode seed for daily variety (same for everyone on same day/time)
-        const episodeIndex = isLiveMode ? (broadcast.episodeSeed % files.length) : 0;
+        // MUSIC CHANNELS: Calculate sequential track position based on time into the album
+        // Other channels: Use episode seed for variety
+        let episodeIndex;
+        if(ch.cat === "Music" && isLiveMode){
+          // For music: Calculate which track based on time elapsed in current album broadcast
+          // Each track plays for avgDur seconds (~40 mins / 2400 secs per album)
+          // If album has 20 tracks: 2400/20 = 120 secs per track
+          const avgTrackDuration = (ch.avgDur || 2400) / Math.max(files.length, 1);
+          const trackNumber = Math.floor(broadcast.timeIntoBlock / avgTrackDuration);
+          episodeIndex = trackNumber % files.length; // Wrap around if needed
+          console.log('🎵 Music sync: Album has', files.length, 'tracks, playing track', trackNumber + 1, '(index', episodeIndex, ')');
+        } else {
+          // TV/Movies: Use broadcast seed for variety
+          episodeIndex = isLiveMode ? (broadcast.episodeSeed % files.length) : 0;
+        }
+        
         const episode = files[episodeIndex];
         
         curFiles = files;
@@ -4358,6 +4372,7 @@ async function renderGridView(container){
         // REGULAR CHANNELS - use weekly schedule
         if(broadcast && broadcast.episode){
           // We have current episode from weekly schedule
+          console.log('📺 Guide showing for', ch.name, ':', broadcast.episode.n, 'from weekly schedule');
           nowPlaying = `${ch.name}: ${broadcast.episode.n}`;
           
           // Get the full schedule to find what's next
@@ -4865,10 +4880,7 @@ async function buildBrowseMenu(){
   // 🎮 GAMES SECTION - ADD YOUR WORKING GAMES HERE!
   // ═══════════════════════════════════════════════════════════
   const GAMES = [
-    // WORKING GAMES:
-    {id: 'paperboy_nes', name: 'Paperboy (NES)'},
-    
-    // ADD MORE WORKING GAMES BELOW:
+    // ADD WORKING GAMES BELOW:
     // {id: 'archive-id-here', name: 'Game Name Here'},
   ];
   
@@ -4896,6 +4908,21 @@ async function buildBrowseMenu(){
     // SORT CHANNELS ALPHABETICALLY BY NAME WITHIN EACH CATEGORY
     channels.sort((a, b) => a.name.localeCompare(b.name));
     
+    // SPECIAL HANDLING FOR ADULT CATEGORY - Show single button instead of all titles
+    if(catName === 'Adult'){
+      html+=`<div class="browse-category">`;
+      html+=`<div class="browse-cat-title">🔞 ADULT CONTENT (18+)</div>`;
+      html+=`<div class="browse-grid">`;
+      html+=`<div class="browse-card" onclick="openAdultCatalog()" style="border: 3px solid #ff1493; background: rgba(255,20,147,0.1); cursor: pointer;">`;
+      html+=`<div class="browse-ch-num">🔞</div>`;
+      html+=`<div class="browse-ch-name">VIEW ADULT CATALOG</div>`;
+      html+=`<div class="browse-ch-info">${channels.length} Shows Available</div>`;
+      html+=`<div class="browse-ch-click">Click to browse adult content →</div>`;
+      html+=`</div>`;
+      html+=`</div></div>`;
+      continue; // Skip normal rendering for Adult category
+    }
+    
     html+=`<div class="browse-category">`;
     html+=`<div class="browse-cat-title">${catName.toUpperCase()}</div>`;
     html+=`<div class="browse-grid">`;
@@ -4918,6 +4945,92 @@ async function buildBrowseMenu(){
   }
   
   content.innerHTML=html;
+}
+
+
+// Open Adult Content Catalog (behind button in ON-DEMAND)
+async function openAdultCatalog(){
+  // Check parental controls first
+  checkAdultAccess(async (allowed) => {
+    if(!allowed) return;
+    
+    const content = document.getElementById('browse-content');
+    
+    // Get all adult content
+    const categories = {};
+    const singleShowChannels = CHANNELS.filter(ch => {
+      return !ch.master && !ch.pluto && ch.cat !== 'Music' && !ch.youtube && ch.embedOnly;
+    });
+    
+    singleShowChannels.forEach(ch=>{
+      const cat=ch.cat||'Other';
+      if(!categories[cat])categories[cat]=[];
+      categories[cat].push(ch);
+    });
+    
+    // Add SpiceXXX content
+    const spiceChannel = CHANNELS.find(ch => ch.num === 910);
+    if(spiceChannel && spiceChannel.networkShows){
+      if(!categories['Adult']) categories['Adult'] = [];
+      
+      spiceChannel.networkShows.forEach((showId, idx) => {
+        let displayName = showId
+          .replace(/98_20220403\/\d+\.mp4/, 'Classic Adult Collection')
+          .replace(/98_20220403/, 'Classic Adult Collection')
+          .replace(/-/g, ' ')
+          .replace(/_/g, ' ')
+          .replace(/  +/g, ' ')
+          .trim();
+        
+        displayName = displayName.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join(' ');
+        
+        if(displayName.length > 50){
+          displayName = displayName.substring(0, 47) + '...';
+        }
+        
+        categories['Adult'].push({
+          num: 910,
+          name: displayName,
+          cat: 'Adult',
+          embedOnly: showId,
+          isSpiceContent: true,
+          spiceIndex: idx
+        });
+      });
+    }
+    
+    const adultChannels = categories['Adult'] || [];
+    adultChannels.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Build HTML for adult catalog
+    let html = `
+      <div class="show-detail-header" style="border: 3px solid #ff1493;">
+        <button class="back-btn" onclick="buildBrowseMenu()">← BACK TO BROWSE</button>
+        <div class="show-detail-title">
+          <div class="show-title">🔞 ADULT CONTENT CATALOG</div>
+          <div class="show-subtitle">${adultChannels.length} Shows Available • 18+ Only</div>
+        </div>
+      </div>
+      
+      <div class="browse-grid" style="margin-top: 20px;">
+    `;
+    
+    for(const ch of adultChannels){
+      const chNumDisplay = ch.isSpiceContent ? '🔞 XXX' : `Ch ${ch.num}`;
+      
+      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num}${ch.isSpiceContent ? `, '${ch.embedOnly}'` : ''})" style="border: 3px solid #ff1493; background: rgba(255,20,147,0.1);">`;
+      html+=`<div class="browse-ch-num">${chNumDisplay}</div>`;
+      html+=`<div class="browse-ch-name">🔞 ${ch.name}</div>`;
+      html+=`<div class="browse-ch-info">Adult Content</div>`;
+      html+=`<div class="browse-ch-click">Click to browse episodes →</div>`;
+      html+=`</div>`;
+    }
+    
+    html += `</div>`;
+    content.innerHTML = html;
+  });
 }
 
 async function openShowDetails(chNum, spiceShowId){
@@ -5238,7 +5351,7 @@ function setTheme(t){
   document.getElementById('thm-panel').classList.remove('show');
 }
 
-let tvOff=false;
+let tvOff=true; // Start powered OFF - user must click power button to turn on
 function toggleOff(){
   tvOff=!tvOff;
   const os=document.getElementById('off-screen');
