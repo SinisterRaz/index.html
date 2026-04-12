@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sinister TV - Archive Edition</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Permanent+Marker&family=Rock+Salt&family=Pacifico&family=Orbitron:wght@700&family=Rajdhani:wght@600&family=Raleway:wght@400&family=Nunito:wght@400&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -410,6 +411,22 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
   font-family:'VT323',monospace;font-size:1.6rem;padding:6px 18px;cursor:pointer;
   letter-spacing:1px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
 #browse-btn:hover{color:var(--cnt-color);border-color:var(--cnt-color);box-shadow:0 0 12px var(--logo-glow);}
+
+/* WATCH PARTY BUTTON */
+#party-btn{position:fixed;top:10px;left:50%;transform:translateX(calc(-50% - 270px));z-index:200;
+  background:var(--gc-bg);border:2px solid var(--gc-border);color:var(--gc-color);
+  font-family:'VT323',monospace;font-size:1.6rem;padding:6px 18px;cursor:pointer;
+  letter-spacing:1px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
+#party-btn:hover{color:var(--cnt-color);border-color:var(--cnt-color);box-shadow:0 0 12px var(--logo-glow);}
+#party-btn.active{background:#00ff88;color:#000;border-color:#00ff88;animation:pulse 2s infinite;}
+
+/* SETTINGS BUTTON */
+#settings-btn{position:fixed;top:10px;left:50%;transform:translateX(calc(-50% + 270px));z-index:200;
+  background:var(--gc-bg);border:2px solid var(--gc-border);color:var(--gc-color);
+  font-family:'VT323',monospace;font-size:1.6rem;padding:6px 18px;cursor:pointer;
+  letter-spacing:1px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
+#settings-btn:hover{color:var(--cnt-color);border-color:var(--cnt-color);box-shadow:0 0 12px var(--logo-glow);}
+
 
 #thm-panel{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:201;
   background:var(--gov-bg);border:2px solid var(--brand-border);padding:12px 16px;
@@ -887,6 +904,117 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 
 <button id="thm-btn" onclick="toggleThemes()">&#127912; THEME</button>
 <button id="browse-btn" onclick="toggleBrowse()">📋 ON-DEMAND</button>
+<button id="party-btn" onclick="toggleWatchParty()">📡 WATCH PARTY</button>
+<button id="settings-btn" onclick="toggleSettings()">⚙️ SETTINGS</button>
+
+<!-- WATCH PARTY OVERLAY -->
+<div id="party-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;padding:40px;">
+  <div style="max-width:600px;margin:0 auto;font-family:'VT323',monospace;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+      <h2 style="font-size:2.5rem;color:#00ff88;">📡 WATCH PARTY</h2>
+      <button onclick="toggleWatchParty()" style="background:#333;color:#fff;border:2px solid #555;padding:10px 20px;font-family:'VT323',monospace;font-size:1.5rem;cursor:pointer;">CLOSE</button>
+    </div>
+    
+    <div id="party-status" style="background:#1a1a1a;padding:20px;border:3px solid #333;margin-bottom:20px;border-radius:8px;">
+      <div style="font-size:1.8rem;margin-bottom:15px;color:#ffcc00;">STATUS: <span id="party-status-text">NOT IN PARTY</span></div>
+      <div id="party-viewers" style="font-size:1.5rem;color:#00ff88;display:none;">👥 Viewers: <span id="viewer-count">1</span></div>
+      <div id="party-code-display" style="font-size:1.5rem;color:#00e5ff;display:none;">Room Code: <span id="current-code" style="font-weight:bold;letter-spacing:2px;"></span></div>
+    </div>
+    
+    <div id="party-create" style="margin-bottom:30px;">
+      <button onclick="createWatchParty()" style="width:100%;background:linear-gradient(145deg,#00ff88,#00cc70);color:#000;border:none;padding:20px;font-family:'VT323',monospace;font-size:2rem;cursor:pointer;border-radius:8px;font-weight:bold;">
+        🎬 START NEW WATCH PARTY
+      </button>
+      <div style="font-size:1.3rem;color:#888;margin-top:10px;text-align:center;">
+        You'll get a room code to share with friends
+      </div>
+    </div>
+    
+    <div style="border-top:2px solid #333;padding-top:30px;">
+      <div style="font-size:1.8rem;margin-bottom:15px;color:#ffcc00;">JOIN A PARTY:</div>
+      <div style="display:flex;gap:10px;">
+        <input type="text" id="party-code-input" placeholder="Enter 6-char code" maxlength="6" style="flex:1;background:#1a1a1a;border:2px solid #333;color:#fff;padding:15px;font-family:'VT323',monospace;font-size:1.8rem;text-transform:uppercase;" />
+        <button onclick="joinWatchParty()" style="background:#00e5ff;color:#000;border:none;padding:15px 30px;font-family:'VT323',monospace;font-size:1.8rem;cursor:pointer;border-radius:8px;font-weight:bold;">
+          JOIN
+        </button>
+      </div>
+    </div>
+    
+    <div id="party-active-controls" style="display:none;margin-top:30px;border-top:2px solid #333;padding-top:30px;">
+      <button onclick="leaveWatchParty()" style="width:100%;background:#ff4444;color:#fff;border:none;padding:15px;font-family:'VT323',monospace;font-size:1.8rem;cursor:pointer;border-radius:8px;">
+        🚪 LEAVE PARTY
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;padding:40px;overflow-y:auto;">
+  <div style="max-width:600px;margin:0 auto;font-family:'VT323',monospace;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+      <h2 style="font-size:2.5rem;color:#00ff88;">⚙️ SETTINGS</h2>
+      <button onclick="toggleSettings()" style="background:#333;color:#fff;border:2px solid #555;padding:10px 20px;font-family:'VT323',monospace;font-size:1.5rem;cursor:pointer;">CLOSE</button>
+    </div>
+    
+    <!-- PARENTAL CONTROLS -->
+    <div style="background:#1a1a1a;padding:25px;border:3px solid #333;margin-bottom:20px;border-radius:8px;">
+      <h3 style="font-size:2rem;color:#ffcc00;margin-bottom:20px;">🔒 PARENTAL CONTROLS</h3>
+      
+      <div id="pin-not-set" style="display:block;">
+        <div style="font-size:1.5rem;margin-bottom:15px;color:#ccc;">Adult content protection is currently <span style="color:#ff4444;">DISABLED</span></div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:1.5rem;display:block;margin-bottom:10px;">Set 4-Digit PIN:</label>
+          <input type="password" id="new-pin-input" maxlength="4" placeholder="####" style="width:150px;background:#0a0a0a;border:2px solid #555;color:#fff;padding:10px;font-family:'VT323',monospace;font-size:2rem;text-align:center;letter-spacing:10px;" />
+        </div>
+        <button onclick="setParentalPin()" style="background:#00ff88;color:#000;border:none;padding:12px 30px;font-family:'VT323',monospace;font-size:1.8rem;cursor:pointer;border-radius:8px;font-weight:bold;">
+          SET PIN
+        </button>
+      </div>
+      
+      <div id="pin-is-set" style="display:none;">
+        <div style="font-size:1.5rem;margin-bottom:15px;color:#00ff88;">✅ Adult content protection is <span style="font-weight:bold;">ENABLED</span></div>
+        <div style="font-size:1.3rem;color:#888;margin-bottom:20px;">
+          • Adult category requires PIN to access<br>
+          • SpiceXXX channel is scrambled by default<br>
+          • PIN expires after 1 hour of inactivity
+        </div>
+        
+        <div style="margin-top:20px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:1.5rem;">
+            <input type="checkbox" id="hide-adult-toggle" onchange="toggleHideAdult()" style="width:20px;height:20px;cursor:pointer;" />
+            <span>Hide Adult content entirely</span>
+          </label>
+        </div>
+        
+        <div style="margin-top:20px;padding-top:20px;border-top:2px solid #333;">
+          <button onclick="removeParentalPin()" style="background:#ff4444;color:#fff;border:none;padding:10px 20px;font-family:'VT323',monospace;font-size:1.5rem;cursor:pointer;border-radius:8px;">
+            REMOVE PIN
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PIN UNLOCK PANEL (shown when locked) -->
+    <div id="pin-unlock-panel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.98);z-index:11000;display:none;align-items:center;justify-content:center;">
+      <div style="background:#1a1a1a;padding:40px;border:4px solid #ff1493;border-radius:12px;text-align:center;max-width:400px;">
+        <div style="font-size:3rem;margin-bottom:20px;">🔒</div>
+        <h3 style="font-size:2rem;color:#ff1493;margin-bottom:20px;">ADULT CONTENT LOCKED</h3>
+        <div style="font-size:1.5rem;color:#ccc;margin-bottom:25px;">Enter PIN to access</div>
+        <input type="password" id="pin-unlock-input" maxlength="4" placeholder="####" style="width:200px;background:#0a0a0a;border:2px solid #ff1493;color:#fff;padding:15px;font-family:'VT323',monospace;font-size:2.5rem;text-align:center;letter-spacing:15px;margin-bottom:20px;" />
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button onclick="unlockAdultContent()" style="background:#00ff88;color:#000;border:none;padding:12px 30px;font-family:'VT323',monospace;font-size:1.8rem;cursor:pointer;border-radius:8px;font-weight:bold;">
+            UNLOCK
+          </button>
+          <button onclick="cancelPinUnlock()" style="background:#333;color:#fff;border:2px solid #555;padding:12px 30px;font-family:'VT323',monospace;font-size:1.8rem;cursor:pointer;border-radius:8px;">
+            CANCEL
+          </button>
+        </div>
+        <div id="pin-error" style="color:#ff4444;margin-top:15px;font-size:1.3rem;display:none;">❌ Incorrect PIN</div>
+      </div>
+    </div>
+    
+  </div>
+</div>
 
 <div id="browse-overlay">
   <div id="browse-header">
@@ -1712,7 +1840,13 @@ const CHANNELS = [
       "penthouse-productions-movies-collection","blonde-heaven-1995-tvrip-xvi-d-maestro-cg",
       "TheVistaGroup-90sLateNightAdultHotlineCommercialsVol1","ultra-flesh-1980-1080p",
       "98_20220403/8.mp4","2016-07-04-girls-of-electric-blue-vol.-1",
-      "playboy-video-playmate-calendar-2003","playboy-video-playmate-calendar-1991","california-girls-vhd-1983"
+      "playboy-video-playmate-calendar-2003","playboy-video-playmate-calendar-1991","california-girls-vhd-1983",
+      "booty-hunter-2012","desire-and-deception-2001","maximum-thrust-2003",
+      "sin-city-diaries-the-midnight-show","fred-olen-ray-double-feature",
+      "the-erotic-traveler-object-of-desire","zanes-jump-off-complete-series",
+      "emmanuelle-1993-complete-series","erotic-dreams","titanic6",
+      "mp_Heavenly_Bodies_Penthouse_Japan_Bill_Cote","Utmtv-BarbieIsACutieWithABOOTYBOOTYBOOTY674-3",
+      "hollywood-honeys-no.-381","a-free-ride","am-abend","98_20220403"
     ], avgDur:3600, files:[{u:"",n:"SpiceXXX Network"}] },
 
   { num:911, name:"🚀 Sci-Fi Movies", cat:"Movies Master", master:true,
@@ -2294,75 +2428,158 @@ document.addEventListener('DOMContentLoaded', function(){
 // SYNCHRONIZED TV SYSTEM - Everyone watches the same thing!
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// WEEKLY SCHEDULE SYSTEM - Generates a synchronized 7-day schedule
+// ═══════════════════════════════════════════════════════════════
+
+// Calculate current week number (weeks since epoch)
+function getCurrentWeek(){
+  const now = Date.now();
+  const weekNumber = Math.floor(now / (7 * 24 * 60 * 60 * 1000));
+  return weekNumber;
+}
+
+// Deterministic shuffle using week number as seed
+function shuffleWithSeed(array, seed){
+  const shuffled = [...array];
+  let random = seed;
+  
+  for(let i = shuffled.length - 1; i > 0; i--){
+    random = (random * 9301 + 49297) % 233280;
+    const j = random % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  return shuffled;
+}
+
+// Build weekly schedule for a channel
+function buildWeeklySchedule(ch, contentList){
+  const weekNumber = getCurrentWeek();
+  const seed = weekNumber * 10000 + ch.num; // Unique per channel per week
+  
+  // Shuffle the content for this week
+  const shuffledList = shuffleWithSeed(contentList, seed);
+  
+  // Calculate schedule blocks
+  const isMusicChannel = ch.cat === "Music";
+  const avgDuration = ch.avgDur || 1380; // seconds
+  const commercialDuration = isMusicChannel ? 0 : 60; // 1 min commercials for TV, none for music
+  const blockDuration = avgDuration + commercialDuration; // Total block time in seconds
+  
+  const weekSeconds = 7 * 24 * 60 * 60; // Total seconds in a week
+  
+  // Build schedule - fill the week with shuffled content
+  const schedule = [];
+  let currentSecond = 0;
+  let contentIdx = 0;
+  
+  while(currentSecond < weekSeconds){
+    const content = shuffledList[contentIdx % shuffledList.length];
+    
+    schedule.push({
+      startSecond: currentSecond,
+      content: content,
+      contentIndex: contentIdx % shuffledList.length,
+      duration: avgDuration,
+      hasCommercial: !isMusicChannel
+    });
+    
+    currentSecond += blockDuration;
+    contentIdx++;
+  }
+  
+  return schedule;
+}
+
+// Get what's broadcasting NOW based on weekly schedule
 function getCurrentBroadcast(ch, files){
   const now = Date.now();
-  const secondsSinceMidnight = Math.floor((now / 1000) % 86400);
+  
+  // Calculate week boundaries
+  const weekNumber = getCurrentWeek();
+  const weekStart = weekNumber * (7 * 24 * 60 * 60 * 1000);
+  const secondsSinceWeekStart = Math.floor((now - weekStart) / 1000);
+  
+  // Determine content list
+  let contentList;
+  let isMaster = false;
   
   if(ch.master){
-    // MASTER CHANNEL - Fixed show rotation based on time
-    const showList = ch.networkShows || [];
-    if(showList.length === 0){
+    // MASTER CHANNELS - use networkShows
+    contentList = ch.networkShows || [];
+    isMaster = true;
+    if(contentList.length === 0){
       console.warn('Master channel has no shows:', ch.name);
       return null;
     }
-    
-    // MUSIC CHANNELS: Short track rotation (3 min avg), no commercials
-    // TV/MOVIE CHANNELS: Long show blocks with commercials
-    const isMusicChannel = ch.cat === "Music";
-    const blockDuration = isMusicChannel ? 180 : ((ch.avgDur || 1380) + 60); // Music: 3min tracks, TV: show + 1min commercial
-    
-    const totalBlocks = Math.floor(secondsSinceMidnight / blockDuration);
-    const showIndex = totalBlocks % showList.length;
-    const timeIntoBlock = secondsSinceMidnight % blockDuration;
-    const isCommercial = isMusicChannel ? false : (timeIntoBlock >= (ch.avgDur || 1380));
-    
-    // Daily episode seeding - same track/episode for everyone on same day/time block
-    const today = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
-    const episodeSeed = (today + totalBlocks) % 1000;
-    
-    console.log('📺 Master broadcast:', {
-      channel: ch.name,
-      show: showList[showIndex],
-      block: totalBlocks,
-      timeInBlock: Math.floor(timeIntoBlock),
-      isCommercial: isCommercial,
-      seed: episodeSeed
-    });
-    
-    return {
-      showName: showList[showIndex],
-      showIndex: showIndex,
-      timeIntoBlock: timeIntoBlock,
-      isCommercial: isCommercial,
-      episodeSeed: episodeSeed
-    };
   } else {
-    // REGULAR CHANNEL - Sequential episodes
+    // REGULAR CHANNELS - use files
     if(!files || files.length === 0){
       console.warn('Regular channel has no files:', ch.name);
       return null;
     }
-    
-    const blockDuration = (ch.avgDur || 1380) + 60; // Episode + 1 min commercial
-    const totalBlocks = Math.floor(secondsSinceMidnight / blockDuration);
-    const episodeIndex = totalBlocks % files.length;
-    const timeIntoBlock = secondsSinceMidnight % blockDuration;
-    const isCommercial = timeIntoBlock >= (ch.avgDur || 1380);
-    
-    console.log('📺 Regular broadcast:', {
-      channel: ch.name,
-      episode: episodeIndex + 1,
-      of: files.length,
-      timeInBlock: Math.floor(timeIntoBlock),
-      isCommercial: isCommercial
-    });
-    
-    return {
-      episodeIndex: episodeIndex,
-      timeIntoBlock: timeIntoBlock,
-      isCommercial: isCommercial
-    };
+    contentList = files;
   }
+  
+  // Build this week's schedule
+  const schedule = buildWeeklySchedule(ch, contentList);
+  
+  // Find current block in schedule
+  for(let i = 0; i < schedule.length; i++){
+    const block = schedule[i];
+    const nextBlock = schedule[i + 1];
+    
+    const blockStart = block.startSecond;
+    const blockEnd = nextBlock ? nextBlock.startSecond : (7 * 24 * 60 * 60);
+    
+    if(secondsSinceWeekStart >= blockStart && secondsSinceWeekStart < blockEnd){
+      const timeIntoBlock = secondsSinceWeekStart - blockStart;
+      const isCommercial = block.hasCommercial && (timeIntoBlock >= block.duration);
+      
+      if(isMaster){
+        // Master channel - return show name and index
+        console.log('📺 WEEKLY Master broadcast:', {
+          channel: ch.name,
+          week: weekNumber,
+          show: block.content,
+          blockNum: i,
+          timeIntoBlock: Math.floor(timeIntoBlock),
+          isCommercial: isCommercial
+        });
+        
+        return {
+          showName: block.content,
+          showIndex: block.contentIndex,
+          timeIntoBlock: timeIntoBlock,
+          isCommercial: isCommercial,
+          episodeSeed: weekNumber * 1000 + i // For loading specific episode from Archive.org
+        };
+      } else {
+        // Regular channel - return episode file
+        console.log('📺 WEEKLY Regular broadcast:', {
+          channel: ch.name,
+          week: weekNumber,
+          episode: block.content.n,
+          blockNum: i,
+          of: contentList.length,
+          timeIntoBlock: Math.floor(timeIntoBlock),
+          isCommercial: isCommercial
+        });
+        
+        return {
+          episode: block.content,
+          episodeIndex: block.contentIndex,
+          timeIntoBlock: timeIntoBlock,
+          isCommercial: isCommercial
+        };
+      }
+    }
+  }
+  
+  // Fallback (shouldn't happen)
+  console.warn('No broadcast found for current time');
+  return null;
 }
 
 // Get synchronized commercial (everyone sees same commercial)
@@ -2524,12 +2741,6 @@ function showOSD(ch){
   // Update scrambler button visibility
   updateScramblerButton();
 }
-
-function simEp(files,avgDur){
-  const s=Math.floor(Date.now()/1000)%86400;
-  return Math.floor(s/avgDur)%files.length;
-}
-function simOff(avgDur){return(Math.floor(Date.now()/1000)%86400)%avgDur;}
 
 const metaCache={};
 
@@ -3172,9 +3383,19 @@ async function selectCh(idx){
     player.onerror=null;
     player.onended=null;
 
-    const epIdx=simEp(ch.files,ch.avgDur);
-    const ep=ch.files[epIdx];
-    const offset=simOff(ch.avgDur);
+    // USE WEEKLY SCHEDULE for regular channels with files
+    const broadcast = getCurrentBroadcast(ch, ch.files);
+    if(!broadcast || !broadcast.episode){
+      console.error('Could not get broadcast schedule for channel', ch.name);
+      setStat('SCHEDULE ERROR');
+      loading=false;
+      return;
+    }
+    
+    const epIdx = broadcast.episodeIndex;
+    const ep = broadcast.episode;
+    const offset = isLiveMode ? broadcast.timeIntoBlock : 0; // Only seek in LIVE mode
+    
     curFiles=ch.files; curEpIdx=epIdx;
     setStat('LOADING: '+ep.n.toUpperCase());
 
@@ -3186,7 +3407,7 @@ async function selectCh(idx){
       player.addEventListener('loadedmetadata',function onM(){
         player.removeEventListener('loadedmetadata',onM);
         const sk=Math.min(offset,Math.max(0,(player.duration||0)-10));
-        if(sk>0) player.currentTime=sk;
+        if(sk>0 && isLiveMode) player.currentTime=sk; // Only seek in LIVE mode
         player.play().catch(()=>{});
       });
       player.onended=()=>{
@@ -3715,7 +3936,6 @@ function showMusicOverlay(channelName, trackName){
 async function getNext2Hours(ch){
   const schedule = [];
   const now = Date.now();
-  const secondsSinceMidnight = Math.floor((now / 1000) % 86400);
   
   if(ch.pluto || ch.hls){
     // Live streams - just show "LIVE 24/7"
@@ -3727,99 +3947,76 @@ async function getNext2Hours(ch){
     return [{time: 'ANYTIME', show: '🎮 Ready to Play', duration: '∞'}];
   }
   
-  const blockDuration = (ch.avgDur || 1380) + 60; // Show/episode + 1 min commercial
-  let currentTime = secondsSinceMidnight;
-  const twoHoursInSeconds = 2 * 60 * 60; // 2 hours
-  const endTime = currentTime + twoHoursInSeconds;
+  // Get content list for this channel
+  let contentList;
+  let isMaster = false;
   
-  if(ch.master && ch.cat !== 'Music'){
-    // TV MASTER CHANNELS - rotating shows
-    const showList = ch.networkShows || [];
-    if(showList.length === 0) return [{time: 'N/A', show: 'No schedule', duration: 'N/A'}];
-    
-    while(currentTime < endTime && schedule.length < 8){
-      const totalBlocks = Math.floor(currentTime / blockDuration);
-      const showIndex = totalBlocks % showList.length;
-      const timeIntoBlock = currentTime % blockDuration;
-      const showName = showList[showIndex];
-      
-      // Calculate start time for this show
-      const blockStartTime = totalBlocks * blockDuration;
-      const showStartSeconds = blockStartTime;
-      const showEndSeconds = blockStartTime + ch.avgDur;
-      
-      const startDate = new Date(now - secondsSinceMidnight * 1000 + showStartSeconds * 1000);
-      const endDate = new Date(now - secondsSinceMidnight * 1000 + showEndSeconds * 1000);
-      
-      const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
-      const durationMins = Math.floor(ch.avgDur / 60);
-      
-      schedule.push({
-        time: timeStr,
-        show: `📺 ${showName}`,
-        duration: `${durationMins} min`
-      });
-      
-      currentTime = blockStartTime + blockDuration;
-    }
-  } else if(ch.cat === 'Music' && ch.master){
-    // MUSIC CHANNELS - show album rotation
-    const albumList = ch.networkShows || [];
-    if(albumList.length === 0) return [{time: 'N/A', show: 'No albums', duration: 'N/A'}];
-    
-    while(currentTime < endTime && schedule.length < 8){
-      const totalBlocks = Math.floor(currentTime / blockDuration);
-      const albumIndex = totalBlocks % albumList.length;
-      const albumName = albumList[albumIndex];
-      
-      const blockStartTime = totalBlocks * blockDuration;
-      const startDate = new Date(now - secondsSinceMidnight * 1000 + blockStartTime * 1000);
-      
-      const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
-      const durationMins = Math.floor(ch.avgDur / 60);
-      
-      schedule.push({
-        time: timeStr,
-        show: `🎵 ${albumName.substring(0, 35)}`,
-        duration: `${durationMins} min`
-      });
-      
-      currentTime = blockStartTime + blockDuration;
+  if(ch.master){
+    contentList = ch.networkShows || [];
+    isMaster = true;
+    if(contentList.length === 0){
+      return [{time: 'N/A', show: 'No schedule', duration: 'N/A'}];
     }
   } else {
-    // REGULAR CHANNELS - fetch actual files and show real episodes
+    // Fetch files for regular channels
     try {
       const files = await fetchFiles(ch.embedOnly || ch.files);
-      if(files && files.length > 0){
-        while(currentTime < endTime && schedule.length < 8){
-          const totalBlocks = Math.floor(currentTime / blockDuration);
-          const episodeIndex = totalBlocks % files.length;
-          const episode = files[episodeIndex];
-          
-          const blockStartTime = totalBlocks * blockDuration;
-          const startDate = new Date(now - secondsSinceMidnight * 1000 + blockStartTime * 1000);
-          
-          const timeStr = startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
-          const durationMins = Math.floor(ch.avgDur / 60);
-          
-          schedule.push({
-            time: timeStr,
-            show: episode.n,
-            duration: `${durationMins} min`
-          });
-          
-          currentTime = blockStartTime + blockDuration;
-        }
-      } else {
+      if(!files || files.length === 0){
         return [{time: 'N/A', show: 'No episodes available', duration: 'N/A'}];
       }
+      contentList = files;
     } catch(e) {
       console.warn('Could not fetch schedule for', ch.name);
       return [{time: 'N/A', show: 'Schedule unavailable', duration: 'N/A'}];
     }
   }
   
-  return schedule;
+  // Build weekly schedule
+  const weekNumber = getCurrentWeek();
+  const weekStart = weekNumber * (7 * 24 * 60 * 60 * 1000);
+  const secondsSinceWeekStart = Math.floor((now - weekStart) / 1000);
+  
+  const weeklySchedule = buildWeeklySchedule(ch, contentList);
+  
+  // Find current position in schedule
+  let currentBlockIdx = 0;
+  for(let i = 0; i < weeklySchedule.length; i++){
+    if(secondsSinceWeekStart >= weeklySchedule[i].startSecond){
+      currentBlockIdx = i;
+    } else {
+      break;
+    }
+  }
+  
+  // Get next 2 hours (or up to 8 items)
+  const twoHoursInSeconds = 2 * 60 * 60;
+  const endTime = secondsSinceWeekStart + twoHoursInSeconds;
+  
+  for(let i = currentBlockIdx; i < weeklySchedule.length && schedule.length < 8; i++){
+    const block = weeklySchedule[i];
+    
+    if(block.startSecond > endTime) break;
+    
+    // Calculate actual time
+    const blockTime = new Date(weekStart + block.startSecond * 1000);
+    const timeStr = blockTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+    const durationMins = Math.floor(block.duration / 60);
+    
+    let showName;
+    if(isMaster){
+      showName = ch.cat === 'Music' ? `🎵 ${block.content.substring(0, 35)}` : `📺 ${block.content}`;
+    } else {
+      showName = block.content.n;
+    }
+    
+    schedule.push({
+      time: timeStr,
+      show: showName,
+      duration: `${durationMins} min`
+    });
+  }
+  
+  return schedule.length > 0 ? schedule : [{time: 'N/A', show: 'End of schedule', duration: 'N/A'}];
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -4095,7 +4292,9 @@ async function renderGridView(container){
     // Channels in this category
     for(const ch of channels) {
       const idx = ch.idx;
-      const broadcast = getCurrentBroadcast(ch, null);
+      // Pass actual files for regular channels so guide shows correct episodes
+      const channelFiles = ch.embedOnly ? null : ch.files;
+      const broadcast = getCurrentBroadcast(ch, channelFiles);
       const isSelected = idx === selectedGuideChannel;
       const isCurrent = idx === curIdx;
       
@@ -4110,37 +4309,93 @@ async function renderGridView(container){
         nowPlaying = '🎮 Ready to Play';
         upNext = 'Click to Start Game';
       } else if(ch.master && ch.cat !== 'Music'){
-        // TV MASTER CHANNELS - show rotating shows
+        // TV MASTER CHANNELS - show rotating shows from weekly schedule
         if(broadcast){
           nowPlaying = `${ch.name}: ${broadcast.showName}`;
-          const nextShowIdx = (broadcast.showIndex + 1) % ch.networkShows.length;
-          upNext = `→ ${ch.networkShows[nextShowIdx]}`;
+          // Get the full schedule to find what's next
+          const weeklySchedule = buildWeeklySchedule(ch, ch.networkShows);
+          const weekNumber = getCurrentWeek();
+          const weekStart = weekNumber * (7 * 24 * 60 * 60 * 1000);
+          const secondsSinceWeekStart = Math.floor((Date.now() - weekStart) / 1000);
+          
+          // Find next block
+          let nextShow = 'End of schedule';
+          for(let i = 0; i < weeklySchedule.length; i++){
+            if(weeklySchedule[i].startSecond > secondsSinceWeekStart){
+              nextShow = weeklySchedule[i].content;
+              break;
+            }
+          }
+          upNext = `→ ${nextShow}`;
         } else {
           nowPlaying = ch.name;
           upNext = 'Network Programming';
         }
       } else if(ch.cat === 'Music' && ch.master){
-        // MUSIC CHANNELS - show album info
+        // MUSIC CHANNELS - show album info from weekly schedule
         if(broadcast){
-          const currentAlbum = ch.networkShows[broadcast.episodeSeed % ch.networkShows.length];
-          nowPlaying = `${ch.name}: ${currentAlbum.substring(0, 25)}...`;
-          const nextAlbum = ch.networkShows[(broadcast.episodeSeed + 1) % ch.networkShows.length];
-          upNext = `→ ${nextAlbum.substring(0, 25)}...`;
+          nowPlaying = `${ch.name}: ${broadcast.showName.substring(0, 25)}...`;
+          // Get the full schedule to find what's next
+          const weeklySchedule = buildWeeklySchedule(ch, ch.networkShows);
+          const weekNumber = getCurrentWeek();
+          const weekStart = weekNumber * (7 * 24 * 60 * 60 * 1000);
+          const secondsSinceWeekStart = Math.floor((Date.now() - weekStart) / 1000);
+          
+          // Find next block
+          let nextAlbum = 'End of schedule';
+          for(let i = 0; i < weeklySchedule.length; i++){
+            if(weeklySchedule[i].startSecond > secondsSinceWeekStart){
+              nextAlbum = weeklySchedule[i].content.substring(0, 25);
+              break;
+            }
+          }
+          upNext = `→ ${nextAlbum}...`;
         } else {
           nowPlaying = ch.name;
           upNext = 'Shuffled Playlist';
         }
       } else {
-        // REGULAR CHANNELS - use getCurrentBroadcast data
-        if(broadcast && broadcast.showName){
-          // getCurrentBroadcast has show info
-          nowPlaying = `${ch.name}: ${broadcast.showName}`;
-          const nextEpIdx = (broadcast.episodeIndex + 1) % (broadcast.totalEpisodes || 20);
-          upNext = `Next Episode`;
-        } else if(broadcast && broadcast.episodeIndex !== undefined){
-          // We have episode index but no name
-          nowPlaying = `${ch.name}`;
-          upNext = `Programming`;
+        // REGULAR CHANNELS - use weekly schedule
+        if(broadcast && broadcast.episode){
+          // We have current episode from weekly schedule
+          nowPlaying = `${ch.name}: ${broadcast.episode.n}`;
+          
+          // Get the full schedule to find what's next
+          if(channelFiles && channelFiles.length > 0){
+            const weeklySchedule = buildWeeklySchedule(ch, channelFiles);
+            const weekNumber = getCurrentWeek();
+            const weekStart = weekNumber * (7 * 24 * 60 * 60 * 1000);
+            const secondsSinceWeekStart = Math.floor((Date.now() - weekStart) / 1000);
+            
+            // Find next block
+            let nextEp = null;
+            for(let i = 0; i < weeklySchedule.length; i++){
+              if(weeklySchedule[i].startSecond > secondsSinceWeekStart){
+                nextEp = weeklySchedule[i].content;
+                break;
+              }
+            }
+            upNext = nextEp ? `→ ${nextEp.n}` : 'End of schedule';
+          } else {
+            upNext = 'Next Episode';
+          }
+        } else if(broadcast && broadcast.episodeIndex !== undefined && channelFiles && channelFiles.length > 0){
+          // Fallback: We have episode index and files
+          const ep = channelFiles[broadcast.episodeIndex];
+          nowPlaying = `${ch.name}: ${ep.n}`;
+          const weeklySchedule = buildWeeklySchedule(ch, channelFiles);
+          const weekNumber = getCurrentWeek();
+          const weekStart = weekNumber * (7 * 24 * 60 * 60 * 1000);
+          const secondsSinceWeekStart = Math.floor((Date.now() - weekStart) / 1000);
+          
+          let nextEp = null;
+          for(let i = 0; i < weeklySchedule.length; i++){
+            if(weeklySchedule[i].startSecond > secondsSinceWeekStart){
+              nextEp = weeklySchedule[i].content;
+              break;
+            }
+          }
+          upNext = nextEp ? `→ ${nextEp.n}` : 'Next Episode';
         } else {
           nowPlaying = ch.name;
           upNext = 'Episodes Available';
@@ -4534,6 +4789,49 @@ async function buildBrowseMenu(){
     categories[cat].push(ch);
   });
   
+  // ═══════════════════════════════════════════════════════════
+  // ADD SPICEXXX NETWORK CONTENT TO ON-DEMAND (ADULT CATEGORY)
+  // Only add shows - content validation happens when clicked
+  // ═══════════════════════════════════════════════════════════
+  const spiceChannel = CHANNELS.find(ch => ch.num === 910);
+  if(spiceChannel && spiceChannel.networkShows){
+    // Create Adult category if it doesn't exist
+    if(!categories['Adult']) categories['Adult'] = [];
+    
+    // Add each SpiceXXX show as a browseable item
+    // NOTE: Dead/invalid Archive.org IDs are filtered out when user clicks them
+    spiceChannel.networkShows.forEach((showId, idx) => {
+      // Clean up the ID for display name
+      let displayName = showId
+        .replace(/98_20220403\/\d+\.mp4/, 'Classic Adult Collection') // Handle path-based IDs
+        .replace(/98_20220403/, 'Classic Adult Collection') // Handle base collection
+        .replace(/-/g, ' ')
+        .replace(/_/g, ' ')
+        .replace(/  +/g, ' ') // Remove double spaces
+        .trim();
+      
+      // Capitalize first letter of each word
+      displayName = displayName.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ');
+      
+      // Limit length
+      if(displayName.length > 50){
+        displayName = displayName.substring(0, 47) + '...';
+      }
+      
+      categories['Adult'].push({
+        num: 910,
+        name: displayName,
+        cat: 'Adult',
+        embedOnly: showId,
+        isSpiceContent: true,
+        spiceIndex: idx
+      });
+    });
+  }
+  // ═══════════════════════════════════════════════════════════
+  
   // Build HTML
   let html='';
   
@@ -4603,9 +4901,14 @@ async function buildBrowseMenu(){
     html+=`<div class="browse-grid">`;
     
     for(const ch of channels){
-      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num})">`;
-      html+=`<div class="browse-ch-num">Ch ${ch.num}</div>`;
-      html+=`<div class="browse-ch-name">${ch.name}</div>`;
+      const isAdultContent = ch.cat === 'Adult' || ch.isSpiceContent;
+      const adultStyle = isAdultContent ? 'border: 3px solid #ff1493; background: rgba(255,20,147,0.1);' : '';
+      const adultIcon = isAdultContent ? '🔞 ' : '';
+      const chNumDisplay = ch.isSpiceContent ? '🔞 XXX' : `Ch ${ch.num}`;
+      
+      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num}${ch.isSpiceContent ? `, '${ch.embedOnly}'` : ''})" style="${adultStyle}">`;
+      html+=`<div class="browse-ch-num">${chNumDisplay}</div>`;
+      html+=`<div class="browse-ch-name">${adultIcon}${ch.name}</div>`;
       html+=`<div class="browse-ch-info">${ch.cat||'TV Show'}</div>`;
       html+=`<div class="browse-ch-click">Click to browse episodes →</div>`;
       html+=`</div>`;
@@ -4617,8 +4920,75 @@ async function buildBrowseMenu(){
   content.innerHTML=html;
 }
 
-async function openShowDetails(chNum){
+async function openShowDetails(chNum, spiceShowId){
   const content=document.getElementById('browse-content');
+  
+  // Special handling for SpiceXXX individual shows
+  if(spiceShowId){
+    const ch = CHANNELS.find(c => c.num === 910); // SpiceXXX Network
+    if(!ch) return;
+    
+    // Show loading
+    content.innerHTML=`
+      <div style="text-align:center;padding:40px;">
+        <div style="font-family:'Press Start 2P';font-size:1rem;color:#ff1493;margin-bottom:20px;">
+          🔞 Loading Adult Content...
+        </div>
+        <div style="font-family:VT323;font-size:1.6rem;color:var(--np-color);">
+          Fetching from Archive.org
+        </div>
+      </div>
+    `;
+    
+    // Fetch episodes from this specific SpiceXXX show
+    let episodes=[];
+    try{
+      episodes=await fetchFiles(spiceShowId);
+    }catch(e){
+      console.error('Error fetching episodes:',e);
+    }
+    
+    if(!episodes||episodes.length===0){
+      // Auto-return to browse menu for invalid content
+      console.warn('No content available for:', spiceShowId);
+      setTimeout(() => {
+        buildBrowseMenu();
+      }, 100);
+      return;
+    }
+    
+    // Build episode list with adult content warning
+    const showName = spiceShowId.replace(/-/g, ' ').replace(/_/g, ' ');
+    let html=`
+      <div class="show-detail-header" style="border: 3px solid #ff1493;">
+        <button class="back-btn" onclick="buildBrowseMenu()">← BACK</button>
+        <div class="show-detail-title">
+          <div class="show-title">🔞 ${showName}</div>
+          <div class="show-subtitle">Adult Content • ${episodes.length} Episodes • Scrambled by default</div>
+        </div>
+        <button class="play-channel-btn" onclick="playSpiceContent('${spiceShowId}', 0)">▶ PLAY (SCRAMBLED)</button>
+      </div>
+      
+      <div class="episode-grid">
+    `;
+    
+    episodes.forEach((ep,idx)=>{
+      html+=`
+        <div class="episode-card" onclick="playSpiceContent('${spiceShowId}',${idx})" style="border-color: #ff1493;">
+          <div class="episode-num">🔞 EP ${idx+1}</div>
+          <div class="episode-name">${ep.n}</div>
+          <div class="episode-duration">${Math.floor(ep.dur/60)}:${String(Math.floor(ep.dur%60)).padStart(2,'0')}</div>
+          <div class="episode-play">▶ PLAY (SCRAMBLED)</div>
+        </div>
+      `;
+    });
+    
+    html+=`</div>`;
+    content.innerHTML=html;
+    return;
+  }
+  
+  // Regular channel handling (existing code)
   const ch=CHANNELS.find(c=>c.num===chNum);
   if(!ch)return;
   
@@ -4739,6 +5109,75 @@ function startBingeMode(chNum, startEpIdx){
       console.log(`BROWSE MODE ACTIVATED: Starting from Episode ${startEpIdx+1} at 0:00`);
     }
   }, 500);
+}
+
+// Play SpiceXXX content in ON-DEMAND mode with scrambler
+async function playSpiceContent(showId, episodeIdx){
+  // Close browse menu
+  toggleBrowse();
+  
+  // Switch to SpiceXXX channel (910)
+  const channelIdx = CHANNELS.findIndex(c => c.num === 910);
+  if(channelIdx === -1) return;
+  
+  const ch = CHANNELS[channelIdx];
+  
+  // Set browse mode AND exit live mode
+  browseMode = true;
+  isLiveMode = false;
+  
+  // Switch to channel
+  curIdx = channelIdx;
+  
+  // Fetch episodes from this specific show
+  try {
+    const episodes = await fetchFiles(showId);
+    if(!episodes || episodes.length === 0){
+      console.error('No episodes found for', showId);
+      return;
+    }
+    
+    curFiles = episodes;
+    curEpIdx = episodeIdx;
+    
+    // Enable scrambler for adult content
+    scramblerActive = true;
+    
+    const player = document.getElementById('player');
+    const scramblerBtn = document.getElementById('scrambler-btn');
+    
+    // Show scrambler button
+    scramblerBtn.style.display = 'block';
+    scramblerBtn.textContent = '📺 UNSCRAMBLE';
+    scramblerBtn.style.animation = 'pulse 1.5s infinite';
+    
+    // Apply scrambler effect and mute
+    player.classList.add('scrambled');
+    player.muted = true;
+    
+    // Load and play episode
+    player.ontimeupdate = null;
+    player.src = episodes[episodeIdx].u;
+    player.currentTime = 0;
+    player.load();
+    
+    player.onloadedmetadata = function(){
+      player.currentTime = 0;
+      player.play();
+    };
+    
+    // Update UI
+    document.getElementById('chn').textContent = ch.num;
+    document.getElementById('np-name').textContent = ch.name;
+    document.getElementById('np-ep').textContent = episodes[episodeIdx].n || `Episode ${episodeIdx+1}`;
+    setStat(`🔞 ADULT CONTENT (SCRAMBLED): ${episodes[episodeIdx].n || 'Episode ' + (episodeIdx+1)}`);
+    
+    updateLiveIndicator();
+    
+    console.log(`🔞 Playing SpiceXXX content: ${showId} - Episode ${episodeIdx+1} (SCRAMBLED)`);
+  } catch(e) {
+    console.error('Error loading SpiceXXX content:', e);
+  }
 }
 
 // WATCH HISTORY TRACKING
@@ -4907,26 +5346,487 @@ if(document.readyState === 'loading'){
 // Initialize LIVE indicator
 setTimeout(()=> updateLiveIndicator(), 600);
 
-// Volume control
+// ═══════════════════════════════════════════════════════════
+// PERSISTENT VOLUME CONTROL
+// ═══════════════════════════════════════════════════════════
 const volSlider = document.getElementById('vol-slider');
 const player = document.getElementById('player');
+
+let persistentVolume = 0.75; // Default volume
+
 if(volSlider && player){
+  // Load saved volume from localStorage
+  const savedVol = localStorage.getItem('sinister-volume');
+  if(savedVol !== null){
+    persistentVolume = savedVol / 100;
+    volSlider.value = savedVol;
+  } else {
+    volSlider.value = 75;
+  }
+  
   // Set initial volume
-  player.volume = volSlider.value / 100;
+  player.volume = persistentVolume;
   
   // Update volume when slider changes
   volSlider.addEventListener('input', function(){
-    player.volume = this.value / 100;
+    persistentVolume = this.value / 100;
+    player.volume = persistentVolume;
     localStorage.setItem('sinister-volume', this.value);
   });
   
-  // Load saved volume
-  const savedVol = localStorage.getItem('sinister-volume');
-  if(savedVol !== null){
-    volSlider.value = savedVol;
-    player.volume = savedVol / 100;
+  // CRITICAL: Restore volume every time a new video loads
+  // This ensures volume persists across channel changes, commercials, and everything
+  player.addEventListener('loadstart', function(){
+    // Check if scrambler is active (SpiceXXX channel)
+    const ch = CHANNELS[curIdx];
+    const isSpiceChannel = ch && ch.num === 910;
+    
+    if(isSpiceChannel && scramblerActive){
+      // Keep muted for scrambled adult channel
+      player.muted = true;
+    } else {
+      // Restore persistent volume for all other content
+      player.muted = false;
+      player.volume = persistentVolume;
+    }
+  });
+  
+  // Also restore after video metadata loads (backup)
+  player.addEventListener('loadedmetadata', function(){
+    const ch = CHANNELS[curIdx];
+    const isSpiceChannel = ch && ch.num === 910;
+    
+    if(!(isSpiceChannel && scramblerActive)){
+      player.volume = persistentVolume;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PARENTAL CONTROLS SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+let parentalPinSet = false;
+let parentalPinHash = null;
+let adultUnlocked = false;
+let adultUnlockExpiry = null;
+let hideAdultContent = false;
+
+// Initialize parental controls on load
+function initParentalControls(){
+  const savedPin = localStorage.getItem('sinister-parental-pin');
+  const hideAdult = localStorage.getItem('sinister-hide-adult');
+  
+  if(savedPin){
+    parentalPinSet = true;
+    parentalPinHash = savedPin;
+    document.getElementById('pin-not-set').style.display = 'none';
+    document.getElementById('pin-is-set').style.display = 'block';
+  }
+  
+  if(hideAdult === 'true'){
+    hideAdultContent = true;
+    document.getElementById('hide-adult-toggle').checked = true;
+  }
+  
+  // Check if unlock has expired
+  const expiry = localStorage.getItem('sinister-adult-unlock-expiry');
+  if(expiry && Date.now() < parseInt(expiry)){
+    adultUnlocked = true;
+    adultUnlockExpiry = parseInt(expiry);
   }
 }
+
+// Simple hash function
+function simpleHash(str){
+  let hash = 0;
+  for(let i = 0; i < str.length; i++){
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash.toString();
+}
+
+function setParentalPin(){
+  const input = document.getElementById('new-pin-input');
+  const pin = input.value.trim();
+  
+  if(pin.length !== 4 || !/^\d{4}$/.test(pin)){
+    alert('PIN must be exactly 4 digits');
+    return;
+  }
+  
+  parentalPinHash = simpleHash(pin);
+  parentalPinSet = true;
+  localStorage.setItem('sinister-parental-pin', parentalPinHash);
+  
+  document.getElementById('pin-not-set').style.display = 'none';
+  document.getElementById('pin-is-set').style.display = 'block';
+  input.value = '';
+  
+  alert('✅ Parental PIN set successfully!\n\nAdult content is now protected.');
+}
+
+function removeParentalPin(){
+  if(!confirm('Remove parental controls? Adult content will be accessible without PIN.')){
+    return;
+  }
+  
+  parentalPinSet = false;
+  parentalPinHash = null;
+  adultUnlocked = false;
+  localStorage.removeItem('sinister-parental-pin');
+  localStorage.removeItem('sinister-adult-unlock-expiry');
+  localStorage.removeItem('sinister-hide-adult');
+  hideAdultContent = false;
+  
+  document.getElementById('pin-not-set').style.display = 'block';
+  document.getElementById('pin-is-set').style.display = 'none';
+  document.getElementById('hide-adult-toggle').checked = false;
+  
+  alert('✅ Parental controls removed');
+}
+
+function toggleHideAdult(){
+  hideAdultContent = document.getElementById('hide-adult-toggle').checked;
+  localStorage.setItem('sinister-hide-adult', hideAdultContent);
+}
+
+function checkAdultAccess(callback){
+  if(!parentalPinSet){
+    // No PIN set, allow access
+    callback(true);
+    return;
+  }
+  
+  if(hideAdultContent){
+    alert('🔒 Adult content is hidden in settings');
+    callback(false);
+    return;
+  }
+  
+  // Check if already unlocked and not expired
+  if(adultUnlocked && adultUnlockExpiry && Date.now() < adultUnlockExpiry){
+    callback(true);
+    return;
+  }
+  
+  // Need PIN
+  showPinUnlock(callback);
+}
+
+function showPinUnlock(callback){
+  const panel = document.getElementById('pin-unlock-panel');
+  panel.style.display = 'flex';
+  document.getElementById('pin-unlock-input').value = '';
+  document.getElementById('pin-error').style.display = 'none';
+  
+  // Store callback
+  window.pinUnlockCallback = callback;
+}
+
+function unlockAdultContent(){
+  const input = document.getElementById('pin-unlock-input');
+  const pin = input.value.trim();
+  const error = document.getElementById('pin-error');
+  
+  if(simpleHash(pin) === parentalPinHash){
+    // Correct PIN
+    adultUnlocked = true;
+    adultUnlockExpiry = Date.now() + (60 * 60 * 1000); // 1 hour
+    localStorage.setItem('sinister-adult-unlock-expiry', adultUnlockExpiry);
+    
+    document.getElementById('pin-unlock-panel').style.display = 'none';
+    
+    if(window.pinUnlockCallback){
+      window.pinUnlockCallback(true);
+      window.pinUnlockCallback = null;
+    }
+  } else {
+    // Wrong PIN
+    error.style.display = 'block';
+    input.value = '';
+    setTimeout(() => {
+      error.style.display = 'none';
+    }, 2000);
+  }
+}
+
+function cancelPinUnlock(){
+  document.getElementById('pin-unlock-panel').style.display = 'none';
+  if(window.pinUnlockCallback){
+    window.pinUnlockCallback(false);
+    window.pinUnlockCallback = null;
+  }
+}
+
+function toggleSettings(){
+  const overlay = document.getElementById('settings-overlay');
+  overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+}
+
+// Modify openShowDetails to check PIN for SpiceXXX content
+const originalOpenShowDetails = openShowDetails;
+openShowDetails = async function(chNum, spiceShowId){
+  if(spiceShowId || chNum === 910){
+    // This is adult content
+    checkAdultAccess((allowed) => {
+      if(allowed){
+        originalOpenShowDetails(chNum, spiceShowId);
+      }
+    });
+  } else {
+    originalOpenShowDetails(chNum, spiceShowId);
+  }
+};
+
+// Modify playSpiceContent to check PIN
+const originalPlaySpiceContent = playSpiceContent;
+playSpiceContent = async function(showId, episodeIdx){
+  checkAdultAccess((allowed) => {
+    if(allowed){
+      originalPlaySpiceContent(showId, episodeIdx);
+    }
+  });
+};
+
+// ═══════════════════════════════════════════════════════════
+// WATCH PARTY SYSTEM (PeerJS P2P)
+// ═══════════════════════════════════════════════════════════
+
+let peer = null;
+let isHost = false;
+let hostConnection = null;
+let guestConnections = [];
+let currentRoomCode = null;
+let inParty = false;
+
+function generateRoomCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No confusing chars
+  let code = '';
+  for(let i = 0; i < 6; i++){
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+function toggleWatchParty(){
+  const overlay = document.getElementById('party-overlay');
+  overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+}
+
+function createWatchParty(){
+  if(inParty){
+    alert('Already in a watch party!');
+    return;
+  }
+  
+  currentRoomCode = generateRoomCode();
+  isHost = true;
+  inParty = true;
+  
+  // Initialize PeerJS
+  peer = new Peer('sinister-tv-' + currentRoomCode, {
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    }
+  });
+  
+  peer.on('open', (id) => {
+    console.log('Watch party created:', currentRoomCode);
+    updatePartyUI();
+    
+    document.getElementById('party-btn').classList.add('active');
+    document.getElementById('party-btn').textContent = '📡 HOSTING (' + guestConnections.length + ')';
+  });
+  
+  peer.on('connection', (conn) => {
+    console.log('Guest connected:', conn.peer);
+    guestConnections.push(conn);
+    updatePartyUI();
+    
+    conn.on('open', () => {
+      // Send current state to new guest
+      syncToGuests();
+    });
+    
+    conn.on('close', () => {
+      guestConnections = guestConnections.filter(c => c !== conn);
+      updatePartyUI();
+    });
+  });
+  
+  peer.on('error', (err) => {
+    console.error('Peer error:', err);
+    alert('Failed to create watch party. Please try again.');
+    leaveWatchParty();
+  });
+}
+
+function joinWatchParty(){
+  const input = document.getElementById('party-code-input');
+  const code = input.value.trim().toUpperCase();
+  
+  if(code.length !== 6){
+    alert('Please enter a 6-character room code');
+    return;
+  }
+  
+  if(inParty){
+    alert('Already in a watch party!');
+    return;
+  }
+  
+  currentRoomCode = code;
+  isHost = false;
+  inParty = true;
+  
+  // Initialize PeerJS as guest
+  peer = new Peer();
+  
+  peer.on('open', () => {
+    // Connect to host
+    hostConnection = peer.connect('sinister-tv-' + code);
+    
+    hostConnection.on('open', () => {
+      console.log('Connected to watch party:', code);
+      updatePartyUI();
+      
+      document.getElementById('party-btn').classList.add('active');
+      document.getElementById('party-btn').textContent = '📡 IN PARTY';
+    });
+    
+    hostConnection.on('data', (data) => {
+      handleHostSync(data);
+    });
+    
+    hostConnection.on('close', () => {
+      alert('Host disconnected. Leaving watch party.');
+      leaveWatchParty();
+    });
+    
+    hostConnection.on('error', (err) => {
+      console.error('Connection error:', err);
+      alert('Could not connect to watch party. Check the code and try again.');
+      leaveWatchParty();
+    });
+  });
+  
+  peer.on('error', (err) => {
+    console.error('Peer error:', err);
+    alert('Failed to join watch party. Check the code and try again.');
+    leaveWatchParty();
+  });
+}
+
+function syncToGuests(){
+  if(!isHost || guestConnections.length === 0) return;
+  
+  const syncData = {
+    type: 'sync',
+    channelIndex: curIdx,
+    episodeIndex: curEpIdx,
+    timestamp: Date.now(),
+    isLiveMode: isLiveMode
+  };
+  
+  guestConnections.forEach(conn => {
+    if(conn.open){
+      conn.send(syncData);
+    }
+  });
+}
+
+function handleHostSync(data){
+  if(data.type === 'sync'){
+    console.log('Syncing from host:', data);
+    
+    // Switch to same channel
+    if(data.channelIndex !== curIdx){
+      selectCh(data.channelIndex);
+    }
+    
+    // Match live/on-demand mode
+    if(data.isLiveMode !== isLiveMode){
+      if(data.isLiveMode){
+        resumeToLive();
+      } else {
+        isLiveMode = false;
+        browseMode = true;
+      }
+    }
+  }
+}
+
+function leaveWatchParty(){
+  if(peer){
+    peer.destroy();
+    peer = null;
+  }
+  
+  hostConnection = null;
+  guestConnections = [];
+  currentRoomCode = null;
+  isHost = false;
+  inParty = false;
+  
+  document.getElementById('party-btn').classList.remove('active');
+  document.getElementById('party-btn').textContent = '📡 WATCH PARTY';
+  
+  updatePartyUI();
+}
+
+function updatePartyUI(){
+  const statusText = document.getElementById('party-status-text');
+  const viewerCount = document.getElementById('viewer-count');
+  const viewerDiv = document.getElementById('party-viewers');
+  const codeDisplay = document.getElementById('party-code-display');
+  const currentCode = document.getElementById('current-code');
+  const activeControls = document.getElementById('party-active-controls');
+  const createDiv = document.getElementById('party-create');
+  
+  if(inParty){
+    if(isHost){
+      statusText.textContent = 'HOSTING WATCH PARTY';
+      statusText.style.color = '#00ff88';
+      viewerCount.textContent = guestConnections.length + 1;
+      viewerDiv.style.display = 'block';
+      codeDisplay.style.display = 'block';
+      currentCode.textContent = currentRoomCode;
+    } else {
+      statusText.textContent = 'CONNECTED TO PARTY';
+      statusText.style.color = '#00e5ff';
+      viewerDiv.style.display = 'none';
+      codeDisplay.style.display = 'block';
+      currentCode.textContent = currentRoomCode;
+    }
+    activeControls.style.display = 'block';
+    createDiv.style.display = 'none';
+  } else {
+    statusText.textContent = 'NOT IN PARTY';
+    statusText.style.color = '#888';
+    viewerDiv.style.display = 'none';
+    codeDisplay.style.display = 'none';
+    activeControls.style.display = 'none';
+    createDiv.style.display = 'block';
+  }
+}
+
+// Sync channel changes to guests
+const originalSelectCh = selectCh;
+selectCh = async function(idx){
+  await originalSelectCh(idx);
+  if(inParty && isHost){
+    syncToGuests();
+  }
+};
+
+// Initialize on page load
+initParentalControls();
 
 </script>
 </body>
