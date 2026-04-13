@@ -822,7 +822,7 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
     <div id="np"><div id="np-name">SELECT A CHANNEL</div><div id="np-ep"></div></div>
   </div>
   <div id="screen">
-    <video id="player" controls playsinline preload="metadata"></video>
+    <video id="player" controls playsinline preload="metadata" muted></video>
     <div id="osd"></div>
     <div id="click-to-start" style="position:absolute;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;display:none;">
       <div style="font-family:'Press Start 2P',monospace;font-size:2rem;color:#00ff88;text-shadow:0 0 20px #00ff88;margin-bottom:20px;">SINISTER TV</div>
@@ -5358,7 +5358,10 @@ function toggleOff(){
   const btn=document.getElementById('off-btn');
   if(tvOff){
     const player=document.getElementById('player');
-    player.pause(); player.removeAttribute('src'); player.load();
+    player.pause(); 
+    player.muted = true; // CRITICAL: Mute when turning OFF
+    player.removeAttribute('src'); 
+    player.load();
     const fr=document.getElementById('fallback-iframe');
     if(fr){fr.src='about:blank'; fr.remove();}
     const dot=document.getElementById('off-dot');
@@ -5367,6 +5370,8 @@ function toggleOff(){
     btn.classList.add('on');
     btn.textContent='⏻';
   } else {
+    const player=document.getElementById('player');
+    player.muted = false; // Unmute when turning ON
     os.classList.remove('show');
     btn.classList.remove('on');
     btn.textContent='⭕';
