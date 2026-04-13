@@ -5375,7 +5375,12 @@ function toggleOff(){
     os.classList.remove('show');
     btn.classList.remove('on');
     btn.textContent='⭕';
-    if(curIdx>=0) selectCh(curIdx);
+    // If no channel selected yet, start with channel 0
+    if(curIdx >= 0) {
+      selectCh(curIdx);
+    } else {
+      selectCh(0); // Start with first channel
+    }
   }
 }
 
@@ -5430,34 +5435,18 @@ function attemptAutoStart(){
   if(autoStartAttempted) return;
   autoStartAttempted = true;
   
-  console.log('Attempting auto-start...');
-  selectCh(0);
-  
-  // Check if autoplay worked after a short delay
-  setTimeout(()=>{
-    const player = document.getElementById('player');
-    if(player.paused && player.readyState >= 2){
-      // Autoplay was blocked, show click-to-start
-      console.log('Autoplay blocked, showing click-to-start overlay');
-      const clickOverlay = document.getElementById('click-to-start');
-      if(clickOverlay){
-        clickOverlay.style.display = 'flex';
-        clickOverlay.onclick = function(){
-          clickOverlay.style.display = 'none';
-          player.play().catch(err => console.error('Play error:', err));
-        };
-      }
-    }
-  }, 1000);
+  console.log('TV loaded - waiting for power button (starts in OFF mode)');
+  // DO NOT auto-select channel - TV starts OFF and silent
+  // User must click power button to turn TV ON
 }
 
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', function(){
-    console.log('DOM loaded, auto-starting TV...');
+    console.log('DOM loaded, TV in OFF mode...');
     setTimeout(attemptAutoStart, 500);
   });
 } else {
-  console.log('Auto-starting TV immediately...');
+  console.log('TV in OFF mode...');
   setTimeout(attemptAutoStart, 500);
 }
 
