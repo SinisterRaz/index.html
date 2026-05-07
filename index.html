@@ -1769,59 +1769,28 @@ const CHANNELS = [
   // ══════════════════════════════════════════════════════════════
   // REMOVED: Ch 440 Top Gear
 
-  // ── FORMULA 1 (all archives combined) ──
-  { num:640, name:"Formula 1 Racing", cat:"Automotive", avgDur:5400,
-    master:true,
-    networkShows:[
-      "all-the-formula-1-races-from-1950-to-2018",
-      "all-the-formula-1-races-from-2019",
-      "All-the-Formula-1-races-from-2012",
-      "formula-one-history",
-      "UltimateCrashes",
-      "f1-1999-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-2001-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-2002-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-2008-gp-reviews",
-      "f1-1997-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-1998-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-1995-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-1986-full-race-replys-grand-prix-highlights-and-reviews",
-      "f1-1950",
-      "f1-1954"
-    ], files:[{u:"",n:"Formula 1"}] },
-
-  // ── NASCAR (all archives combined) ──
-  { num:641, name:"NASCAR Racing", cat:"Automotive", avgDur:7200,
-    master:true,
-    networkShows:[
-      "nascar-cup-series-full-races-archival",
-      "nascar-cup-series-full-races-archival-p2",
-      "nascar-truck-series-full-races-archival",
-      "nascar-2nd-series-full-races-archival",
-      "arca-racing-series-full-races-archival",
-      "nascar-regional-full-races-archival",
-      "nascar-dash-series-full-races-archival"
-    ], files:[{u:"",n:"NASCAR"}] },
-
-  // ── MISC AUTOMOTIVE ──
-  // ── AUTOMOTIVE ON-DEMAND ONLY (not standalone channels in guide) ──
-  { num:662, name:"Richard Petty Story",   cat:"Automotive", avgDur:5400, hidden:true, embedOnly:"43TheRichardPettyStory_201301",    files:[{u:"",n:"Richard Petty"}] },
-  { num:663, name:"Cannonball Run 1981",   cat:"Automotive", avgDur:5400, hidden:true, embedOnly:"the.-cannonball.-run.-1981.1080p", files:[{u:"",n:"Cannonball Run"}] },
-  { num:664, name:"Police Chases",         cat:"Automotive", avgDur:1800, hidden:true, embedOnly:"CPZ-0041",                         files:[{u:"",n:"Police Chases"}] },
-
-    // ── AUTOMOTIVE MASTER CHANNEL ──
-  { num:919, name:"🏎️ Motor Sports Network", cat:"Automotive", master:true,
-    networkShows:["Formula 1 Racing","NASCAR Racing","Monster Jam","Richard Petty Story","Cannonball Run 1981","Police Chases"],
-    avgDur:5400, files:[{u:"",n:"Motor Sports Network"}] },
-
-
-
   // ══════════════════════════════════════════════════════════════
+  // AUTOMOTIVE CHANNELS
+  // ══════════════════════════════════════════════════════════════
+  { num:640, name:"Formula 1 Racing", cat:"Automotive", avgDur:5400, master:true,
+    networkShows:["all-the-formula-1-races-from-1950-to-2018","all-the-formula-1-races-from-2019","All-the-Formula-1-races-from-2012","f1-1999-full-race-replys-grand-prix-highlights-and-reviews","f1-2001-full-race-replys-grand-prix-highlights-and-reviews","f1-2002-full-race-replys-grand-prix-highlights-and-reviews","f1-2008-gp-reviews","f1-1997-full-race-replys-grand-prix-highlights-and-reviews","f1-1998-full-race-replys-grand-prix-highlights-and-reviews","f1-1995-full-race-replys-grand-prix-highlights-and-reviews","f1-1986-full-race-replys-grand-prix-highlights-and-reviews"],
+    files:[{u:"",n:"Formula 1"}] },
+  { num:641, name:"NASCAR Racing", cat:"Automotive", avgDur:7200, master:true,
+    networkShows:["nascar-cup-series-full-races-archival","nascar-cup-series-full-races-archival-p2","nascar-truck-series-full-races-archival","nascar-2nd-series-full-races-archival","arca-racing-series-full-races-archival","nascar-regional-full-races-archival","nascar-dash-series-full-races-archival"],
+    files:[{u:"",n:"NASCAR"}] },
+  { num:662, name:"Richard Petty Story", cat:"Automotive", avgDur:5400, hidden:true, embedOnly:"43TheRichardPettyStory_201301", files:[{u:"",n:"Richard Petty"}] },
+  { num:663, name:"Cannonball Run 1981", cat:"Automotive", avgDur:5400, hidden:true, embedOnly:"the.-cannonball.-run.-1981.1080p", files:[{u:"",n:"Cannonball Run"}] },
+  { num:664, name:"Police Chases", cat:"Automotive", avgDur:1800, hidden:true, embedOnly:"CPZ-0041", files:[{u:"",n:"Police Chases"}] },
+  { num:919, name:"🏎️ Motor Sports Network", cat:"Automotive", master:true, avgDur:5400,
+    networkShows:["Formula 1 Racing","NASCAR Racing","Monster Jam","Richard Petty Story","Cannonball Run 1981","Police Chases"],
+    files:[{u:"",n:"Motor Sports Network"}] },
+
+    // ══════════════════════════════════════════════════════════════
   // NETWORK MASTER CHANNELS - Auto-rotating by original network
   // ══════════════════════════════════════════════════════════════
   { num:900, name:"📺 NickToons Network", cat:"Network Master", master:true, networkShows:["Spider-Man TAS","The Batman","TaleSpin","Dennis Menace","Pepper Ann","Mighty Max","Carmen Sandiego","Pole Position","James Bond Jr","Street Fighter","Double Dragon","Mutant League","Baby-Sitters Club","Little Bill","Sesame Street","My Little Pony"], avgDur:1380, files:[{u:"",n:"NickToons Network"}] },
   
-  { num:901, name:"🎬 ToonVerse Central", cat:"Network Master", master:true, networkShows:["Powerpuff Girls","The Batman","Spider-Man TAS","Freakazoid"], avgDur:1380, files:[{u:"",n:"ToonVerse Central"}] },
+  { num:901, name:"🎬 ToonVerse Central", cat:"Network Master", master:true, networkShows:["Dexter's Laboratory","Powerpuff Girls","Ed, Edd n Eddy","Courage the Cowardly Dog","Samurai Jack","The Batman","Batman Beyond","Spider-Man TAS","Freakazoid"], avgDur:1380, files:[{u:"",n:"ToonVerse Central"}] },
   
   { num:902, name:"🌙 After Dark Network", cat:"Network Master", master:true, networkShows:["the-boondocks_202410","beavis-and-butthead-king-turd-collection","panty-and-stocking"], avgDur:1380, files:[{u:"",n:"After Dark Network"}] },
   
@@ -1829,13 +1798,13 @@ const CHANNELS = [
   
   { num:904, name:"🎌 Anime Action Network", cat:"Network Master", master:true, networkShows:["Element Hunters","Get Backers","Paranoia Agent","Ghost Stories","Samurai Pizza Cats","Death Note","Dragon Ball Z"], avgDur:1380, files:[{u:"",n:"Anime Action Network"}] },
   
-  { num:905, name:"😂 Laugh Track TV", cat:"Network Master", master:true, networkShows:["Roseanne","Family Matters","Everybody Loves Raymond","The Golden Girls","Drew Carey Show","King of Queens","Leave It to Beaver","Home Improvement","In Living Color","That 80s Show","My Wife and Kids","Aliens in the Family","The Jeff Foxworthy Show","MADtv","The PJs","Reaper","Monty Python"], avgDur:1380, files:[{u:"",n:"Laugh Track TV"}] },
+  { num:905, name:"😂 Laugh Track TV", cat:"Network Master", master:true, networkShows:["Roseanne","Family Matters","Everybody Loves Raymond","The Golden Girls","Drew Carey Show","King of Queens","Leave It to Beaver","Home Improvement","In Living Color","That 80s Show","My Wife and Kids"], avgDur:1380, files:[{u:"",n:"Laugh Track TV"}] },
   
-  { num:906, name:"📺 Classic Rerun Station", cat:"Network Master", master:true, networkShows:["Patty Duke Show","M*A*S*H","The Jeffersons","The Wonder Years","The A-Team","Sherlock Holmes 1954"], avgDur:1380, files:[{u:"",n:"Classic Rerun Station"}] },
+  { num:906, name:"📺 Classic Rerun Station", cat:"Network Master", master:true, networkShows:["Patty Duke Show","M*A*S*H","The Jeffersons","Gilligan's Island","The Wonder Years","The A-Team","Sherlock Holmes 1954"], avgDur:1380, files:[{u:"",n:"Classic Rerun Station"}] },
   
-  { num:907, name:"🎃 Midnight Horror Theatre", cat:"Network Master", master:true, networkShows:["Nightmare Cafe","Dark Shadows","Poltergeist Legacy","Tales Cryptkeeper"], avgDur:2700, files:[{u:"",n:"Midnight Horror Theatre"}] },
+  { num:907, name:"🎃 Midnight Horror Theatre", cat:"Network Master", master:true, networkShows:["Nightmare Cafe","Dark Shadows","Poltergeist Legacy","Tales Cryptkeeper","Creepshow 2019"], avgDur:2700, files:[{u:"",n:"Midnight Horror Theatre"}] },
   
-  { num:908, name:"📚 Knowledge Kids Network", cat:"Network Master", master:true, networkShows:["Sesame Street","Schoolhouse Rock","Arthur","Bob the Builder","Little Bill","Mister Rogers","Ghostwriter","Berenstain Bears"], avgDur:1380, files:[{u:"",n:"Knowledge Kids Network"}] },
+  { num:908, name:"📚 Knowledge Kids Network", cat:"Network Master", master:true, networkShows:["Sesame Street","Schoolhouse Rock","Bill Nye the Science Guy","Magic School Bus","Reading Rainbow","Arthur","Bob the Builder","Thomas the Tank Engine"], avgDur:1380, files:[{u:"",n:"Knowledge Kids Network"}] },
   
   { num:909, name:"🎭 Prime Time Drama", cat:"Network Master", master:true, networkShows:["Party of Five","Live PD Wanted","NYPD Blue"], avgDur:2700, files:[{u:"",n:"Prime Time Drama"}] },
 
@@ -2416,37 +2385,14 @@ const CHANNELS = [
 // ============================================================
 const CATS=[...new Set(CHANNELS.map(c=>c.cat))];
 let curIdx=-1,loading=false,staticAn=null,loadingTimeout=null;
-const channelFailCount = {};
-
+const channelFailCount={};
 function safeSetLoading(val){
-  if(val){
-    loading = true;
-    if(loadingTimeout) clearTimeout(loadingTimeout);
-    loadingTimeout = setTimeout(()=>{
-      if(loading){ console.warn('Loading timeout'); loading=false; ssoff(); loadingTimeout=null; }
-    }, 20000);
-  } else {
-    loading = false;
-    if(loadingTimeout){ clearTimeout(loadingTimeout); loadingTimeout=null; }
-  }
+  if(val){loading=true;if(loadingTimeout)clearTimeout(loadingTimeout);loadingTimeout=setTimeout(()=>{if(loading){loading=false;ssoff();loadingTimeout=null;}},20000);}
+  else{loading=false;if(loadingTimeout){clearTimeout(loadingTimeout);loadingTimeout=null;}}
 }
-
-function showSplash(msg){
-  ssoff(); safeSetLoading(false);
-  const player=document.getElementById('player');
-  if(player){ player.pause(); player.removeAttribute('src'); player.load(); }
-  document.getElementById('idle').classList.remove('gone');
-  setStat(msg||'CHANNEL UNAVAILABLE - SELECT ANOTHER CHANNEL');
-  setBar(0);
-}
-
-function recordFailAndCheck(chIdx){
-  channelFailCount[chIdx]=(channelFailCount[chIdx]||0)+1;
-  if(channelFailCount[chIdx]>=3){ channelFailCount[chIdx]=0; return true; }
-  return false;
-}
-
-function clearFail(chIdx){ channelFailCount[chIdx]=0; }
+function showSplash(msg){ssoff();safeSetLoading(false);const p=document.getElementById('player');if(p){p.pause();p.removeAttribute('src');p.load();}document.getElementById('idle').classList.remove('gone');setStat(msg||'CHANNEL UNAVAILABLE');setBar(0);}
+function recordFailAndCheck(i){channelFailCount[i]=(channelFailCount[i]||0)+1;if(channelFailCount[i]>=3){channelFailCount[i]=0;return true;}return false;}
+function clearFail(i){channelFailCount[i]=0;}
 let curFiles=[],curEpIdx=0;
 let isLiveMode=true; // LIVE mode by default - watching synchronized broadcast
 
@@ -2560,11 +2506,8 @@ function getCurrentBroadcast(ch, files){
   
   const weekNumber = getCurrentWeek();
   const nowDate = new Date(now);
-  const dow = nowDate.getUTCDay();
-  const daysSinceMon = dow === 0 ? 6 : dow - 1;
-  const secondsSinceWeekStart =
-    daysSinceMon * 86400 + nowDate.getUTCHours() * 3600 +
-    nowDate.getUTCMinutes() * 60 + nowDate.getUTCSeconds();
+  const dow = nowDate.getUTCDay(); const daysSinceMon = dow===0?6:dow-1;
+  const secondsSinceWeekStart = daysSinceMon*86400+nowDate.getUTCHours()*3600+nowDate.getUTCMinutes()*60+nowDate.getUTCSeconds();
   
   // Determine content list
   let contentList;
@@ -2813,10 +2756,8 @@ const metaCache={};
 async function fetchFiles(identifier){
   if(metaCache[identifier]) return metaCache[identifier];
   try{
-    const controller=new AbortController();
-    const ft=setTimeout(()=>controller.abort(),12000);
-    const r=await fetch('https://archive.org/metadata/'+identifier,{signal:controller.signal});
-    clearTimeout(ft);
+    const ctrl=new AbortController();const ft=setTimeout(()=>ctrl.abort(),12000);
+    const r=await fetch('https://archive.org/metadata/'+identifier,{signal:ctrl.signal});clearTimeout(ft);
     const j=await r.json();
     const files=j.files.filter(f=>{
       // Must be audio/video file
@@ -2828,7 +2769,9 @@ async function fetchFiles(identifier){
         '.mp3', '.m4a', '.aac', // Audio (compressed)
         '.ogg', '.oga',        // Ogg audio
         '.flac', '.wav',       // Lossless audio
-        '.webm', '.mkv'        // Web formats
+        '.webm', '.mkv',                // Web/container formats
+        '.mpeg', '.mpg', '.avi',        // Legacy video
+        '.mov', '.m4v', '.ogv'          // Other video formats
       ];
       
       const hasValidExt = validExtensions.some(ext => f.name.toLowerCase().endsWith(ext));
@@ -2837,21 +2780,9 @@ async function fetchFiles(identifier){
       // Skip thumbnails, samples, metadata
       if(f.name.includes('_thumb') || f.name.includes('_sample')) return false;
       if(f.source === 'metadata') return false;
-      
-      // MUSIC FILTER: Skip skits, intros, outros
-      const nameLower = f.name.toLowerCase();
-      if(nameLower.includes('skit')) return false;
-      if(nameLower.includes('intro')) return false;
-      if(nameLower.includes('outro')) return false;
-      if(nameLower.includes('interlude')) return false;
-      
-      // MUSIC FILTER: Skip tracks under 90 seconds (1:30)
-      const length = parseFloat(f.length);
-      if(!isNaN(length) && length > 0 && length < 90) return false;
-      
-      // Skip files that are too large (over 500MB - likely won't play)
+
       const size = parseFloat(f.size);
-      if(!isNaN(size) && size > 500000000) return false;
+      if(!isNaN(size) && size === 0) return false;
       
       return true;
     }).sort((a,b)=>{
@@ -2886,6 +2817,14 @@ async function selectCh(idx){
   }
   safeSetLoading(true);curIdx=idx;
   const ch=CHANNELS[idx];
+  // Clear scrambler for non-adult channels
+  if(!ch || ch.num !== 910){
+    scramblerActive = false;
+    const _sp = document.getElementById('player');
+    if(_sp) _sp.classList.remove('scrambled');
+    const _sb = document.getElementById('scrambler-btn');
+    if(_sb) _sb.style.display = 'none';
+  }
   
   showOSD(ch);
 
@@ -2982,11 +2921,8 @@ async function selectCh(idx){
       // Check if this is a music master channel (Archive.org IDs directly in networkShows)
       // Music channels have cat:"Music" and master:true
       // Movie masters have cat:"Movies Master" or cat:"Adult" and master:true
-      const showsAreArchiveIds = ch.networkShows && ch.networkShows.length > 0 &&
-        ch.networkShows.every(s => /^[a-zA-Z0-9_\-\.\/_]+$/.test(s));
-      const isDirectArchiveMaster = showsAreArchiveIds ||
-        ((ch.cat==='Music'||ch.cat==='Movies Master'||ch.cat==='Adult')
-        && ch.master===true && ch.networkShows && ch.networkShows.length>0);
+      const _aids=ch.networkShows&&ch.networkShows.length>0&&ch.networkShows.every(s=>/^[a-zA-Z0-9_\-\.\/]+$/.test(s));
+      const isDirectArchiveMaster=_aids||((ch.cat==='Music'||ch.cat==='Movies Master'||ch.cat==='Adult')&&ch.master===true&&ch.networkShows&&ch.networkShows.length>0);
       
       if(isDirectArchiveMaster){
         // DIRECT ARCHIVE MASTER CHANNEL - with scheduled rotation and commercials
@@ -3065,15 +3001,8 @@ async function selectCh(idx){
           episodeIndex = trackNumber % files.length; // Wrap around if needed
           console.log('🎵 Music sync: Album has', files.length, 'tracks, playing track', trackNumber + 1, '(index', episodeIndex, ')');
         } else {
-          // Sports/TV/Movies: Calculate which file is playing based on timeIntoBlock
-          // Each file is assumed to be avgDur / files.length seconds long
-          // This keeps all viewers on the same file at the same position
-          if(isLiveMode){
-            const estFileDur = (ch.avgDur || 5400) / Math.max(files.length, 1);
-            episodeIndex = Math.floor(broadcast.timeIntoBlock / estFileDur) % files.length;
-          } else {
-            episodeIndex = Math.max(curEpIdx, 0);
-          }
+          // TV/Movies: Use broadcast seed for variety
+          episodeIndex = isLiveMode ? (broadcast.episodeSeed % files.length) : 0;
         }
         
         const episode = files[episodeIndex];
@@ -3082,12 +3011,17 @@ async function selectCh(idx){
         curEpIdx = episodeIndex;
         currentMasterShow = currentShowName;
         
-        if(ch.cat === "Music") showMusicOverlay(ch.name, episode.n);
+        // Show music overlay for music channels
+        if(ch.cat === "Music"){
+          showMusicOverlay(ch.name, episode.n);
+        }
+        
+        console.log('Master channel synced:', currentShowName, '-', episode.n, 'position:', broadcast.timeIntoBlock);
         
         document.getElementById('np-ep').textContent = currentShowName + ' - ' + episode.n;
         player.style.display='block';
-        player.muted = false;
-        player.volume = 0.75;
+        
+        // Clear all previous event handlers
         player.oncanplay=null;
         player.onended=null;
         player.onerror=null;
@@ -3096,35 +3030,62 @@ async function selectCh(idx){
         player.src = episode.u;
         player.load();
         
+        console.log('🎵 Music channel - Loading:', episode.n, 'from', episode.u);
+        
+        // Ensure player is NOT muted for music
+        player.muted = false;
+        player.volume = 0.75;
+        console.log('🎵 Player muted:', player.muted, 'volume:', player.volume);
+        
         player.addEventListener('loadedmetadata', function onM(){
           player.removeEventListener('loadedmetadata', onM);
-          clearFail(idx);
+          console.log('🎵 Music loaded, duration:', player.duration);
+          
+          // MUSIC CHANNELS: Don't seek - always play from start
+          // (Music tracks are 3-5 min, schedule position can be 1000+ seconds)
           if(ch.cat === "Music"){
-            // Music: play from start, track selection handles sync
-          } else if(isLiveMode && broadcast.timeIntoBlock > 0){
-            // Sports/TV: seek into current file
-            const estFileDur = (ch.avgDur || 5400) / Math.max(files.length, 1);
-            const seekWithin = broadcast.timeIntoBlock % estFileDur;
-            if(seekWithin > 0 && seekWithin < player.duration - 2){
-              player.currentTime = seekWithin;
+            console.log('🎵 Music channel - playing from start (no time-sync)');
+          } else {
+            // SYNC: Seek to current position if in LIVE mode
+            if(isLiveMode && broadcast.timeIntoBlock > 0){
+              player.currentTime = broadcast.timeIntoBlock;
+              console.log('🎵 Seeking to:', broadcast.timeIntoBlock);
             }
           }
-          player.play().catch(err => console.error('Play error:', err));
+          
+          console.log('🎵 Starting playback...');
+          player.play().then(() => {
+            console.log('🎵 Music playing successfully - muted:', player.muted, 'volume:', player.volume);
+          }).catch(err => {
+            console.error('🎵 Play error:', err);
+          });
         });
         
+        // Log if metadata fails to load
+        player.addEventListener('error', function logError(e){
+          console.error('🎵 Player error event:', e, 'Error code:', player.error ? player.error.code : 'none');
+          player.removeEventListener('error', logError);
+        });
+        
+        // When episode ends
         player.onended = function(){
-          clearFail(idx);
           if(ch.cat === "Music"){
+            // MUSIC CHANNELS: Reload to get next scheduled track (synchronized for everyone)
+            console.log('🎵 Track ended, loading next scheduled track (no commercials)');
             safeSetLoading(false);
             selectCh(idx);
           } else {
+            // TV/MOVIE CHANNELS: Play commercial break then reload
+            console.log('Episode ended, starting commercial break');
             playShortThenSwitchShow(idx);
           }
         };
         
+        // Handle errors
         player.onerror = function(){
-          if(recordFailAndCheck(idx)) showSplash('STREAM ERROR - SELECT ANOTHER CHANNEL');
-          else { safeSetLoading(false); setTimeout(()=>selectCh(idx),500); }
+          console.error('Episode error, reloading channel');
+          safeSetLoading(false);
+          selectCh(idx);
         };
         
         ssoff();setBar(100);
@@ -3374,7 +3335,7 @@ async function selectCh(idx){
       let files=await fetchFiles(ch.embedOnly);
       const _ae=['.mp3','.m4a','.aac','.ogg','.oga','.flac','.wav','.opus','.wma'];
       const _vf=files.filter(f=>!_ae.some(e=>f.u.toLowerCase().endsWith(e)));
-      if(_vf.length>0) files=_vf;
+      if(_vf.length>0)files=_vf;
       if(!files||!files.length){
         player.style.display='none';
         const fr=document.createElement('iframe');
@@ -3416,10 +3377,7 @@ async function selectCh(idx){
       player.load();
       player.addEventListener('loadedmetadata',function onM(){
         player.removeEventListener('loadedmetadata',onM);
-        if(offset>0 && player.duration>0){
-          const sk=offset<player.duration?offset:offset%player.duration;
-          if(sk>0 && sk<player.duration-2) player.currentTime=sk;
-        }
+        if(offset>0&&player.duration>0){const sk=offset<player.duration?offset:offset%player.duration;if(sk>0&&sk<player.duration-2)player.currentTime=sk;}
         player.play().catch(()=>{});
       });
       player.onerror=()=>{
@@ -4090,7 +4048,7 @@ let selectedGuideChannel = null;
 let guideRefreshInterval = null;
 
 // SCRAMBLER EFFECT for SpiceXXX Network
-let scramblerActive = true; // Default ON for that retro experience
+let scramblerActive = false; // Only active for SpiceXXX adult channel
 
 function toggleScrambler(){
   const player = document.getElementById('player');
@@ -4377,9 +4335,7 @@ async function renderGridView(container){
           nowPlaying = `${ch.name}: ${broadcast.showName}`;
           // Get the full schedule to find what's next
           const weeklySchedule = buildWeeklySchedule(ch, ch.networkShows);
-          const _d=new Date();
-          const _dow=_d.getUTCDay();
-          const _dsm=_dow===0?6:_dow-1;
+          const _d=new Date();const _dow=_d.getUTCDay();const _dsm=_dow===0?6:_dow-1;
           const secondsSinceWeekStart=_dsm*86400+_d.getUTCHours()*3600+_d.getUTCMinutes()*60+_d.getUTCSeconds();
           
           // Find next block
@@ -4401,9 +4357,7 @@ async function renderGridView(container){
           nowPlaying = `${ch.name}: ${broadcast.showName.substring(0, 25)}...`;
           // Get the full schedule to find what's next
           const weeklySchedule = buildWeeklySchedule(ch, ch.networkShows);
-          const _d=new Date();
-          const _dow=_d.getUTCDay();
-          const _dsm=_dow===0?6:_dow-1;
+          const _d=new Date();const _dow=_d.getUTCDay();const _dsm=_dow===0?6:_dow-1;
           const secondsSinceWeekStart=_dsm*86400+_d.getUTCHours()*3600+_d.getUTCMinutes()*60+_d.getUTCSeconds();
           
           // Find next block
@@ -4450,9 +4404,7 @@ async function renderGridView(container){
           const ep = channelFiles[broadcast.episodeIndex];
           nowPlaying = `${ch.name}: ${ep.n}`;
           const weeklySchedule = buildWeeklySchedule(ch, channelFiles);
-          const _d=new Date();
-          const _dow=_d.getUTCDay();
-          const _dsm=_dow===0?6:_dow-1;
+          const _d=new Date();const _dow=_d.getUTCDay();const _dsm=_dow===0?6:_dow-1;
           const secondsSinceWeekStart=_dsm*86400+_d.getUTCHours()*3600+_d.getUTCMinutes()*60+_d.getUTCSeconds();
           
           let nextEp = null;
@@ -4842,39 +4794,23 @@ async function buildBrowseMenu(){
   
   // Filter to ONLY single-show channels (not masters, not live streams, not music, not YouTube)
   const singleShowChannels = CHANNELS.filter(ch => {
-    return !ch.master &&          // Not a network master
-           !ch.pluto &&           // Not a live stream
-           ch.cat !== 'Music' &&  // Not a music station
-           !ch.youtube &&         // Not YouTube
-           ch.embedOnly;          // Has an Archive.org ID (includes hidden channels)
+    return !ch.master &&
+           !ch.pluto &&
+           ch.cat !== 'Music' &&
+           !ch.youtube &&
+           ch.embedOnly;
   });
-
-  // Also add direct-archive master channels as browseable items
-  // These are channels whose networkShows are Archive.org IDs (F1, NASCAR, etc.)
   const directArchiveMasters = CHANNELS.filter(ch => {
-    if(!ch.master || !ch.networkShows || ch.networkShows.length === 0) return false;
-    if(ch.cat === 'Music') return false; // music handled separately
-    return ch.networkShows.every(s => /^[a-zA-Z0-9_\-\.\/_]+$/.test(s));
+    if(!ch.master||!ch.networkShows||ch.networkShows.length===0) return false;
+    if(ch.cat==='Music') return false;
+    return ch.networkShows.every(s=>/^[a-zA-Z0-9_\-\.\/]+$/.test(s));
   });
-
-  directArchiveMasters.forEach(ch => {
-    const cat = ch.cat || 'Other';
-    if(!categories[cat]) categories[cat] = [];
-    // Add each archive ID as a sub-show entry
-    ch.networkShows.forEach(archiveId => {
-      const displayName = archiveId
-        .replace(/[-_]/g, ' ')
-        .replace(/\w/g, l => l.toUpperCase())
-        .replace(/F1 /g, 'F1 ')
-        .replace(/Nascar/g, 'NASCAR')
-        .trim();
-      categories[cat].push({
-        num: ch.num,
-        name: displayName,
-        cat: cat,
-        embedOnly: archiveId,
-        _archiveSubItem: true
-      });
+  directArchiveMasters.forEach(ch=>{
+    const cat=ch.cat||'Other';
+    if(!categories[cat])categories[cat]=[];
+    ch.networkShows.forEach(archiveId=>{
+      const dn=archiveId.replace(/[-_.]/g,' ').trim().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+      categories[cat].push({num:ch.num,name:dn,cat:cat,embedOnly:archiveId,_archiveSubItem:true});
     });
   });
   
@@ -5014,7 +4950,7 @@ async function buildBrowseMenu(){
       const adultIcon = isAdultContent ? '🔞 ' : '';
       const chNumDisplay = ch.isSpiceContent ? '🔞 XXX' : `Ch ${ch.num}`;
       
-      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num}${(ch.isSpiceContent || ch._archiveSubItem) ? `, '${ch.embedOnly}'` : ''})" style="${adultStyle}">`;
+      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num}${(ch.isSpiceContent||ch._archiveSubItem) ? `, '${ch.embedOnly}'` : ''})" style="${adultStyle}">`;
       html+=`<div class="browse-ch-num">${chNumDisplay}</div>`;
       html+=`<div class="browse-ch-name">${adultIcon}${ch.name}</div>`;
       html+=`<div class="browse-ch-info">${ch.cat||'TV Show'}</div>`;
@@ -5101,7 +5037,7 @@ async function openAdultCatalog(){
     for(const ch of adultChannels){
       const chNumDisplay = ch.isSpiceContent ? '🔞 XXX' : `Ch ${ch.num}`;
       
-      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num}${(ch.isSpiceContent || ch._archiveSubItem) ? `, '${ch.embedOnly}'` : ''})" style="border: 3px solid #ff1493; background: rgba(255,20,147,0.1);">`;
+      html+=`<div class="browse-card" onclick="openShowDetails(${ch.num}${(ch.isSpiceContent||ch._archiveSubItem) ? `, '${ch.embedOnly}'` : ''})" style="border: 3px solid #ff1493; background: rgba(255,20,147,0.1);">`;
       html+=`<div class="browse-ch-num">${chNumDisplay}</div>`;
       html+=`<div class="browse-ch-name">🔞 ${ch.name}</div>`;
       html+=`<div class="browse-ch-info">Adult Content</div>`;
@@ -5116,29 +5052,25 @@ async function openAdultCatalog(){
 
 async function openShowDetails(chNum, spiceShowId){
   const content=document.getElementById('browse-content');
-  
-  // Handle archive sub-items (F1, NASCAR individual archive IDs, SpiceXXX)
+
+  // Non-adult archive sub-items (F1, NASCAR, etc.) - handle BEFORE SpiceXXX check
   if(spiceShowId && chNum !== 910){
-    // Generic archive sub-item - fetch the specific archive ID
-    const ch = CHANNELS.find(c => c.num === chNum);
-    const displayName = spiceShowId.replace(/[-_]/g,' ').replace(/\w/g,l=>l.toUpperCase());
+    const displayName = spiceShowId.replace(/[-_.]/g,' ').trim()
+      .split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     content.innerHTML=`<div style="text-align:center;padding:40px;font-family:VT323;font-size:1.6rem;color:var(--np-color);">Loading ${displayName}...</div>`;
     let episodes=[];
-    try{ episodes=await fetchFiles(spiceShowId); }catch(e){}
-    if(!episodes||episodes.length===0){
-      content.innerHTML=`<div style="padding:40px;text-align:center;font-family:VT323;font-size:1.4rem;color:#ff4444;">No content available.<br><button onclick="buildBrowseMenu()" style="margin-top:20px;background:transparent;border:1px solid var(--ch-color);color:var(--ch-color);font-family:VT323;font-size:1.2rem;padding:8px 20px;cursor:pointer;">← BACK</button></div>`;
-      return;
-    }
-    // Filter audio-only
+    try{ episodes=await fetchFiles(spiceShowId); }catch(e){ console.error(e); }
     const ae=['.mp3','.m4a','.aac','.ogg','.flac','.wav'];
     const vf=episodes.filter(f=>!ae.some(e=>f.u.toLowerCase().endsWith(e)));
     if(vf.length>0) episodes=vf;
-    let html=`<div class="show-detail-header"><button class="back-btn" onclick="buildBrowseMenu()">← BACK</button><div class="show-detail-title"><div class="show-title">${displayName}</div><div class="show-meta">${episodes.length} episodes • Archive.org</div></div></div><div class="episode-list">`;
+    if(!episodes||episodes.length===0){
+      content.innerHTML=`<div style="padding:40px;text-align:center;font-family:VT323;font-size:1.4rem;color:#ff4444;">No content found.<br><button onclick="buildBrowseMenu()" style="margin-top:20px;background:transparent;border:1px solid var(--ch-color);color:var(--ch-color);font-family:VT323;font-size:1.2rem;padding:8px 20px;cursor:pointer;">← BACK</button></div>`;
+      return;
+    }
+    let html=`<div class="show-detail-header"><button class="back-btn" onclick="buildBrowseMenu()">← BACK</button><div class="show-detail-title"><div class="show-title">${displayName}</div><div class="show-subtitle">${episodes.length} Episodes • Archive.org</div></div><button class="play-channel-btn" onclick="browsePlayEpisode(${chNum},'${spiceShowId}',0)">▶ PLAY FROM START</button></div><div class="episode-grid">`;
     episodes.forEach((ep,i)=>{
-      html+=`<div class="episode-item" onclick="browsePlayEpisode(${chNum},'${spiceShowId}',${i})">
-        <div class="ep-num">${String(i+1).padStart(2,'0')}</div>
-        <div class="ep-info"><div class="ep-title">${ep.n||'Episode '+(i+1)}</div></div>
-        <div class="ep-play">▶</div></div>`;
+      const dur=ep.dur?`${Math.floor(ep.dur/60)}:${String(Math.floor(ep.dur%60)).padStart(2,'0')}`:'';
+      html+=`<div class="episode-card" onclick="browsePlayEpisode(${chNum},'${spiceShowId}',${i})"><div class="episode-num">EP ${i+1}</div><div class="episode-name">${ep.n||'Episode '+(i+1)}</div>${dur?`<div class="episode-duration">${dur}</div>`:''}<div class="episode-play">▶ PLAY</div></div>`;
     });
     html+=`</div>`;
     content.innerHTML=html;
@@ -5785,13 +5717,8 @@ function toggleSettings(){
 // Modify openShowDetails to check PIN for SpiceXXX content
 const originalOpenShowDetails = openShowDetails;
 openShowDetails = async function(chNum, spiceShowId){
-  if(spiceShowId || chNum === 910){
-    // This is adult content
-    checkAdultAccess((allowed) => {
-      if(allowed){
-        originalOpenShowDetails(chNum, spiceShowId);
-      }
-    });
+  if(chNum === 910){
+    checkAdultAccess((allowed) => { if(allowed) originalOpenShowDetails(chNum, spiceShowId); });
   } else {
     originalOpenShowDetails(chNum, spiceShowId);
   }
@@ -6044,12 +5971,18 @@ selectCh = async function(idx){
 function browsePlayEpisode(chNum, archiveId, epIdx){
   const ch = CHANNELS.find(c => c.num === chNum);
   if(!ch) return;
-  // Close browse, switch to channel, then load specific episode
-  toggleGuide();
+  // Disable scrambler for non-adult channels
+  if(chNum !== 910){
+    scramblerActive = false;
+    const p2 = document.getElementById('player');
+    if(p2) p2.classList.remove('scrambled');
+    const sb = document.getElementById('scrambler-btn');
+    if(sb) sb.style.display = 'none';
+  }
+  toggleBrowse();
   browseMode = true;
   isLiveMode = false;
   curEpIdx = epIdx;
-  // Load the channel then seek to specific episode
   fetchFiles(archiveId).then(files => {
     const ae=['.mp3','.m4a','.aac','.ogg','.flac','.wav'];
     const vf=files.filter(f=>!ae.some(e=>f.u.toLowerCase().endsWith(e)));
