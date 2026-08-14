@@ -1253,6 +1253,103 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
 </div>
 
 <script>
+// ─────────────────────────────────────────────────────────────────────────
+// SAFE STORAGE — touching localStorage THROWS (not returns null) when storage
+// is blocked: SL's CEF with storage off, cookies disabled, file://. Any throw
+// at top level kills every function defined after it.
+// ─────────────────────────────────────────────────────────────────────────
+const Store = (function(){
+  const mem = {};
+  let ok = false;
+  try { const k='__t'+Date.now(); window.localStorage.setItem(k,'1'); window.localStorage.removeItem(k); ok=true; }
+  catch(e){ console.warn('localStorage unavailable ('+(e&&e.name)+') — in-memory fallback.'); }
+  return {
+    available: ok,
+    getItem(k){ if(ok){ try { return window.localStorage.getItem(k); } catch(e){} } return mem[k]===undefined?null:mem[k]; },
+    setItem(k,v){ mem[k]=String(v); if(ok){ try { window.localStorage.setItem(k,v); } catch(e){} } },
+    removeItem(k){ delete mem[k]; if(ok){ try { window.localStorage.removeItem(k); } catch(e){} } }
+  };
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// BROADCAST CONTROL — the LSL script is the authority.
+// SL viewers all load whatever URL the prim's media is set to, so the channel
+// travels in the URL: index.html#ch=512&n=<nonce>. When the owner changes the
+// channel, LSL re-sets the URL and every nearby viewer follows.
+// ─────────────────────────────────────────────────────────────────────────
+window.addEventListener('hashchange', function(){
+  try {
+    const st = readUrlState();
+    if(!st || typeof CHANNELS === 'undefined') return;
+    const i = CHANNELS.findIndex(x => x.num === st.ch);
+    if(i >= 0 && i !== curIdx){
+      console.log('📡 hashchange → channel ' + st.ch);
+      _fromUrl=true; selectCh(i); _fromUrl=false;
+    }
+  } catch(e){}
+});
+
+// ─────────────────────────────────────────────────
+// BROADCAST RELAY — page tells LSL what the controller picked,
+// LSL pushes the new URL to all viewers.
+// ─────────────────────────────────────────────────
+let _relayUrl = null;
+let _fromUrl = false;
+
+function getRelayUrl(){
+  if(_relayUrl) return _relayUrl;
+  try {
+    const h = (location.hash || '').replace(/^#/, '');
+    const q = new URLSearchParams(h);
+    const r = q.get('relay');
+    if(r && r.startsWith('http')) { _relayUrl = r; return r; }
+  } catch(e){}
+  return null;
+}
+
+function relayChannel(chNum){
+  if(_fromUrl) return;
+  const url = getRelayUrl();
+  if(!url) return;
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'text/plain'},
+    body: 'ch=' + chNum
+  }).catch(e => console.warn('relay failed:', e));
+}
+
+function relayPower(onOff){
+  if(_fromUrl) return;
+  const url = getRelayUrl();
+  if(!url) return;
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'text/plain'},
+    body: 'power=' + (onOff ? 'on' : 'off')
+  }).catch(e => console.warn('relay failed:', e));
+}
+
+function readUrlState(){
+  try {
+    const h = (location.hash || '').replace(/^#/, '');
+    if(h.indexOf('=') < 0) return null;
+    const q = new URLSearchParams(h);
+    const raw = q.get('ch') || q.get('channel');
+    if(raw === null) return null;
+    const n = parseInt(raw, 10);
+    if(!isFinite(n)) return null;
+    return {
+      ch: n,
+      show: q.get('show') || null,    // on-demand: specific archive ID
+      game: q.get('game') || null,     // arcade: game ID
+      t: q.get('t') || null,
+      power: q.get('power') || null            // seek offset for mid-show join
+    };
+  } catch(e){ return null; }
+}
+// back-compat
+function readUrlChannel(){ const s = readUrlState(); return s ? s.ch : null; }
+
 const B = "https://archive.org/download/";
 
 // SHORT RETRO COMMERCIALS - 30-60 SECONDS (80s-2000s era only)
@@ -1654,7 +1751,6 @@ const CHANNELS = [
   { num:400, name:"Party of Five", cat:"Drama", avgDur:2700, embedOnly:"party-of-five-complete-series", files:[{u:"",n:"Party of Five"}] },
   { num:401, name:"Live PD Wanted", cat:"Drama", avgDur:2700, embedOnly:"live.-pd.-wanted.-s-01-e-07.720p.-hdtv.x-264-cri-mson-obfuscated", files:[{u:"",n:"Live PD: Wanted"}] },
   { num:402, name:"NYPD Blue", cat:"Drama", avgDur:2700, embedOnly:"001-nypd-blue", files:[{u:"",n:"NYPD Blue"}] },
-  { num:403, name:"Real Sex HBO", cat:"Drama", avgDur:2700, embedOnly:"hborealsex", files:[{u:"",n:"HBO Real Sex"}] },
 
   // ══════════════════════════════════════════════════════════════
   // NEW CHANNELS - DAYTIME TV
@@ -1772,9 +1868,7 @@ const CHANNELS = [
   // ══════════════════════════════════════════════════════════════
   // AUTOMOTIVE CHANNELS
   // ══════════════════════════════════════════════════════════════
-  { num:640, name:"Formula 1 Racing", cat:"Automotive", avgDur:5400, master:true,
-    networkShows:["all-the-formula-1-races-from-1950-to-2018","all-the-formula-1-races-from-2019","All-the-Formula-1-races-from-2012","f1-1999-full-race-replys-grand-prix-highlights-and-reviews","f1-2001-full-race-replys-grand-prix-highlights-and-reviews","f1-2002-full-race-replys-grand-prix-highlights-and-reviews","f1-2008-gp-reviews","f1-1997-full-race-replys-grand-prix-highlights-and-reviews","f1-1998-full-race-replys-grand-prix-highlights-and-reviews","f1-1995-full-race-replys-grand-prix-highlights-and-reviews","f1-1986-full-race-replys-grand-prix-highlights-and-reviews"],
-    files:[{u:"",n:"Formula 1"}] },
+  { num:640, name:"Formula 1 Racing", cat:"Automotive", avgDur:5400, embedOnly:"all-the-formula-1-races-from-1950-to-2018", files:[{u:"",n:"Formula 1"}] },
   { num:641, name:"NASCAR Racing", cat:"Automotive", avgDur:7200, master:true,
     networkShows:["nascar-cup-series-full-races-archival","nascar-cup-series-full-races-archival-p2","nascar-truck-series-full-races-archival","nascar-2nd-series-full-races-archival","arca-racing-series-full-races-archival","nascar-regional-full-races-archival","nascar-dash-series-full-races-archival"],
     files:[{u:"",n:"NASCAR"}] },
@@ -1809,45 +1903,7 @@ const CHANNELS = [
   { num:909, name:"🎭 Prime Time Drama", cat:"Network Master", master:true, networkShows:["Party of Five","Live PD Wanted","NYPD Blue"], avgDur:2700, files:[{u:"",n:"Prime Time Drama"}] },
 
   { num:910, name:"🔞 SpiceXXX Network", cat:"Adult", master:true, 
-    networkShows:[
-      "hborealsex","laguna-beach-bikini-bash-bikini-bash","palm-spring-bikini-bash-bikini-bash","beverly-hills-bikini-contest",
-      "california-swimsuit-spectacular-vhs","nitro-girls-swimsuit-calendar-special-vhs","si-swimsuit-97-vhs",
-      "sports-illustrated-2000-swimsuit-video-vhs","sports-illustrated-swimsuit-issue-2007",
-      "california-foxhunt-lingerie-contest","sports-illustrated-swimsuit-1998-vhs",
-      "sports-illustrated-1995-swimsuit-video-vhs","sports-illustrated-30th-anniversary-swimsuit-video",
-      "sports-illustrated-1999-swimsuit-video-vhs","sports-illustrated-the-1993-swimsuit-video-vhs",
-      "sports-illustrated-swimsuit-2005-vhs","sports-illustrated-swimsuit-2010-vhs",
-      "sports-illustrated-swimsuit-2002-vhs","sports-illustrated-2002-swimsuit-video-vhs",
-      "sports-illustrated-1996-swimsuit-video-vhs","sports-illustrated-swimsuit-issue-2001",
-      "hooters-island-paradise-vhs","sports-illustrated-swimsuit-2003-vhs",
-      "dazzling-women-of-sport-the-making-of-sport-magazines-91-swimsuit-issue-vhs",
-      "the-best-of-the-sports-illustrated-swimsuit-model-search-vhs-2005",
-      "sports-illustrated-the-making-of-the-1995-swimsuit-issue-video-vhs",
-      "the-best-of-the-sports-illustrated-swimsuit-model-search-featurette-vhs-2005",
-      "sports-illustrated-25th-anniversary-swimsuit-video-1989","capture-a-1684",
-      "girls-gone-wild-tv-spot","girls-gone-wild-mardi-gras-college-co-eds-2000-vhs",
-      "girls-gone-wild-college-spring-break-1999-vhs","americas-funniest-home-videos-uncensored",
-      "Girls_Girls_Girls","playboyvideopartyjokes",
-      "playboy-workout-with-jeana-tomasino-and-victoria-cooke-1983",
-      "6_Hours_of_Amateur_and_Pro_Porn","Random_Sets_of_Adult_Films_and_Materials",
-      "nina-hartley-pool-sex-video","Up_and_Cummers_3","encounters-h-264-master",
-      "sensualrealitycomputerescapes1996","WarmUpToTraciLordsExerciseVideo1990",
-      "playboy-video-magazine-11","temping-trios","playboygirlsoftheinternet",
-      "playboy-wet-wild-iv","playboy1989videoplaymatecalendar","playboy-channel-late-1986-my-vhsrip",
-      "playboy-sexy-lingerie-ii","playboy-video-magazine-3","howtohavecybersexontheinternet1996",
-      "tasha-lane-playboy-video","krista-fox-playboy-video-2","carla-blake-playboy-video-2",
-      "susie-grey-playboy-video","tanya-reed-playboy-video","krista-fox-playboy-video",
-      "penthouse-productions-movies-collection","blonde-heaven-1995-tvrip-xvi-d-maestro-cg",
-      "TheVistaGroup-90sLateNightAdultHotlineCommercialsVol1","ultra-flesh-1980-1080p",
-      "98_20220403/8.mp4","2016-07-04-girls-of-electric-blue-vol.-1",
-      "playboy-video-playmate-calendar-2003","playboy-video-playmate-calendar-1991","california-girls-vhd-1983",
-      "booty-hunter-2012","desire-and-deception-2001","maximum-thrust-2003",
-      "sin-city-diaries-the-midnight-show","fred-olen-ray-double-feature",
-      "the-erotic-traveler-object-of-desire","zanes-jump-off-complete-series",
-      "emmanuelle-1993-complete-series","erotic-dreams","titanic6",
-      "mp_Heavenly_Bodies_Penthouse_Japan_Bill_Cote","Utmtv-BarbieIsACutieWithABOOTYBOOTYBOOTY674-3",
-      "hollywood-honeys-no.-381","a-free-ride","am-abend","98_20220403"
-    ], avgDur:3600, files:[{u:"",n:"SpiceXXX Network"}] },
+    networkShows:["laguna-beach-bikini-bash-bikini-bash","palm-spring-bikini-bash-bikini-bash","beverly-hills-bikini-contest","nitro-girls-swimsuit-calendar-special-vhs","california-foxhunt-lingerie-contest","playboy-sexy-lingerie-ii"], avgDur:3600, files:[{u:"",n:"SpiceXXX Network"}] },
 
   { num:911, name:"🚀 Sci-Fi Movies", cat:"Movies Master", master:true,
     networkShows:[
@@ -2764,14 +2820,14 @@ async function fetchFiles(identifier){
       if(!f.name) return false;
       
       // Accept ALL common audio/video formats
+      // Browsers cannot decode .avi, .mpg/.mpeg, .mkv or most .mov — they were
+      // being scheduled and produced a dead or silent slot. Removed.
       const validExtensions = [
-        '.mp4', '.ia.mp4',     // Video
-        '.mp3', '.m4a', '.aac', // Audio (compressed)
-        '.ogg', '.oga',        // Ogg audio
-        '.flac', '.wav',       // Lossless audio
-        '.webm', '.mkv',                // Web/container formats
-        '.mpeg', '.mpg', '.avi',        // Legacy video
-        '.mov', '.m4v', '.ogv'          // Other video formats
+        '.mp4', '.ia.mp4', '.m4v',      // Video (browser-safe containers)
+        '.webm', '.ogv',                // Open video
+        '.mp3', '.m4a', '.aac',         // Audio (compressed)
+        '.ogg', '.oga', '.opus',        // Ogg audio
+        '.flac', '.wav'                 // Lossless audio (music channels)
       ];
       
       const hasValidExt = validExtensions.some(ext => f.name.toLowerCase().endsWith(ext));
@@ -2787,11 +2843,22 @@ async function fetchFiles(identifier){
       return true;
     }).sort((a,b)=>{
       // Prefer .mp4 and .mp3 (most compatible)
-      const aScore = (a.name.endsWith('.mp4') || a.name.endsWith('.mp3')) ? 2 : 
-                     (a.name.endsWith('.ia.mp4')) ? 1 : 0;
-      const bScore = (b.name.endsWith('.mp4') || b.name.endsWith('.mp3')) ? 2 : 
-                     (b.name.endsWith('.ia.mp4')) ? 1 : 0;
-      return bScore - aScore || a.name.localeCompare(b.name);
+      // THE NO-AUDIO BUG: this ranked raw .mp4 ABOVE .ia.mp4 — backwards.
+      // .ia.mp4 is archive.org's own transcode: H.264 video + AAC audio,
+      // guaranteed to play in a browser. A raw .mp4 upload is whatever the
+      // uploader had, and TV rips very often carry AC-3 / E-AC-3 audio, which
+      // Chrome cannot decode for licensing reasons. Result: picture plays,
+      // no sound. Prefer the derivative.
+      const rank = n => {
+        n = n.toLowerCase();
+        if(n.endsWith('.ia.mp4')) return 0;   // archive transcode — safest
+        if(n.endsWith('.mp4') || n.endsWith('.m4v')) return 1;
+        if(n.endsWith('.webm')) return 2;
+        if(n.endsWith('.ogv'))  return 3;
+        if(n.endsWith('.mp3') || n.endsWith('.m4a') || n.endsWith('.aac')) return 4;
+        return 5;
+      };
+      return rank(a.name) - rank(b.name) || a.name.localeCompare(b.name);
     });
     
     console.log(`Fetched ${files.length} playable files from ${identifier} (filtered skits/intros/shorts)`);
@@ -2810,12 +2877,31 @@ async function fetchFiles(identifier){
   }
 }
 
+let tuneGen = 0;
+let loadWatchdog = null;
+
 async function selectCh(idx){
-  if(loading){
-    console.warn('Already loading, please wait...');
-    return;
-  }
+  // A newer press SUPERSEDES an in-flight one instead of being rejected.
+  // The old guard ignored the second press, so mashing the remote felt broken —
+  // and if `loading` ever stuck true the whole TV was bricked until reload.
+  const myGen = ++tuneGen;
+  const stale = () => myGen !== tuneGen;
+
   safeSetLoading(true);curIdx=idx;
+
+  // Tell LSL so it pushes the new URL to all viewers.
+  const _ch = CHANNELS[idx];
+  if(_ch) relayChannel(_ch.num);
+
+
+  // Failsafe: never let the loading flag strand the UI.
+  if(loadWatchdog) clearTimeout(loadWatchdog);
+  loadWatchdog = setTimeout(() => {
+    if(myGen === tuneGen && loading){
+      console.warn('⏱️ Load watchdog fired — clearing stuck loading state');
+      safeSetLoading(false);
+    }
+  }, 20000);
   const ch=CHANNELS[idx];
   // Clear scrambler for non-adult channels
   if(!ch || ch.num !== 910){
@@ -3105,11 +3191,28 @@ async function selectCh(idx){
         });
       }
       
-      // Find the specific show channel
-      const showChannel = genreChannels.find(c => 
-        c.name.toLowerCase().includes(currentShowName.toLowerCase()) ||
-        currentShowName.toLowerCase().includes(c.name.toLowerCase())
-      );
+      // Find the specific show channel.
+      // Bidirectional includes() was too greedy: looking for "The Batman" also
+      // matched a channel just named "Batman", and whichever find() hit first
+      // won — so master channels announced one show and played another.
+      // Exact match wins; otherwise take the CLOSEST match, not the first.
+      const _want = currentShowName.toLowerCase().trim();
+      let showChannel = genreChannels.find(c => c.name.toLowerCase().trim() === _want);
+      if(!showChannel){
+        const cands = genreChannels.filter(c => {
+          const n = c.name.toLowerCase().trim();
+          return n.includes(_want) || _want.includes(n);
+        });
+        // Closest = smallest length difference, so "The Batman" prefers
+        // "The Batman" over "Batman Beyond".
+        cands.sort((a,b) =>
+          Math.abs(a.name.length - _want.length) - Math.abs(b.name.length - _want.length));
+        showChannel = cands[0];
+        if(cands.length > 1){
+          console.log('⚠️ "' + currentShowName + '" matched ' + cands.length +
+                      ' channels — chose "' + showChannel.name + '"');
+        }
+      }
       
       if(!showChannel){
         console.error('Could not find show:', currentShowName);
@@ -5338,7 +5441,7 @@ async function playSpiceContent(showId, episodeIdx){
 function saveWatchHistory(showName, episodeIdx, channelNum){
   try {
     // Get existing history
-    let history = JSON.parse(localStorage.getItem('sinister-watch-history') || '[]');
+    let history = JSON.parse(Store.getItem('sinister-watch-history') || '[]');
     
     // Add/update this show
     const existing = history.findIndex(h => h.showName === showName);
@@ -5358,7 +5461,7 @@ function saveWatchHistory(showName, episodeIdx, channelNum){
     // Keep only last 20 shows
     history = history.slice(0, 20);
     
-    localStorage.setItem('sinister-watch-history', JSON.stringify(history));
+    Store.setItem('sinister-watch-history', JSON.stringify(history));
   } catch(e) {
     console.error('Error saving watch history:', e);
   }
@@ -5366,7 +5469,7 @@ function saveWatchHistory(showName, episodeIdx, channelNum){
 
 function getWatchHistory(){
   try {
-    return JSON.parse(localStorage.getItem('sinister-watch-history') || '[]');
+    return JSON.parse(Store.getItem('sinister-watch-history') || '[]');
   } catch(e) {
     return [];
   }
@@ -5388,11 +5491,18 @@ const THEMES=['','sears','jcpenney','zenith','trinitron','spaceage','neon','midn
 function setTheme(t){
   document.body.className=t;
   document.querySelectorAll('.thm').forEach((el,i)=>el.classList.toggle('on',THEMES[i]===t));
-  localStorage.setItem('sinister-theme',t);
+  Store.setItem('sinister-theme',t);
   document.getElementById('thm-panel').classList.remove('show');
 }
 
-let tvOff=true; // Start powered OFF - user must click power button to turn on
+// If the URL has a channel, the TV was turned on by the controller — auto power on.
+// If URL says power=off, stay off. Otherwise default off until user clicks power.
+let tvOff = true;
+(function checkUrlPower(){
+  const s = readUrlState();
+  if(s && s.power === 'off') { tvOff = true; return; }
+  if(s && s.ch) { tvOff = false; }   // LSL pushed a channel = TV is on
+})();
 function toggleOff(){
   tvOff=!tvOff;
   const os=document.getElementById('off-screen');
@@ -5410,22 +5520,45 @@ function toggleOff(){
     os.classList.add('show');
     btn.classList.add('on');
     btn.textContent='⏻';
+    relayPower(false);
   } else {
     const player=document.getElementById('player');
     player.muted = false; // Unmute when turning ON
     os.classList.remove('show');
     btn.classList.remove('on');
     btn.textContent='⭕';
-    // If no channel selected yet, start with channel 0
-    if(curIdx >= 0) {
-      selectCh(curIdx);
+    relayPower(true);
+    // BROADCAST CONTROL: the URL IS the remote. LSL sets the prim's media URL,
+    // every nearby viewer loads it, and they all land here on the same content.
+    // Owner changes channel → everyone sees it. Owner picks on-demand → everyone
+    // watches. Owner starts an arcade game → everyone's screen shows it.
+    // If LSL says power off, stay off
+    const _urlState = readUrlState();
+    if(_urlState && _urlState.power === 'off'){
+      tvOff = true;
+      os.classList.add('show');
+      btn.classList.add('on');
+      btn.textContent='⏻';
+      return;
+    }
+    if(_urlState !== null){
+      const _i = CHANNELS.findIndex(x => x.num === _urlState.ch);
+      if(_i >= 0){
+        console.log('📡 Broadcast:', JSON.stringify(_urlState));
+        _fromUrl=true; selectCh(_i); _fromUrl=false;
+      } else {
+        console.warn('📡 URL channel ' + _urlState.ch + ' not found — falling back');
+        _fromUrl=true; selectCh(curIdx >= 0 ? curIdx : 0); _fromUrl=false;
+      }
+    } else if(curIdx >= 0) {
+      _fromUrl=true; selectCh(curIdx); _fromUrl=false;
     } else {
-      selectCh(0); // Start with first channel
+      _fromUrl=true; selectCh(0); _fromUrl=false; // Start with first channel
     }
   }
 }
 
-const saved=localStorage.getItem('sinister-theme');
+const saved=Store.getItem('sinister-theme');
 if(saved!==null) setTheme(saved);
 
 let numberBuffer = '';
@@ -5504,7 +5637,7 @@ let persistentVolume = 0.75; // Default volume
 
 if(volSlider && player){
   // Load saved volume from localStorage
-  const savedVol = localStorage.getItem('sinister-volume');
+  const savedVol = Store.getItem('sinister-volume');
   if(savedVol !== null){
     persistentVolume = savedVol / 100;
     volSlider.value = savedVol;
@@ -5519,7 +5652,7 @@ if(volSlider && player){
   volSlider.addEventListener('input', function(){
     persistentVolume = this.value / 100;
     player.volume = persistentVolume;
-    localStorage.setItem('sinister-volume', this.value);
+    Store.setItem('sinister-volume', this.value);
   });
   
   // CRITICAL: Restore volume every time a new video loads
@@ -5562,8 +5695,8 @@ let hideAdultContent = false;
 
 // Initialize parental controls on load
 function initParentalControls(){
-  const savedPin = localStorage.getItem('sinister-parental-pin');
-  const hideAdult = localStorage.getItem('sinister-hide-adult');
+  const savedPin = Store.getItem('sinister-parental-pin');
+  const hideAdult = Store.getItem('sinister-hide-adult');
   
   if(savedPin){
     parentalPinSet = true;
@@ -5578,7 +5711,7 @@ function initParentalControls(){
   }
   
   // Check if unlock has expired
-  const expiry = localStorage.getItem('sinister-adult-unlock-expiry');
+  const expiry = Store.getItem('sinister-adult-unlock-expiry');
   if(expiry && Date.now() < parseInt(expiry)){
     adultUnlocked = true;
     adultUnlockExpiry = parseInt(expiry);
@@ -5607,7 +5740,7 @@ function setParentalPin(){
   
   parentalPinHash = simpleHash(pin);
   parentalPinSet = true;
-  localStorage.setItem('sinister-parental-pin', parentalPinHash);
+  Store.setItem('sinister-parental-pin', parentalPinHash);
   
   document.getElementById('pin-not-set').style.display = 'none';
   document.getElementById('pin-is-set').style.display = 'block';
@@ -5624,9 +5757,9 @@ function removeParentalPin(){
   parentalPinSet = false;
   parentalPinHash = null;
   adultUnlocked = false;
-  localStorage.removeItem('sinister-parental-pin');
-  localStorage.removeItem('sinister-adult-unlock-expiry');
-  localStorage.removeItem('sinister-hide-adult');
+  Store.removeItem('sinister-parental-pin');
+  Store.removeItem('sinister-adult-unlock-expiry');
+  Store.removeItem('sinister-hide-adult');
   hideAdultContent = false;
   
   document.getElementById('pin-not-set').style.display = 'block';
@@ -5638,7 +5771,7 @@ function removeParentalPin(){
 
 function toggleHideAdult(){
   hideAdultContent = document.getElementById('hide-adult-toggle').checked;
-  localStorage.setItem('sinister-hide-adult', hideAdultContent);
+  Store.setItem('sinister-hide-adult', hideAdultContent);
 }
 
 function checkAdultAccess(callback){
@@ -5683,7 +5816,7 @@ function unlockAdultContent(){
     // Correct PIN
     adultUnlocked = true;
     adultUnlockExpiry = Date.now() + (60 * 60 * 1000); // 1 hour
-    localStorage.setItem('sinister-adult-unlock-expiry', adultUnlockExpiry);
+    Store.setItem('sinister-adult-unlock-expiry', adultUnlockExpiry);
     
     document.getElementById('pin-unlock-panel').style.display = 'none';
     
