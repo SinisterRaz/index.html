@@ -2907,8 +2907,12 @@ let loadWatchdog = null;
       if(player.readyState >= 2) { consecutiveStalls = 0; return; }
       consecutiveStalls++;
       console.warn('⏱️ Video stalled ('+consecutiveStalls+') — no playable data in '+STALL_MS+'ms for', player.currentSrc || player.src);
-      if(consecutiveStalls < MAX_SKIPS && typeof nextEp === 'function'){
-        try { nextEp(); return; } catch(e){ console.error('stall skip failed', e); }
+      // Recover WITHOUT leaving live mode. The old code called nextEp() here, but
+      // nextEp() is an on-demand action that flips the TV out of live mode — so a
+      // slow load would silently drop you to on-demand. Re-tuning the current
+      // channel preserves live mode and recalculates a fresh broadcast position.
+      if(consecutiveStalls < MAX_SKIPS && typeof selectCh === 'function' && curIdx >= 0){
+        try { selectCh(curIdx); return; } catch(e){ console.error('stall recovery failed', e); }
       }
       // Give up gracefully instead of spinning forever.
       consecutiveStalls = 0;
@@ -3576,8 +3580,16 @@ async function selectCh(idx){
       player.load();
       player.addEventListener('loadedmetadata',function onM(){
         player.removeEventListener('loadedmetadata',onM);
-        const sk=Math.min(offset,Math.max(0,(player.duration||0)-10));
-        if(sk>0 && isLiveMode) player.currentTime=sk; // Only seek in LIVE mode
+        // Wrap the schedule offset into the video's REAL length. The old code
+        // clamped to duration-10, so any channel whose guessed length was longer
+        // than the actual file joined at the last 10 seconds (wrong start) AND had
+        // to buffer the whole file to get there (30s load). Modulo joins at a real
+        // point inside the clip; if that lands in the final 15s, start fresh.
+        if(isLiveMode && offset>0 && player.duration>0){
+          let sk = offset % player.duration;
+          if(sk > player.duration - 15) sk = 0;
+          if(sk > 0) player.currentTime = sk;
+        }
         player.play().catch(()=>{});
       });
       player.onended=()=>{
@@ -3630,7 +3642,9 @@ function playEp(ep){
       if(broadcast && !broadcast.isCommercial && broadcast.episodeIndex === curEpIdx){
         const syncPosition = broadcast.timeIntoBlock;
         console.log('LIVE MODE: Syncing to position:', syncPosition);
-        player.currentTime = Math.min(syncPosition, Math.max(0, (player.duration || 0) - 10));
+        let sk = player.duration>0 ? (syncPosition % player.duration) : 0;
+        if(sk > player.duration - 15) sk = 0;   // don't join at the dead end
+        if(sk > 0) player.currentTime = sk;
       } else {
         console.log('LIVE MODE: Episode index mismatch or in commercial, playing from start');
       }
