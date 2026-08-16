@@ -1473,15 +1473,6 @@ const CHANNELS = [
   // COMEDY
   // ══════════════════════════════════════════════
   {
-    num:2, name:"Three Stooges", cat:"Comedy", avgDur:1100,
-    files:[
-      {u:B+"3stooges/3stooges_NewApants2.mp4",   n:"Sing a Song of Six Pants"},
-      {u:B+"3stooges/3stooges_NewDisorder2.mp4", n:"Disorder in the Court"},
-      {u:B+"3stooges/3stooges_NewGroom.mp4",     n:"Brideless Groom"},
-      {u:B+"3stooges/3stooges_NewMalice1.mp4",   n:"Malice in the Palace"},
-    ]
-  },
-  {
     num:3, name:"Three Stooges Toons", cat:"Comedy", avgDur:900,
     files:[
       {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x112%20-%20%27Fraidy%20Cat.mp4",          n:"Fraidy Cat"},
@@ -2460,11 +2451,14 @@ let currentMasterShow=null; // Track current show on master channels
 document.addEventListener('DOMContentLoaded', function(){
   const player = document.getElementById('player');
   
-  // Pre-fetch commercials in background
-  console.log('Starting to fetch commercials from collections...');
-  fetchAllCommercials().then(() => {
-    console.log('Commercials ready!');
-  });
+  // Pre-fetch commercials LATER, off the critical path. This used to fire on
+  // load and kick off ~21 sequential archive.org requests that competed with
+  // the first channel's video fetch. 20 fallback commercials cover us until
+  // this quietly runs, so nothing waits on it.
+  setTimeout(function(){
+    console.log('Starting background commercial prefetch...');
+    fetchAllCommercials().then(() => { console.log('Commercials ready!'); });
+  }, 20000);
   
   player.addEventListener('pause', function(e){
     const ch = CHANNELS[curIdx];
@@ -2879,6 +2873,59 @@ async function fetchFiles(identifier){
 
 let tuneGen = 0;
 let loadWatchdog = null;
+
+// ─────────────────────────────────────────────────────────────
+// VIDEO STALL WATCHDOG
+// The one failure mode selectCh could NOT recover from: a source
+// gets assigned to player.src but never fires loadedmetadata
+// (dead archive.org link, CORS block in SL's CEF, or a codec the
+// browser won't decode). The idle overlay clears but the <video>
+// spins forever, because 'error' does not fire on an indefinite
+// stall — only on hard failures. That is the "loads infinitely" bug.
+//
+// This attaches ONCE and watches every src assignment globally, so
+// no individual tune path needs changing. If a load produces no
+// playable data in STALL_MS, it skips to the next episode; after a
+// few consecutive dead sources it surfaces a clear on-screen error
+// instead of hanging.
+// ─────────────────────────────────────────────────────────────
+(function installStallWatchdog(){
+  const player = document.getElementById('player');
+  if(!player) return;
+  const STALL_MS = 15000;   // no playable data within 15s = stalled
+  const MAX_SKIPS = 3;      // dead files to skip before showing an error
+  let stallTimer = null;
+  let consecutiveStalls = 0;
+
+  function clearStall(){ if(stallTimer){ clearTimeout(stallTimer); stallTimer = null; } }
+
+  function armStall(){
+    clearStall();
+    stallTimer = setTimeout(function(){
+      stallTimer = null;
+      // readyState >= 2 (HAVE_CURRENT_DATA) means it actually loaded — not a stall.
+      if(player.readyState >= 2) { consecutiveStalls = 0; return; }
+      consecutiveStalls++;
+      console.warn('⏱️ Video stalled ('+consecutiveStalls+') — no playable data in '+STALL_MS+'ms for', player.currentSrc || player.src);
+      if(consecutiveStalls < MAX_SKIPS && typeof nextEp === 'function'){
+        try { nextEp(); return; } catch(e){ console.error('stall skip failed', e); }
+      }
+      // Give up gracefully instead of spinning forever.
+      consecutiveStalls = 0;
+      if(typeof showSplash === 'function') showSplash('SOURCE UNAVAILABLE — TRY ANOTHER CHANNEL');
+    }, STALL_MS);
+  }
+
+  // A real, playable load clears the timer and the counter.
+  function loadedOK(){ clearStall(); consecutiveStalls = 0; }
+
+  player.addEventListener('loadstart',      armStall);
+  player.addEventListener('loadedmetadata', loadedOK);
+  player.addEventListener('canplay',        loadedOK);
+  player.addEventListener('playing',        loadedOK);
+  // Hard errors already have their own onerror recovery in selectCh; just stop our timer.
+  player.addEventListener('error',          clearStall);
+})();
 
 async function selectCh(idx){
   // A newer press SUPERSEDES an in-flight one instead of being rejected.
@@ -3538,8 +3585,8 @@ async function selectCh(idx){
       };
       document.getElementById('idle').classList.add('gone');
       safeSetLoading(false);
-    },500);
-  },400);
+    },0);   // was 500ms of artificial "tuning" delay before src was set
+  },0);     // was 400ms before any tune logic ran — video now starts loading immediately
 }
 
 function playEp(ep){
