@@ -1473,7 +1473,7 @@ const CHANNELS = [
   // COMEDY
   // ══════════════════════════════════════════════
   {
-    num:3, name:"Three Stooges Toons", cat:"Comedy", avgDur:900,
+    num:3, name:"Three Stooges", cat:"Comedy", avgDur:900,
     files:[
       {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x112%20-%20%27Fraidy%20Cat.mp4",          n:"Fraidy Cat"},
       {u:B+"the_three_stooges_specials/The%20Three%20Stooges%20-%200x114%20-%20Aim%2C%20Fire%2C%20Scoot.mp4", n:"Aim Fire Scoot"},
@@ -5571,6 +5571,11 @@ function toggleOff(){
   } else {
     const player=document.getElementById('player');
     player.muted = false; // Unmute when turning ON
+    // Powering ON always returns to LIVE broadcast. From here, only on-demand
+    // features (next/prev episode, browse, binge) can leave live mode.
+    isLiveMode = true;
+    browseMode = false;
+    updateLiveIndicator();
     os.classList.remove('show');
     btn.classList.remove('on');
     btn.textContent='⭕';
