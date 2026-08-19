@@ -2552,6 +2552,7 @@ function buildWeeklySchedule(ch, contentList){
 
 // Get what's broadcasting NOW based on weekly schedule
 function getCurrentBroadcast(ch, files){
+  if(!ch) return null;   // guard: never crash on a missing channel
   const now = Date.now();
   
   const weekNumber = getCurrentWeek();
@@ -2645,6 +2646,14 @@ function getSyncedCommercial(){
   const now = Date.now();
   const commercialIndex = Math.floor((now / 60000) % SHORT_COMMERCIALS.length);
   return SHORT_COMMERCIALS[commercialIndex];
+}
+// Two commercials chosen by clock, so every synced viewer sees the SAME ad break.
+// Uses the hardcoded fallback list (identical on every client) rather than the
+// fetched pool (which can differ per viewer).
+function getSyncedTwoCommercials(){
+  const base = Math.floor(Date.now() / 60000);
+  const len = SHORT_COMMERCIALS.length;
+  return [ SHORT_COMMERCIALS[base % len], SHORT_COMMERCIALS[(base + 1) % len] ];
 }
 
 // Update UI for LIVE/ON DEMAND mode
@@ -2801,10 +2810,28 @@ function showOSD(ch){
   updateScramblerButton();
 }
 
+// Prebuilt media database (db.json): maps each archive.org identifier to its
+// resolved file list, so tuning skips the slow LIVE archive.org metadata call
+// that made channels crawl. Loads once on startup; until it arrives — or if the
+// file isn't present — fetchFiles falls back to the live call automatically.
+let MEDIA_DB = {};
+(function loadMediaDB(){
+  fetch('db.json', {cache:'force-cache'})
+    .then(function(r){ return r.ok ? r.json() : {}; })
+    .then(function(d){ MEDIA_DB = d || {}; console.log('📀 Media DB loaded:', Object.keys(MEDIA_DB).length, 'items'); })
+    .catch(function(){ console.log('No db.json found — using live archive.org fetch'); });
+})();
+
 const metaCache={};
 
 async function fetchFiles(identifier){
   if(metaCache[identifier]) return metaCache[identifier];
+  // FAST PATH: prebuilt DB. If this identifier is in db.json, return instantly
+  // and skip the live archive.org lookup that was making tuning slow.
+  if(typeof identifier === 'string' && MEDIA_DB[identifier] && MEDIA_DB[identifier].length){
+    metaCache[identifier] = MEDIA_DB[identifier];
+    return MEDIA_DB[identifier];
+  }
   try{
     const ctrl=new AbortController();const ft=setTimeout(()=>ctrl.abort(),12000);
     const r=await fetch('https://archive.org/metadata/'+identifier,{signal:ctrl.signal});clearTimeout(ft);
@@ -2892,8 +2919,9 @@ let loadWatchdog = null;
 (function installStallWatchdog(){
   const player = document.getElementById('player');
   if(!player) return;
-  const STALL_MS = 15000;   // no playable data within 15s = stalled
-  const MAX_SKIPS = 3;      // dead files to skip before showing an error
+  const CHECK_MS = 10000;   // re-check every 10s
+  const ABS_MAX  = 90000;   // absolute ceiling: even a slow load must finish within 90s
+  const MAX_SKIPS = 3;      // dead sources to skip before showing an error
   let stallTimer = null;
   let consecutiveStalls = 0;
 
@@ -2901,23 +2929,29 @@ let loadWatchdog = null;
 
   function armStall(){
     clearStall();
-    stallTimer = setTimeout(function(){
-      stallTimer = null;
-      // readyState >= 2 (HAVE_CURRENT_DATA) means it actually loaded — not a stall.
-      if(player.readyState >= 2) { consecutiveStalls = 0; return; }
-      consecutiveStalls++;
-      console.warn('⏱️ Video stalled ('+consecutiveStalls+') — no playable data in '+STALL_MS+'ms for', player.currentSrc || player.src);
-      // Recover WITHOUT leaving live mode. The old code called nextEp() here, but
-      // nextEp() is an on-demand action that flips the TV out of live mode — so a
-      // slow load would silently drop you to on-demand. Re-tuning the current
-      // channel preserves live mode and recalculates a fresh broadcast position.
-      if(consecutiveStalls < MAX_SKIPS && typeof selectCh === 'function' && curIdx >= 0){
-        try { selectCh(curIdx); return; } catch(e){ console.error('stall recovery failed', e); }
-      }
-      // Give up gracefully instead of spinning forever.
-      consecutiveStalls = 0;
-      if(typeof showSplash === 'function') showSplash('SOURCE UNAVAILABLE — TRY ANOTHER CHANNEL');
-    }, STALL_MS);
+    const start = Date.now();
+    (function tick(){
+      stallTimer = setTimeout(function(){
+        stallTimer = null;
+        // Already playable — success.
+        if(player.readyState >= 2){ consecutiveStalls = 0; return; }
+        // Still downloading, or some data has arrived? It's just SLOW — do NOT
+        // restart it. Restarting a live download was what made content crawl or
+        // never finish. Keep waiting until it plays or hits the hard ceiling.
+        const stillLoading = player.networkState === 2 /* NETWORK_LOADING */
+                          || (player.buffered && player.buffered.length > 0)
+                          || player.readyState >= 1;   /* metadata arrived */
+        if(stillLoading && (Date.now() - start) < ABS_MAX){ tick(); return; }
+        // Genuinely stuck (dead source / no activity) or exceeded ceiling — recover.
+        consecutiveStalls++;
+        console.warn('⏱️ Video truly stalled ('+consecutiveStalls+') for', player.currentSrc || player.src);
+        if(consecutiveStalls < MAX_SKIPS && typeof selectCh === 'function' && curIdx >= 0){
+          try { selectCh(curIdx); return; } catch(e){ console.error('stall recovery failed', e); }
+        }
+        consecutiveStalls = 0;
+        if(typeof showSplash === 'function') showSplash('SOURCE UNAVAILABLE — TRY ANOTHER CHANNEL');
+      }, CHECK_MS);
+    })();
   }
 
   // A real, playable load clears the timer and the counter.
@@ -2954,8 +2988,16 @@ async function selectCh(idx){
     }
   }, 20000);
   const ch=CHANNELS[idx];
+  // Bad index (e.g. a channel number that doesn't exist): bail safely, don't hang.
+  if(!ch){ safeSetLoading(false); return; }
+  // Empty placeholder channel (COMING SOON): show a clean message, not a schedule error.
+  if(!hasContent(ch)){
+    showOSD(ch);
+    showSplash((ch.name||'').replace(/\s*-\s*COMING SOON/i,'').trim() + ' — COMING SOON');
+    return;
+  }
   // Clear scrambler for non-adult channels
-  if(!ch || ch.num !== 910){
+  if(ch.num !== 910){
     scramblerActive = false;
     const _sp = document.getElementById('player');
     if(_sp) _sp.classList.remove('scrambled');
@@ -3689,7 +3731,10 @@ function playShort(){
   player.onended=null;
   player.onerror=null;
   
-  const short=SHORT_COMMERCIALS[Math.floor(Math.random()*SHORT_COMMERCIALS.length)];
+  // Live mode: pick the ad by clock so all synced viewers see the same one.
+  const short = isLiveMode
+    ? getSyncedCommercial()
+    : SHORT_COMMERCIALS[Math.floor(Math.random()*SHORT_COMMERCIALS.length)];
   console.log('Playing commercial:', short.n, 'Duration:', short.dur);
   
   document.getElementById('np-ep').textContent='[ COMMERCIAL BREAK ]';
@@ -3739,8 +3784,8 @@ function playShortThenSwitchShow(masterIdx){
   player.onended=null;
   player.onerror=null;
   
-  // Get 2 random commercials (synchronous now)
-  const twoCommercials = getTwoRandomCommercials();
+  // Live mode: same two ads for every synced viewer; on-demand: random is fine.
+  const twoCommercials = isLiveMode ? getSyncedTwoCommercials() : getTwoRandomCommercials();
   
   console.log('Playing 2-commercial break:', twoCommercials.map(c => c.n).join(', '));
   
@@ -3807,7 +3852,8 @@ function prevEp(){
   console.log('=== PREV EP CLICKED ===');
   
   const ch = CHANNELS[curIdx];
-  console.log('Channel:', ch.name, 'curFiles:', curFiles.length, 'curIdx:', curEpIdx);
+  if(!ch) return;   // guard: invalid channel index — don't crash on ch.name
+  console.log('Channel:', ch.name, 'curFiles:', (curFiles||[]).length, 'curIdx:', curEpIdx);
   
   // Block for live streams (Pluto TV and HLS radio)
   if(ch && (ch.pluto || ch.hls)){
@@ -3884,7 +3930,8 @@ function nextEp(){
   console.log('=== NEXT EP CLICKED ===');
   
   const ch = CHANNELS[curIdx];
-  console.log('Channel:', ch.name, 'curFiles:', curFiles.length, 'curIdx:', curEpIdx);
+  if(!ch) return;   // guard: invalid channel index — don't crash on ch.name
+  console.log('Channel:', ch.name, 'curFiles:', (curFiles||[]).length, 'curIdx:', curEpIdx);
   
   // Block for live streams (Pluto TV and HLS radio)
   if(ch && (ch.pluto || ch.hls)){
@@ -3959,8 +4006,26 @@ function nextEp(){
 
 
 
-function nextCh(){if(inParty&&!isHost)return;selectCh((curIdx+1)%CHANNELS.length);}
-function prevCh(){if(inParty&&!isHost)return;selectCh((curIdx-1+CHANNELS.length)%CHANNELS.length);}
+// A channel is "playable" only if it actually has something to show.
+// Empty placeholder channels (e.g. the COMING SOON radio stations) return false.
+function hasContent(ch){
+  if(!ch) return false;
+  if(ch.game || ch.hls || ch.pluto) return true;
+  if(ch.embedOnly) return true;
+  if(ch.master) return !!(ch.networkShows && ch.networkShows.length > 0);
+  return !!(ch.files && ch.files.some(function(f){return f.u;}));
+}
+// Channel up/down now skip empty/placeholder channels so surfing never hits dead air.
+function nextCh(){
+  if(inParty&&!isHost) return;
+  let i=curIdx;
+  for(let n=0;n<CHANNELS.length;n++){ i=(i+1)%CHANNELS.length; if(hasContent(CHANNELS[i])){ selectCh(i); return; } }
+}
+function prevCh(){
+  if(inParty&&!isHost) return;
+  let i=curIdx;
+  for(let n=0;n<CHANNELS.length;n++){ i=(i-1+CHANNELS.length)%CHANNELS.length; if(hasContent(CHANNELS[i])){ selectCh(i); return; } }
+}
 
 // Apply music genre background
 function applyMusicBackground(channelName){
@@ -3968,7 +4033,7 @@ function applyMusicBackground(channelName){
   // Remove all music backgrounds
   player.classList.remove('music-bg-rap','music-bg-rock','music-bg-funk','music-bg-electronic','music-bg-ambient','music-bg-default');
   
-  const name = channelName.toLowerCase();
+  const name = (channelName||"").toLowerCase();
   if(name.includes('rap') || name.includes('hip hop')){
     player.classList.add('music-bg-rap');
   } else if(name.includes('rock')){
@@ -3992,7 +4057,7 @@ function showMusicOverlay(channelName, trackName){
   const infoBox = document.getElementById('music-info');
   const player = document.getElementById('player');
   
-  const name = channelName.toLowerCase();
+  const name = (channelName||"").toLowerCase();
   
   // Always show overlay for ALL music channels
   overlay.style.display = 'block';
@@ -4003,6 +4068,7 @@ function showMusicOverlay(channelName, trackName){
   
   // Parse track name to extract artist and song
   let artist = 'Unknown Artist';
+  trackName = trackName || 'Unknown Track';   // guard: never crash on a missing track name
   let song = trackName;
   
   // Try to parse common formats
@@ -4355,7 +4421,15 @@ function createGuideOverlay(){
   `;
   
   document.body.appendChild(overlay);
+  // First open: behave the same as a reopen — highlight current channel and
+  // start the 60s auto-refresh (previously only happened on the second open).
+  selectedGuideChannel = curIdx;
   renderGuide();
+  if(guideRefreshInterval) clearInterval(guideRefreshInterval);
+  guideRefreshInterval = setInterval(function(){
+    const o = document.getElementById('guide-overlay');
+    if(o && o.style.display === 'block') renderGuide();
+  }, 60000);
 }
 
 // Render guide based on mode
@@ -5943,6 +6017,7 @@ let hostConnection = null;
 let guestConnections = [];
 let currentRoomCode = null;
 let inParty = false;
+let partyHeartbeat = null;   // host->guests position heartbeat
 
 function generateRoomCode(){
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No confusing chars
@@ -5984,6 +6059,13 @@ function createWatchParty(){
     
     document.getElementById('party-btn').classList.add('active');
     document.getElementById('party-btn').textContent = '📡 HOSTING (' + guestConnections.length + ')';
+
+    // Heartbeat: keep guests aligned during a show, not just at channel changes.
+    // Guests only correct when they've drifted more than a few seconds.
+    if(partyHeartbeat) clearInterval(partyHeartbeat);
+    partyHeartbeat = setInterval(function(){
+      if(isHost && inParty && guestConnections.length > 0) syncToGuests();
+    }, 12000);
   });
   
   peer.on('connection', (conn) => {
@@ -6067,15 +6149,15 @@ function joinWatchParty(){
 
 function syncToGuests(){
   if(!isHost || guestConnections.length === 0) return;
-  
+  const player = document.getElementById('player');
   const syncData = {
     type: 'sync',
     channelIndex: curIdx,
     episodeIndex: curEpIdx,
+    currentTime: player ? player.currentTime : 0,   // send playback position
     timestamp: Date.now(),
     isLiveMode: isLiveMode
   };
-  
   guestConnections.forEach(conn => {
     if(conn.open){
       conn.send(syncData);
@@ -6084,7 +6166,7 @@ function syncToGuests(){
 }
 
 function handleHostSync(data){
-  if(data.type === 'sync'){
+  if(data && data.type === 'sync'){
     console.log('Syncing from host:', data);
     
     // Switch to same channel
@@ -6101,10 +6183,30 @@ function handleHostSync(data){
         browseMode = true;
       }
     }
+    
+    // Match playback POSITION (on-demand only; live channels already self-sync).
+    // Compensate for network delay, and only correct when drift is noticeable so
+    // small differences don't cause constant jarring re-seeks.
+    const ch = CHANNELS[data.channelIndex];
+    const isStream = ch && (ch.pluto || ch.hls);
+    if(!data.isLiveMode && !isStream && typeof data.currentTime === 'number'){
+      const elapsed = Math.max(0, (Date.now() - (data.timestamp || Date.now())) / 1000);
+      const target = data.currentTime + elapsed;
+      const applySeek = function(){
+        const player = document.getElementById('player');
+        if(!player || !player.duration) return;
+        if(target > 0 && target < player.duration - 1 && Math.abs(player.currentTime - target) > 3){
+          player.currentTime = target;
+        }
+      };
+      // If we just switched channels the video needs a moment to load before seeking.
+      if(data.channelIndex !== curIdx){ setTimeout(applySeek, 900); } else { applySeek(); }
+    }
   }
 }
 
 function leaveWatchParty(){
+  if(partyHeartbeat){ clearInterval(partyHeartbeat); partyHeartbeat = null; }
   if(peer){
     peer.destroy();
     peer = null;
