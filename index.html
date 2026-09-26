@@ -5386,6 +5386,29 @@ async function renderGridView(container){
     return a.localeCompare(b);
   });
   
+  // FAVOURITES band — pinned ahead of every category so it is the first
+  // thing in the guide. Channels stay listed under their own genre too;
+  // this is a shortcut, not a move.
+  const FAV_CAT = '\u2605 FAVOURITES';
+  if(typeof window.favouriteNums === 'function'){
+    const favNums = window.favouriteNums();
+    if(favNums.length){
+      const favRows = [];
+      favNums.forEach(num => {
+        for(let i = 0; i < CHANNELS.length; i++){
+          if(CHANNELS[i].num === num && !CHANNELS[i].hidden){
+            favRows.push({...CHANNELS[i], idx: i});
+            break;
+          }
+        }
+      });
+      if(favRows.length){
+        categories[FAV_CAT] = favRows;
+        sortedCats.unshift(FAV_CAT);
+      }
+    }
+  }
+
   // POPULATE GENRE NAVIGATION BUTTONS
   const genreNav = document.getElementById('guide-genre-nav');
   if(genreNav){
@@ -5437,7 +5460,10 @@ async function renderGridView(container){
     const channels = categories[catName];
     
     // SORT CHANNELS ALPHABETICALLY BY NAME WITHIN EACH CATEGORY
-    channels.sort((a, b) => a.name.localeCompare(b.name));
+    // (favourites keep the order they were starred in, newest first)
+    if(catName !== '\u2605 FAVOURITES'){
+      channels.sort((a, b) => a.name.localeCompare(b.name));
+    }
     
     // Category header with ID for scrolling
     const categoryId = 'guide-cat-' + catName.replace(/\s+/g, '-').toLowerCase();
@@ -5593,6 +5619,15 @@ async function renderGridView(container){
             cursor: pointer;
             font-size: 1.1rem;
           ">▶ Details</button>
+            <button onclick="event.stopPropagation(); toggleFav(${ch.num});" title="${(typeof window.isFavourite==='function'&&window.isFavourite(ch.num))?'Remove favourite':'Add favourite'}" style="
+              background: transparent;
+              color: ${(typeof window.isFavourite==='function'&&window.isFavourite(ch.num)) ? '#ffcc33' : 'var(--gc-border)'};
+              border: none;
+              padding: 4px 6px;
+              font-size: 1.4rem;
+              line-height: 1;
+              cursor: pointer;
+            ">${(typeof window.isFavourite==='function'&&window.isFavourite(ch.num)) ? '\u2605' : '\u2606'}</button>
         </div>
       </div>
     `;
@@ -7536,6 +7571,285 @@ body.haunted #hz-badge{display:block;animation:hzCandle 5.5s ease-in-out infinit
       // A TV can sit rezzed for months; roll the theme over in place.
       applySeasonTheme(false);
     }, 60 * 60 * 1000);
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     ★ FAVORITES — pinned to the top of the guide
+     Self-contained and additive. Builds its own section and injects
+     stars into the existing rows rather than rewriting the guide,
+     so removing this block leaves the TV untouched.
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+/* The star lives at the end of a row and must not trigger tuning. */
+.fav-star{margin-left:8px;font-size:1.15rem;line-height:1;cursor:pointer;
+  color:var(--gc-color);opacity:.35;transition:opacity .12s,color .12s,transform .1s;
+  user-select:none;flex-shrink:0;}
+.fav-star:hover{opacity:1;color:#ffcc33;transform:scale(1.2);}
+.fav-star.on{opacity:1;color:#ffcc33;text-shadow:0 0 10px rgba(255,204,51,.7);}
+.goch .gomt{margin-left:auto;}
+
+/* Favourites header carries the count so an empty list explains itself. */
+#gocat-favs{font-family:'Press Start 2P',monospace;font-size:.7rem;color:#ffcc33;
+  letter-spacing:3px;padding:10px 3px 4px;border-bottom:1px solid #ffcc33;margin-bottom:3px;
+  text-shadow:0 0 10px rgba(255,204,51,.45);}
+#fav-empty{font-family:'VT323',monospace;font-size:1.15rem;color:var(--gc-color);
+  opacity:.5;padding:8px 10px 12px;}
+.goch.favrow{border-left-color:#ffcc33;}
+
+/* Favourite chips lead the strip and are tinted so they read as pinned. */
+.gc.favchip{border-color:#ffcc33;}
+.gcatbtn.favbtn{border-color:#ffcc33;color:#ffcc33;}
+
+/* Toolbar button — sits in the next slot after SETTINGS. The existing
+   buttons march outward from centre at -270, -90, +90, +270, so this
+   continues the run at +430 and keeps the same shape and sizing. */
+#fav-btn{position:fixed;top:10px;left:50%;transform:translateX(calc(-50% + 430px));z-index:200;
+  background:var(--gc-bg);border:2px solid var(--gc-border);color:var(--gc-color);
+  font-family:'VT323',monospace;font-size:1.6rem;padding:6px 18px;cursor:pointer;
+  letter-spacing:1px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
+#fav-btn:hover{color:#ffcc33;border-color:#ffcc33;box-shadow:0 0 12px rgba(255,204,51,.6);}
+#fav-btn.on{color:#ffcc33;border-color:#ffcc33;text-shadow:0 0 10px rgba(255,204,51,.8);}
+#fav-btn:disabled{opacity:.35;cursor:default;}
+/* Narrow viewports can't fit another button on that row. */
+@media (max-width:1180px){ #fav-btn{display:none;} }
+</style>
+
+<script>
+(function(){
+  var KEY = 'sinister-favorites';
+  var favs = [];
+
+  function load(){
+    try {
+      var raw = Store.getItem(KEY);
+      favs = raw ? JSON.parse(raw) : [];
+      if(!Array.isArray(favs)) favs = [];
+    } catch(e){ favs = []; }
+  }
+  function save(){
+    try { Store.setItem(KEY, JSON.stringify(favs)); } catch(e){}
+  }
+
+  function isFav(num){ return favs.indexOf(num) !== -1; }
+
+  window.toggleFav = function(num, ev){
+    if(ev){ ev.stopPropagation(); ev.preventDefault(); }
+    var i = favs.indexOf(num);
+    if(i === -1) favs.unshift(num); else favs.splice(i, 1);
+    save();
+    syncStars();
+    renderFavs();
+    reorderChips();
+    syncButton();
+    // If the main guide is open, rebuild it so the FAVOURITES band updates.
+    try {
+      var ov = document.getElementById('guide-overlay');
+      if(ov && ov.style.display === 'block' && typeof renderGuide === 'function') renderGuide();
+    } catch(e){}
+    return false;
+  };
+
+  /* ── Stars on the existing rows ──────────────────────────────────
+     The guide rows are built by the original loop before this runs,
+     so we append to them rather than changing how they're made. */
+  function addStars(){
+    if(typeof CHANNELS === 'undefined') return;
+    var rows = document.querySelectorAll('#gob .goch');
+    for(var r = 0; r < rows.length; r++){
+      var row = rows[r];
+      if(row.querySelector('.fav-star')) continue;
+      var id = row.id || '';
+      if(id.indexOf('gr') !== 0) continue;
+      var idx = parseInt(id.slice(2), 10);
+      var ch  = CHANNELS[idx];
+      if(!ch) continue;
+      row.appendChild(makeStar(ch.num));
+    }
+  }
+
+  function makeStar(num){
+    var s = document.createElement('span');
+    s.className = 'fav-star' + (isFav(num) ? ' on' : '');
+    s.textContent = '★';
+    s.title = 'Favourite';
+    s.setAttribute('data-fav', num);
+    s.onclick = function(e){ return window.toggleFav(num, e); };
+    return s;
+  }
+
+  function syncStars(){
+    var stars = document.querySelectorAll('.fav-star');
+    for(var i = 0; i < stars.length; i++){
+      var n = parseInt(stars[i].getAttribute('data-fav'), 10);
+      stars[i].classList.toggle('on', isFav(n));
+    }
+    var chips = document.querySelectorAll('#gbar .gc');
+    for(var c = 0; c < chips.length; c++){
+      var ci = parseInt((chips[c].id || '').slice(2), 10);
+      var cch = (typeof CHANNELS !== 'undefined') ? CHANNELS[ci] : null;
+      if(cch) chips[c].classList.toggle('favchip', isFav(cch.num));
+    }
+  }
+
+  /* ── The pinned section ──────────────────────────────────────────
+     Rebuilt on every change and always kept as the first child of the
+     guide body, above every category. Favourites keep the order they
+     were starred in, newest first. */
+  function renderFavs(){
+    var gob = document.getElementById('gob');
+    if(!gob || typeof CHANNELS === 'undefined') return;
+
+    var old = document.getElementById('fav-section');
+    if(old) old.remove();
+
+    var wrap = document.createElement('div');
+    wrap.id = 'fav-section';
+
+    var head = document.createElement('div');
+    head.className = 'gocat';
+    head.id = 'gocat-favs';
+    head.textContent = '\u2605 FAVOURITES' + (favs.length ? '  (' + favs.length + ')' : '');
+    wrap.appendChild(head);
+
+    if(!favs.length){
+      var e = document.createElement('div');
+      e.id = 'fav-empty';
+      e.textContent = 'Tap the star on any channel to pin it here.';
+      wrap.appendChild(e);
+    } else {
+      for(var f = 0; f < favs.length; f++){
+        var num = favs[f];
+        var idx = -1;
+        for(var k = 0; k < CHANNELS.length; k++){ if(CHANNELS[k].num === num){ idx = k; break; } }
+        if(idx === -1) continue;               // channel no longer exists
+        var ch = CHANNELS[idx];
+        var row = document.createElement('div');
+        row.className = 'goch favrow';
+        row.id = 'fav-row-' + num;
+        row.innerHTML =
+          '<span class="gonum">' + String(ch.num).padStart(3,'0') + '</span>' +
+          '<span class="gonm"></span>' +
+          '<span class="gomt">' + (ch.live ? ('LIVE' + (ch.q ? ' \u00b7 ' + ch.q : '')) : ch.cat) + '</span>';
+        row.querySelector('.gonm').textContent = ch.name;   // no HTML injection from names
+        (function(i){
+          row.onclick = function(){
+            if(typeof selectCh === 'function') selectCh(i);
+            if(typeof toggleGuide === 'function') toggleGuide();
+          };
+        })(idx);
+        row.appendChild(makeStar(ch.num));
+        wrap.appendChild(row);
+      }
+    }
+
+    gob.insertBefore(wrap, gob.firstChild);
+  }
+
+  /* A jump button at the head of the category bar. */
+  function addCatButton(){
+    var gcats = document.getElementById('gcats');
+    if(!gcats || document.getElementById('fav-catbtn')) return;
+    var b = document.createElement('div');
+    b.className = 'gcatbtn favbtn';
+    b.id = 'fav-catbtn';
+    b.textContent = '\u2605 FAVOURITES';
+    b.onclick = function(){
+      var el = document.getElementById('gocat-favs');
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    };
+    gcats.insertBefore(b, gcats.firstChild);
+  }
+
+  /* Favourite chips also lead the top strip, so the remote reaches them
+     first without opening the guide at all. Hoisted, so toggleFav above
+     can call it. Runs newest-first in reverse so the most recently
+     starred channel ends up leftmost. */
+  function reorderChips(){
+    var gbar = document.getElementById('gbar');
+    if(!gbar || typeof CHANNELS === 'undefined') return;
+    for(var f = favs.length - 1; f >= 0; f--){
+      var num = favs[f], idx = -1;
+      for(var k = 0; k < CHANNELS.length; k++){ if(CHANNELS[k].num === num){ idx = k; break; } }
+      if(idx === -1) continue;
+      var chip = document.getElementById('gc' + idx);
+      if(chip) gbar.insertBefore(chip, gbar.firstChild);
+    }
+  }
+
+  // The main guide overlay (renderGridView) reads these.
+  window.isFavourite = function(num){ return isFav(num); };
+  window.favouriteNums = function(){ return favs.slice(); };
+
+  window.favouriteCurrent = function(){
+    if(typeof CHANNELS === 'undefined' || typeof curIdx === 'undefined') return;
+    var ch = CHANNELS[curIdx];
+    if(ch) window.toggleFav(ch.num);
+  };
+  window.clearFavourites = function(){
+    favs = []; save(); syncStars(); renderFavs(); syncButton();
+    console.log('\u2605 Favourites cleared');
+  };
+
+  /* Toolbar button for the channel currently on screen. */
+  function addToolbarButton(){
+    if(document.getElementById('fav-btn')) return;
+    var anchor = document.getElementById('settings-btn');
+    var b = document.createElement('button');
+    b.id = 'fav-btn';
+    b.textContent = '\u2606 FAVOURITE';
+    b.onclick = function(){ window.favouriteCurrent(); };
+    if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(b, anchor.nextSibling);
+    else document.body.appendChild(b);
+    syncButton();
+  }
+
+  /* Filled star and highlight when the channel on screen is pinned;
+     disabled before anything is tuned, so it never lies about state. */
+  function syncButton(){
+    var b = document.getElementById('fav-btn');
+    if(!b) return;
+    var ch = (typeof CHANNELS !== 'undefined' && typeof curIdx !== 'undefined' && curIdx >= 0)
+             ? CHANNELS[curIdx] : null;
+    if(!ch){
+      b.disabled = true;
+      b.classList.remove('on');
+      b.textContent = '\u2606 FAVOURITE';
+      return;
+    }
+    b.disabled = false;
+    var on = isFav(ch.num);
+    b.classList.toggle('on', on);
+    b.textContent = (on ? '\u2605 FAVOURITED' : '\u2606 FAVOURITE');
+    b.title = (on ? 'Remove ' : 'Pin ') + ch.name + ' (Ch ' + ch.num + ')';
+  }
+
+  /* Follow channel changes without editing selectCh: wrap it once. */
+  function hookTuning(){
+    if(typeof window.selectCh !== 'function' || window.selectCh.__favWrapped) return;
+    var orig = window.selectCh;
+    window.selectCh = function(){
+      var r = orig.apply(this, arguments);
+      Promise.resolve(r).then(syncButton, syncButton);
+      setTimeout(syncButton, 0);
+      return r;
+    };
+    window.selectCh.__favWrapped = true;
+  }
+
+  function init(){
+    load();
+    addCatButton();
+    addToolbarButton();
+    hookTuning();
+    addStars();
+    renderFavs();
+    reorderChips();
+    syncStars();
   }
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
