@@ -1238,7 +1238,10 @@ body::before{content:'';position:fixed;inset:0;z-index:998;pointer-events:none;
   <div class="thm"     onclick="setTheme('bloodmoon')" ><div class="thm-dot" style="background:#cc0000"></div>Blood Moon</div>
   <div class="thm"     onclick="setTheme('ocean')"     ><div class="thm-dot" style="background:#00aaff"></div>Ocean Deep</div>
   <div class="thm"     onclick="setTheme('terminal')"  ><div class="thm-dot" style="background:#00ff00"></div>Terminal Green</div>
+  <div class="thm" onclick="useSeasonalTheme()"        ><div class="thm-dot" style="background:linear-gradient(135deg,#ff6600,#22aa55,#00aaff)"></div>🗓️ Auto (by season)</div>
   <div class="thm"     onclick="setTheme('halloween')" ><div class="thm-dot" style="background:#ff6600"></div>🎃 Halloween</div>
+  <div class="thm" id="hz-toggle" onclick="toggleHaunt()"><div class="thm-dot" style="background:#ff7718"></div>🎃 Haunted: OFF</div>
+  <div class="thm"     onclick="hauntedSurf()"          ><div class="thm-dot" style="background:#8a2be2"></div>🦇 Haunted Surf</div>
   <div class="thm"     onclick="setTheme('christmas')" ><div class="thm-dot" style="background:#ff2222"></div>🎄 Christmas</div>
   <div class="thm"     onclick="setTheme('newyear')"   ><div class="thm-dot" style="background:#ffd700"></div>🎆 New Year</div>
   <div class="thm"     onclick="setTheme('valentines')"><div class="thm-dot" style="background:#ff3366"></div>💕 Valentines</div>
@@ -7208,5 +7211,337 @@ function browsePlayEpisode(chNum, archiveId, epIdx){
 initParentalControls();
 
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     🎃 HAUNTED MODE — October only
+     Self-contained and additive. Wraps existing functions instead of
+     editing them, so removing this block restores the TV exactly.
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+/* Overlay stack sits above the picture, below the OSD and guide. */
+#haunt{position:absolute;inset:0;pointer-events:none;z-index:40;display:none;overflow:hidden;}
+body.haunted #haunt{display:block;}
+
+/* Fog — two offset layers drifting at different speeds so it never
+   visibly loops. Transform only, so it composites instead of repainting. */
+.hz-fog{position:absolute;left:-50%;width:200%;height:70%;bottom:-10%;
+  background:radial-gradient(ellipse 50% 60% at 30% 60%,rgba(255,110,20,0.07) 0%,transparent 70%),
+             radial-gradient(ellipse 60% 50% at 70% 40%,rgba(120,60,180,0.06) 0%,transparent 70%),
+             radial-gradient(ellipse 40% 70% at 50% 80%,rgba(200,80,0,0.05) 0%,transparent 70%);
+  filter:blur(18px);will-change:transform;}
+.hz-fog.a{animation:hzDrift 47s linear infinite;}
+.hz-fog.b{animation:hzDrift 71s linear infinite reverse;opacity:0.7;bottom:-25%;}
+@keyframes hzDrift{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+
+/* Jack-o-lantern glow from the bottom edge, breathing like candlelight. */
+.hz-glow{position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 40% at 50% 108%,rgba(255,110,0,0.20) 0%,transparent 65%);
+  animation:hzCandle 5.5s ease-in-out infinite;will-change:opacity;}
+@keyframes hzCandle{0%,100%{opacity:0.55}35%{opacity:0.9}60%{opacity:0.45}80%{opacity:0.75}}
+
+/* Bats cross the screen occasionally, not constantly. */
+.hz-bat{position:absolute;font-size:22px;opacity:0;will-change:transform,opacity;
+  filter:drop-shadow(0 0 6px rgba(0,0,0,0.9));}
+@keyframes hzFly{
+  0%{transform:translate(-8vw,0) scale(.7) rotate(-8deg);opacity:0}
+  8%{opacity:.85}
+  50%{transform:translate(50vw,-7vh) scale(1) rotate(6deg)}
+  92%{opacity:.85}
+  100%{transform:translate(112vw,3vh) scale(.7) rotate(-5deg);opacity:0}}
+
+/* Lightning: a single hard flash, rare. */
+.hz-flash{position:absolute;inset:0;background:rgba(190,205,255,0.9);opacity:0;}
+@keyframes hzBolt{
+  0%{opacity:0}4%{opacity:.5}8%{opacity:0}14%{opacity:.75}22%{opacity:0}
+  28%{opacity:.35}34%{opacity:0}100%{opacity:0}}
+
+/* Vignette tightens and warms in October. */
+body.haunted #screen::after{box-shadow:inset 0 0 180px 60px rgba(25,4,0,0.9) !important;}
+
+/* Channel readout and OSD get an ember cast. */
+body.haunted #osd{color:#ff7718 !important;text-shadow:0 0 14px rgba(255,110,0,.95),0 0 34px rgba(255,60,0,.6) !important;}
+body.haunted #chn{color:#ff7718 !important;text-shadow:0 0 12px rgba(255,110,0,.9) !important;}
+body.haunted #idle-logo{animation:hzFlicker 4.5s steps(1) infinite;}
+@keyframes hzFlicker{0%,100%{opacity:1}42%{opacity:1}44%{opacity:.35}46%{opacity:1}72%{opacity:1}73%{opacity:.5}75%{opacity:1}}
+
+/* Brief signal interference sold through the existing static canvas. */
+body.haunted.hz-glitch #screen{animation:hzShake .28s steps(2) 2;}
+@keyframes hzShake{0%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}
+  50%{transform:translate(2px,-2px)}75%{transform:translate(-2px,-1px)}100%{transform:translate(0,0)}}
+
+/* The seasonal badge, and the manual switch for testing out of season. */
+#hz-badge{position:absolute;top:8px;left:10px;z-index:60;display:none;
+  font-family:'VT323',monospace;font-size:1.05rem;letter-spacing:2px;
+  color:#ff8a30;text-shadow:0 0 12px rgba(255,110,0,.85);pointer-events:none;}
+body.haunted #hz-badge{display:block;animation:hzCandle 5.5s ease-in-out infinite;}
+#hz-toggle{font-family:'VT323',monospace;cursor:pointer;}
+#hz-toggle.on{color:#ff7718;text-shadow:0 0 10px rgba(255,110,0,.8);}
+
+@media (prefers-reduced-motion: reduce){
+  .hz-fog,.hz-glow,.hz-bat,.hz-flash,#hz-badge,body.haunted #idle-logo{animation:none !important;}
+}
+</style>
+
+<script>
+(function(){
+  /* ── When ────────────────────────────────────────────────────────
+     October, local time. Second Life spans every timezone, so this
+     deliberately follows the viewer's own calendar rather than UTC —
+     it should be Halloween when it's Halloween where you are. */
+  function isOctober(){ return new Date().getMonth() === 9; }
+
+  /* ── Seasonal calendar ───────────────────────────────────────────
+     Edit this table and nothing else. Entries are checked top to
+     bottom and the first match wins, so the dated holidays sit above
+     the broad season fallbacks that fill the rest of the year.
+     Ranges are inclusive and may wrap the year end (see New Year).
+     Dates are [month, day] with month 1-12.
+     Seasons are northern-hemisphere. */
+  var SEASONS = [
+    // --- holidays ---
+    { theme:'valentines', from:[2,7],   to:[2,15],  name:"Valentine's"  },
+    { theme:'halloween',  from:[10,1],  to:[10,31], name:'Halloween'    },
+    { theme:'christmas',  from:[12,1],  to:[12,26], name:'Christmas'    },
+    { theme:'newyear',    from:[12,27], to:[1,5],   name:'New Year'     },
+    // --- the rest of the year, by season ---
+    { theme:'ice',        from:[1,6],   to:[3,19],  name:'Winter'       },
+    { theme:'forest',     from:[3,20],  to:[6,20],  name:'Spring'       },
+    { theme:'sunset',     from:[6,21],  to:[9,21],  name:'Summer'       },
+    { theme:'amber',      from:[9,22],  to:[11,30], name:'Autumn'       }
+  ];
+
+  function inRange(d, from, to){
+    var md = (d.getMonth() + 1) * 100 + d.getDate();
+    var a  = from[0] * 100 + from[1];
+    var b  = to[0]   * 100 + to[1];
+    // A window like Dec 27 -> Jan 5 wraps, so the test inverts.
+    return (a <= b) ? (md >= a && md <= b) : (md >= a || md <= b);
+  }
+
+  function seasonNow(){
+    var d = new Date();
+    for(var i = 0; i < SEASONS.length; i++){
+      if(inRange(d, SEASONS[i].from, SEASONS[i].to)) return SEASONS[i];
+    }
+    return null;
+  }
+
+  /* Auto-theming must never overwrite a theme the viewer chose on
+     purpose. We remember what WE last set: if the saved theme still
+     matches that, it's ours to change. If it differs, they picked it
+     and we leave it alone until they choose "Auto" again. */
+  var AUTO_KEY = 'sinister-theme-auto';
+
+  function applySeasonTheme(force){
+    var s = seasonNow();
+    if(!s || typeof setTheme !== 'function') return;
+
+    var saved = null, lastAuto = null;
+    try { saved = Store.getItem('sinister-theme'); lastAuto = Store.getItem(AUTO_KEY); } catch(e){}
+
+    var manual = saved !== null && saved !== '' && saved !== lastAuto;
+    if(manual && !force) return;
+    if(saved === s.theme && lastAuto === s.theme) return;
+
+    setTheme(s.theme);
+    try { Store.setItem(AUTO_KEY, s.theme); } catch(e){}
+    console.log('🗓️ ' + s.name + ' — theme set to ' + s.theme);
+  }
+
+  window.useSeasonalTheme = function(){
+    try { Store.setItem(AUTO_KEY, ''); Store.setItem('sinister-theme', ''); } catch(e){}
+    applySeasonTheme(true);
+    var s = seasonNow();
+    console.log('🗓️ Automatic seasonal theming on' + (s ? ' — currently ' + s.name : ''));
+  };
+  window.currentSeason = function(){ var s = seasonNow(); return s ? s.name : 'none'; };
+  // Re-evaluate the calendar now. Honours a manual pick; used by the hourly
+  // rollover and handy for checking behaviour without waiting for midnight.
+  window.refreshSeasonalTheme = function(){ applySeasonTheme(false); };
+
+
+  var HZ_KEY   = 'sinister-haunt-override';   // 'on' | 'off' | null
+  var hauntOn  = false;
+  var batTimer = null, boltTimer = null, glitchTimer = null;
+
+  function stored(){ try { return Store.getItem(HZ_KEY); } catch(e){ return null; } }
+
+  function shouldHaunt(){
+    var o = stored();
+    if(o === 'on')  return true;
+    if(o === 'off') return false;
+    return isOctober();
+  }
+
+  /* ── Scenery ─────────────────────────────────────────────────── */
+
+  function build(){
+    var screen = document.getElementById('screen');
+    if(!screen || document.getElementById('haunt')) return;
+
+    var h = document.createElement('div');
+    h.id = 'haunt';
+    h.innerHTML =
+      '<div class="hz-fog a"></div>' +
+      '<div class="hz-fog b"></div>' +
+      '<div class="hz-glow"></div>' +
+      '<div class="hz-flash" id="hz-flash"></div>';
+    screen.appendChild(h);
+
+    var badge = document.createElement('div');
+    badge.id = 'hz-badge';
+    badge.textContent = '🎃 HAUNTED';
+    screen.appendChild(badge);
+  }
+
+  function flyBat(){
+    var h = document.getElementById('haunt');
+    if(!h || !hauntOn) return;
+    var b = document.createElement('div');
+    b.className = 'hz-bat';
+    b.textContent = '🦇';
+    b.style.top = (8 + Math.random() * 55) + '%';
+    var dur = 7 + Math.random() * 6;
+    b.style.animation = 'hzFly ' + dur.toFixed(1) + 's linear 1';
+    h.appendChild(b);
+    setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, dur * 1000 + 400);
+  }
+
+  function lightning(){
+    var f = document.getElementById('hz-flash');
+    if(!f || !hauntOn) return;
+    f.style.animation = 'none';
+    void f.offsetWidth;
+    f.style.animation = 'hzBolt 1.5s linear 1';
+  }
+
+  /* Interference: a short burst of the static the TV already draws,
+     so it reads as the signal breaking up rather than a CSS effect.
+     Never fires while tuning, and never on a live stream, where a
+     dropout is indistinguishable from a real one. */
+  function interference(){
+    if(!hauntOn) return;
+    if(typeof loading !== 'undefined' && loading) return;
+    var ch = (typeof CHANNELS !== 'undefined' && typeof curIdx !== 'undefined') ? CHANNELS[curIdx] : null;
+    if(!ch || ch.live) return;
+
+    document.body.classList.add('hz-glitch');
+    try { if(typeof sson === 'function') sson(); } catch(e){}
+    setTimeout(function(){
+      try { if(typeof ssoff === 'function') ssoff(); } catch(e){}
+      document.body.classList.remove('hz-glitch');
+    }, 220 + Math.random() * 260);
+  }
+
+  function schedule(){
+    clearInterval(batTimer); clearInterval(boltTimer); clearInterval(glitchTimer);
+    if(!hauntOn) return;
+    batTimer    = setInterval(function(){ if(Math.random() < 0.55) flyBat(); },      18000);
+    boltTimer   = setInterval(function(){ if(Math.random() < 0.30) lightning(); },   46000);
+    glitchTimer = setInterval(function(){ if(Math.random() < 0.35) interference(); },95000);
+    setTimeout(flyBat, 4000);
+  }
+
+  /* ── Apply ───────────────────────────────────────────────────── */
+
+  /* setTheme() assigns document.body.className outright, which wipes every
+     other class on the body — including ours. Rather than edit it, wrap it
+     and reinstate the flag afterwards, so theme switching and haunted mode
+     stop fighting over the same attribute. */
+  (function guardTheme(){
+    if(typeof window.setTheme !== 'function' || window.setTheme.__hzWrapped) return;
+    var orig = window.setTheme;
+    window.setTheme = function(t){
+      var was = document.body.classList.contains('haunted');
+      orig.apply(this, arguments);
+      if(was) document.body.classList.add('haunted');
+    };
+    window.setTheme.__hzWrapped = true;
+  })();
+
+  function apply(on, quiet){
+    hauntOn = !!on;
+    document.body.classList.toggle('haunted', hauntOn);
+
+    if(hauntOn){
+      build();
+      // Theme selection belongs to the seasonal scheduler above; haunted
+      // mode only adds the scenery on top of whatever palette is active.
+      var st = document.getElementById('idle-sub');
+      if(st) st.textContent = 'ALL HALLOWS EDITION';
+    } else {
+      var st2 = document.getElementById('idle-sub');
+      if(st2) st2.textContent = 'ARCHIVE EDITION';
+    }
+
+    var t = document.getElementById('hz-toggle');
+    if(t){ t.classList.toggle('on', hauntOn); t.textContent = hauntOn ? '🎃 Haunted: ON' : '🎃 Haunted: OFF'; }
+
+    schedule();
+    if(!quiet) console.log('🎃 Haunted mode ' + (hauntOn ? 'ON' : 'OFF'));
+  }
+
+  /* ── Haunted channel surf ────────────────────────────────────────
+     Jumps only between what's actually scary — the Horror, SciFi and
+     Seasonal channels already in the lineup. No new content, no
+     invented archive IDs, just a different way through the guide. */
+  var hzList = null, hzPos = -1;
+  function hauntedChannels(){
+    if(hzList) return hzList;
+    if(typeof CHANNELS === 'undefined') return [];
+    hzList = [];
+    for(var i = 0; i < CHANNELS.length; i++){
+      var c = CHANNELS[i];
+      if(!c || c.hidden) continue;
+      if(c.cat === 'Horror' || c.cat === 'SciFi' || c.cat === 'Seasonal'){
+        if(typeof hasContent !== 'function' || hasContent(c)) hzList.push(i);
+      }
+    }
+    return hzList;
+  }
+  window.hauntedSurf = function(){
+    var l = hauntedChannels();
+    if(!l.length){ console.warn('No haunted channels found'); return; }
+    hzPos = (hzPos + 1) % l.length;
+    if(typeof selectCh === 'function') selectCh(l[hzPos]);
+  };
+
+  window.toggleHaunt = function(){
+    var next = !hauntOn;
+    try { Store.setItem(HZ_KEY, next ? 'on' : 'off'); } catch(e){}
+    apply(next);
+  };
+  window.clearHauntOverride = function(){
+    try { Store.setItem(HZ_KEY, ''); } catch(e){}
+    apply(isOctober());
+    console.log('🎃 Override cleared — following the calendar again.');
+  };
+
+  /* ── Boot ────────────────────────────────────────────────────── */
+
+  function init(){
+    build();
+    applySeasonTheme(false);
+    apply(shouldHaunt(), true);
+
+    // Roll into and out of October without a reload — matters for a TV
+    // that sits rezzed in a sim for weeks at a time.
+    var wasOct = isOctober();
+    setInterval(function(){
+      var now = isOctober();
+      if(now !== wasOct){
+        wasOct = now;
+        if(!stored()) apply(now);
+      }
+      // A TV can sit rezzed for months; roll the theme over in place.
+      applySeasonTheme(false);
+    }, 60 * 60 * 1000);
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 </body>
 </html>
